@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PRN231.TicketBooking.BusinessObject.Models.BaseModel;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace PRN231.TicketBooking.BusinessObject.Models
 {
-    public class Survey
+    public class Survey:BaseEntity
     {
         [Key]
         public Guid Id { get; set; }

@@ -24,15 +24,14 @@ namespace PRN231.TicketBooking.DAO.Data
         }
 
         public DbSet<Account> Accounts { get; set; }
-        public DbSet<Event> EventS { get; set; }
+        public DbSet<Attendee> Attendees { get; set; }
+        public DbSet<Event> Events { get; set; }
         public DbSet<EventSponsor> EventSponsors { get; set; }
         public DbSet<Location> Locations { get; set; }
         public DbSet<Order> Orders { get; set; }
-        public DbSet<OrderDetail> OrderDetails { get; set; }
         public DbSet<Organization> Organizations { get; set; }
         public DbSet<Payment> Payments { get; set; }
         public DbSet<PaymentResponse> PaymentResponses { get; set; }
-        public DbSet<Seat> Seats { get; set; }
         public DbSet<SeatRank> SeatRanks { get; set; }
         public DbSet<Sponsor> Sponsors { get; set; }
         public DbSet<StaticFile> StaticFiles { get; set; }
