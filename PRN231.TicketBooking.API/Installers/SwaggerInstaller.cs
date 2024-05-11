@@ -34,8 +34,8 @@ namespace PRN231.TicketBooking.API.Installers
                  option.SwaggerDoc("v1", new OpenApiInfo
                  {
                      Version = "v1",
-                     Title = "House construction quotation API",
-                     Description = "©Copyright: Hồng Quân & Minh Khang",
+                     Title = "Event Organization API",
+                     Description = "©Copyright: Hồng Quân & Minh Khang & Xuân Tiến & Bình An",
                      TermsOfService = new Uri("https://example.com/terms"),
                      Contact = new OpenApiContact
                      {
