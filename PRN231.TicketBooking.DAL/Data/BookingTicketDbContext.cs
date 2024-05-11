@@ -1,0 +1,93 @@
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using PRN231.TicketBooking.BusinessObject.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace PRN231.TicketBooking.DAO.Data
+{
+    public class BookingTicketDbContext: IdentityDbContext<Account>, IDbContext
+    {
+        public BookingTicketDbContext()
+        {
+
+        }
+
+        public BookingTicketDbContext(DbContextOptions options):base(options)
+        {
+
+        }
+
+        public DbSet<Account> Accounts { get; set; }
+        public DbSet<Event> EventS { get; set; }
+        public DbSet<EventSponsor> EventSponsors { get; set; }
+        public DbSet<Location> Locations { get; set; }
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<OrderDetail> OrderDetails { get; set; }
+        public DbSet<Organization> Organizations { get; set; }
+        public DbSet<Payment> Payments { get; set; }
+        public DbSet<PaymentResponse> PaymentResponses { get; set; }
+        public DbSet<Seat> Seats { get; set; }
+        public DbSet<SeatRank> SeatRanks { get; set; }
+        public DbSet<Sponsor> Sponsors { get; set; }
+        public DbSet<StaticFile> StaticFiles { get; set; }
+        public DbSet<Survey> Surveys { get; set; }
+        public DbSet<SurveyQuestionDetail> SurveyQuestionDetails { get; set; }
+        public DbSet<SurveyResponse> SurveyResponses { get; set; }
+        public DbSet<SurveyResponseDetail> SurveyResponseDetails { get; set; }
+
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            builder.Entity<IdentityRole>().HasData(new IdentityRole
+            {
+                Id = "6a32e12a-60b5-4d93-8306-82231e1232d7",
+                Name = "ADMIN",
+                ConcurrencyStamp = "6a32e12a-60b5-4d93-8306-82231e1232d7",
+                NormalizedName = "admin"
+            });
+            builder.Entity<IdentityRole>().HasData(new IdentityRole
+            {
+                Id = "85b6791c-49d8-4a61-ad0b-8274ec27e764",
+                Name = "STAFF",
+                ConcurrencyStamp = "85b6791c-49d8-4a61-ad0b-8274ec27e764",
+                NormalizedName = "staff"
+            });
+            builder.Entity<IdentityRole>().HasData(new IdentityRole
+            {
+                Id = "814f9270-78f5-4503-b7d3-0c567e5812ba",
+                Name = "ORGANIZER",
+                ConcurrencyStamp = "814f9270-78f5-4503-b7d3-0c567e5812ba",
+                NormalizedName = "organizer"
+            });
+            builder.Entity<IdentityRole>().HasData(new IdentityRole
+            {
+                Id = "02962efa-1273-46c0-b103-7167b1742ef3",
+                Name = "CUSTOMER",
+                ConcurrencyStamp = "02962efa-1273-46c0-b103-7167b1742ef3",
+                NormalizedName = "customer"
+            });
+            base.OnModelCreating(builder);
+        }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            IConfiguration config = new ConfigurationBuilder()
+                           .SetBasePath(Directory.GetCurrentDirectory())
+                           .AddJsonFile("appsettings.json", true, true)
+                           .Build();
+            string cs = config["ConnectionStrings:DB"];
+            if (!optionsBuilder.IsConfigured)
+            {
+                optionsBuilder.UseSqlServer(cs);
+            }
+            
+        }
+
+    }
+}
