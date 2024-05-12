@@ -34,6 +34,7 @@ namespace PRN231.TicketBooking.DAO.Data
         public DbSet<PaymentResponse> PaymentResponses { get; set; }
         public DbSet<SeatRank> SeatRanks { get; set; }
         public DbSet<Sponsor> Sponsors { get; set; }
+        public DbSet<Speaker> Speakers { get; set; }
         public DbSet<StaticFile> StaticFiles { get; set; }
         public DbSet<Survey> Surveys { get; set; }
         public DbSet<SurveyQuestionDetail> SurveyQuestionDetails { get; set; }
@@ -70,6 +71,13 @@ namespace PRN231.TicketBooking.DAO.Data
                 Name = "CUSTOMER",
                 ConcurrencyStamp = "02962efa-1273-46c0-b103-7167b1742ef3",
                 NormalizedName = "customer"
+            });
+            builder.Entity<IdentityRole>().HasData(new IdentityRole
+            {
+                Id = "516f3f61-16de-47ee-bde9-c90e4541a272",
+                Name = "SPONSOR",
+                ConcurrencyStamp = "516f3f61-16de-47ee-bde9-c90e4541a272",
+                NormalizedName = "sponsor"
             });
             base.OnModelCreating(builder);
         }
