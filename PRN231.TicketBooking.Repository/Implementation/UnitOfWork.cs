@@ -5,9 +5,9 @@ namespace PRN231.TicketBooking.Repository.Implementation
 {
     public class UnitOfWork : IUnitOfWork, IDisposable
     {
-        private readonly BookingTicketDbContext _db;
+        private readonly IDbContext _db;
 
-        public UnitOfWork(BookingTicketDbContext db)
+        public UnitOfWork(IDbContext db)
         {
             _db = db;
         }

@@ -2,6 +2,7 @@
 using PRN231.TicketBooking.DAO.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
+using PRN231.TicketBooking.Repository.Contract;
 
 namespace PRN231.TicketBooking.Repository.Implementation;
 

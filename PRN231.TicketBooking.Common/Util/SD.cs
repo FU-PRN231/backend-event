@@ -5,6 +5,10 @@ namespace PRN231.TicketBooking.Common.Util
     public class SD
     {
         public static int MAX_RECORD_PER_PAGE = short.MaxValue;
+        public class DefaultAccountInformation
+        {
+            public static string PASSWORD = "Sponsor123@";
+        }
 
         public class ResponseMessage
         {

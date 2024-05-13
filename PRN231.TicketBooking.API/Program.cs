@@ -1,6 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using PRN231.TicketBooking.API.Installers;
 using PRN231.TicketBooking.DAO.Data;
+using PRN231.TicketBooking.Repository.Contract;
+using PRN231.TicketBooking.Repository.Implementation;
+using PRN231.TicketBooking.Service.Contract;
+using PRN231.TicketBooking.Service.Implementation;
 
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
@@ -22,7 +26,8 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.InstallerServicesInAssembly(builder.Configuration);
-
+builder.Services.AddScoped<ISponsorRepository, SponsorRepository>();
+builder.Services.AddScoped<ISponsorService, SponsorService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

@@ -15,7 +15,7 @@ namespace PRN231.TicketBooking.BusinessObject.Models
         public string Name { get; set; } = null!;
         public string Description { get; set; } = null!;
         public string Img { get; set; } = null!;
-        public string AccountId { get; set; }
+        public string? AccountId { get; set; }
         [ForeignKey(nameof(AccountId))]
         public Account? Account {  get; set; } 
     }
