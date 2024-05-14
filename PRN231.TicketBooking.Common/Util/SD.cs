@@ -74,6 +74,7 @@ namespace PRN231.TicketBooking.Common.Util
             public static string NEWS_PREFIX = "news/";
             public static string BLOG_PREFIX = "blog/";
             public static string SAMPLE_HOUSE_PREFIX = "sample-house/";
+            public static string SPONSOR_PREFIX = "sponsor/";
         }
 
        

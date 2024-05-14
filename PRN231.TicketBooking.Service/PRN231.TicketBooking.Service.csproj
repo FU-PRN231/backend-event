@@ -8,11 +8,15 @@
 
   <ItemGroup>
     <PackageReference Include="Auth0.ManagementApi" Version="7.26.2" />
+    <PackageReference Include="DinkToPdf" Version="1.0.8" />
     <PackageReference Include="FirebaseAdmin" Version="3.0.0" />
     <PackageReference Include="MailKit" Version="4.5.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="8.0.4" />
     <PackageReference Include="MimeKit" Version="4.5.0" />
+	  <PackageReference Include="Firebase.Auth" Version="1.0.0" />
+	  <PackageReference Include="FirebaseStorage.net" Version="1.0.3" />
+	  <PackageReference Include="RestSharp" Version="110.2.0" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.5.1" />
   </ItemGroup>
 

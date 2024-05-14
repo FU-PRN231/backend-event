@@ -13,7 +13,7 @@ namespace PRN231.TicketBooking.Repository.Implementation
     public class SponsorRepository : GenericRepository<Sponsor>, ISponsorRepository
     {
         public readonly IUnitOfWork _unitOfWork;
-        public SponsorRepository(IDbContext context, IUnitOfWork unitOfWork) : base(context)
+        public SponsorRepository(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
         }
@@ -33,7 +33,7 @@ namespace PRN231.TicketBooking.Repository.Implementation
                             Id = Guid.NewGuid(),
                             Name = item.Value.Name,
                             Description = item.Value.Description,
-                            Img = item.Value.Img,
+                            Img = string.Empty,
                             AccountId = item.Key
                         };
                          result.Add(sponsor);

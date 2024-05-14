@@ -13,7 +13,7 @@ namespace PRN231.TicketBooking.Repository.Implementation
 {
     public class AccountRepository : GenericRepository<Account>, IAccountRepository
     {
-        public AccountRepository(BookingTicketDbContext context) : base(context)
+        public AccountRepository()
         {
         }
 

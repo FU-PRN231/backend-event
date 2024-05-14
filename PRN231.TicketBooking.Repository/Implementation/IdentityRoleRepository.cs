@@ -9,7 +9,7 @@ namespace PRN231.TicketBooking.Repository.Implementation
 {
     public class IdentityRoleRepository : GenericRepository<IdentityRole>, IIdentityRoleRepository
     {
-        public IdentityRoleRepository(BookingTicketDbContext context) : base(context)
+        public IdentityRoleRepository()
         {
         }
 
