@@ -7,5 +7,10 @@ namespace PRN231.TicketBooking.API.Controllers
     [ApiController]
     public class EventController : ControllerBase
     {
+        [HttpGet]
+        public IActionResult Get()
+        {
+            return Ok();
+        }
     }
 }
