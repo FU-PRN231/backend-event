@@ -93,7 +93,8 @@ namespace PRN231.TicketBooking.DAO.Data
             {
                 optionsBuilder.UseSqlServer(cs);
             }
-            
+            //optionsBuilder.UseSqlServer(
+            //   "server=.;database=TicketBooking;uid=sa;pwd=12345;TrustServerCertificate=True;MultipleActiveResultSets=True;");
         }
 
     }

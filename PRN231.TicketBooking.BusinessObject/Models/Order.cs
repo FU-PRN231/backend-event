@@ -20,7 +20,7 @@ namespace PRN231.TicketBooking.BusinessObject.Models
         [ForeignKey(nameof(SeatRankId))]
         public SeatRank? SeatRank { get; set; }
         public string? QR {  get; set; }
-        public string AccountId { get; set; }
+        public string AccountId { get; set; } = null!;
         [ForeignKey(nameof(AccountId))]
         public Account? Account { get; set; }
     }
