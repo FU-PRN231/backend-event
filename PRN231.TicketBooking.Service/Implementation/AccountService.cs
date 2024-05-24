@@ -1,26 +1,16 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Builder.Extensions;
-using Microsoft.AspNetCore.Http;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using PRN231.TicketBooking.BusinessObject.Models;
 using PRN231.TicketBooking.Common.ConfigurationModel;
+using PRN231.TicketBooking.Common.Dto;
 using PRN231.TicketBooking.Common.Dto.Request;
 using PRN231.TicketBooking.Common.Dto.Response;
-using PRN231.TicketBooking.Common.Dto;
 using PRN231.TicketBooking.Common.Util;
 using PRN231.TicketBooking.Repository.Contract;
 using PRN231.TicketBooking.Service.Contract;
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using FirebaseAdmin;
-using Google.Apis.Auth.OAuth2;
 
 namespace PRN231.TicketBooking.Service.Implementation
 {
@@ -33,6 +23,7 @@ namespace PRN231.TicketBooking.Service.Implementation
         private readonly IUnitOfWork _unitOfWork;
         private readonly UserManager<Account> _userManager;
         private readonly IEmailService _emailService;
+
         public AccountService(
             IAccountRepository accountRepository,
             IUnitOfWork unitOfWork,
@@ -81,7 +72,7 @@ namespace PRN231.TicketBooking.Service.Implementation
             var result = new AppActionResult();
             try
             {
-                var user = await _accountRepository.GetAccountByEmail(email, false, null);  
+                var user = await _accountRepository.GetAccountByEmail(email, false, null);
                 if (user == null)
                     result = BuildAppActionResultError(result, $"Email này không tồn tại");
                 else if (user.IsVerified == false)
@@ -109,7 +100,7 @@ namespace PRN231.TicketBooking.Service.Implementation
             var result = new AppActionResult();
             try
             {
-                if (await _accountRepository.GetAccountByEmail(signUpRequest.Email,null,null) != null)
+                if (await _accountRepository.GetAccountByEmail(signUpRequest.Email, null, null) != null)
                     result = BuildAppActionResultError(result, "Email hoặc username không tồn tại!");
 
                 if (!BuildAppActionResultIsError(result))
@@ -203,28 +194,28 @@ namespace PRN231.TicketBooking.Service.Implementation
         public async Task<AppActionResult> GetAllAccount(int pageIndex, int pageSize)
         {
             var result = new AppActionResult();
-            //var list = await _accountRepository.GetAllDataByExpression(null, pageIndex, pageSize, null, false, null);
+            var list = await _accountRepository.GetAllDataByExpression(null, pageIndex, pageSize, null, false, null);
 
-            ////var userRoleRepository = Resolve<IUserRole>();
-            //var roleRepository = Resolve<IRepository<IdentityRole>>();
-            //var listRole = await roleRepository!.GetAllDataByExpression(null, 1, 100, null, false, null);
-            //var listMap = _mapper.Map<List<AccountResponse>>(list.Items);
-            //foreach (var item in listMap)
-            //{
-            //    var userRole = new List<IdentityRole>();
-            //    var role = await userRoleRepository!.GetAllDataByExpression(a => a.UserId == item.Id, 1, 100, null, false, null);
-            //    foreach (var itemRole in role.Items!)
-            //    {
-            //        var roleUser = listRole.Items!.ToList().FirstOrDefault(a => a.Id == itemRole.RoleId);
-            //        if (roleUser != null) userRole.Add(roleUser);
-            //    }
+            var userRoleRepository = Resolve<IRepository<IdentityUserRole<string>>>();
+            var roleRepository = Resolve<IRepository<IdentityRole>>();
+            var listRole = await roleRepository!.GetAllDataByExpression(null, 1, 100, null, false, null);
+            var listMap = _mapper.Map<List<AccountResponse>>(list.Items);
+            foreach (var item in listMap)
+            {
+                var userRole = new List<IdentityRole>();
+                var role = await userRoleRepository!.GetAllDataByExpression(a => a.UserId == item.Id, 1, 100, null, false, null);
+                foreach (var itemRole in role.Items!)
+                {
+                    var roleUser = listRole.Items!.ToList().FirstOrDefault(a => a.Id == itemRole.RoleId);
+                    if (roleUser != null) userRole.Add(roleUser);
+                }
 
-            //    item.Role = userRole;
-            //}
+                item.Role = userRole;
+            }
 
-            //result.Result =
-            //    new PagedResult<AccountResponse>
-            //    { Items = listMap, TotalPages = list.TotalPages };
+            result.Result =
+                new PagedResult<AccountResponse>
+                { Items = listMap, TotalPages = list.TotalPages };
             return result;
         }
 
@@ -513,30 +504,30 @@ namespace PRN231.TicketBooking.Service.Implementation
         public async Task<AppActionResult> AssignRoleForUserId(string userId, IList<string> roleId)
         {
             var result = new AppActionResult();
-            //try
-            //{
-            //    var user = await _accountRepository.GetById(userId);
-            //    var userRoleRepository = Resolve<IRepository<IdentityUserRole<string>>>();
-            //    var identityRoleRepository = Resolve<IRepository<IdentityRole>>();
-            //    foreach (var role in roleId)
-            //        if (await identityRoleRepository!.GetById(role) == null)
-            //            result = BuildAppActionResultError(result, $"Vai trò với id {role} không tồn tại");
+            try
+            {
+                var user = await _accountRepository.GetById(userId);
+                var userRoleRepository = Resolve<IRepository<IdentityUserRole<string>>>();
+                var identityRoleRepository = Resolve<IRepository<IdentityRole>>();
+                foreach (var role in roleId)
+                    if (await identityRoleRepository!.GetById(role) == null)
+                        result = BuildAppActionResultError(result, $"Vai trò với id {role} không tồn tại");
 
-            //    if (!BuildAppActionResultIsError(result))
-            //        foreach (var role in roleId)
-            //        {
-            //            var roleDb = await identityRoleRepository!.GetById(role);
-            //            var resultCreateRole = await _userManager.AddToRoleAsync(user, roleDb.NormalizedName);
-            //            if (!resultCreateRole.Succeeded)
-            //                result = BuildAppActionResultError(result, $"Cấp quyền với vai trò {role} không thành công");
-            //        }
+                if (!BuildAppActionResultIsError(result))
+                    foreach (var role in roleId)
+                    {
+                        var roleDb = await identityRoleRepository!.GetById(role);
+                        var resultCreateRole = await _userManager.AddToRoleAsync(user, roleDb.NormalizedName);
+                        if (!resultCreateRole.Succeeded)
+                            result = BuildAppActionResultError(result, $"Cấp quyền với vai trò {role} không thành công");
+                    }
 
-            //    await _unitOfWork.SaveChangeAsync();
-            //}
-            //catch (Exception ex)
-            //{
-            //    result = BuildAppActionResultError(result, ex.Message);
-            //}
+                await _unitOfWork.SaveChangeAsync();
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
 
             return result;
         }
@@ -545,39 +536,35 @@ namespace PRN231.TicketBooking.Service.Implementation
         {
             var result = new AppActionResult();
 
-            //try
-            //{
-            //    var user = await _accountRepository.GetById(userId);
-            //    var userRoleRepository = Resolve<IRepository<IdentityUserRole<string>>>();
-            //    var identityRoleRepository = Resolve<IRepository<IdentityRole>>();
-            //    if (user == null)
-            //        result = BuildAppActionResultError(result, $"Người dùng với {userId} không tồn tại");
-            //    foreach (var role in roleId)
-            //        if (await identityRoleRepository.GetById(role) == null)
-            //            result = BuildAppActionResultError(result, $"Vai trò với {role} không tồn tại");
+            try
+            {
+                var user = await _accountRepository.GetById(userId);
+                var userRoleRepository = Resolve<IRepository<IdentityUserRole<string>>>();
+                var identityRoleRepository = Resolve<IRepository<IdentityRole>>();
+                if (user == null)
+                    result = BuildAppActionResultError(result, $"Người dùng với {userId} không tồn tại");
+                foreach (var role in roleId)
+                    if (await identityRoleRepository.GetById(role) == null)
+                        result = BuildAppActionResultError(result, $"Vai trò với {role} không tồn tại");
 
-            //    if (!BuildAppActionResultIsError(result))
-            //        foreach (var role in roleId)
-            //        {
-            //            var roleDb = await identityRoleRepository!.GetById(role);
-            //            var resultCreateRole = await _userManager.RemoveFromRoleAsync(user!, roleDb.NormalizedName);
-            //            if (!resultCreateRole.Succeeded)
-            //                result = BuildAppActionResultError(result, $"Xóa quyền {role} thất bại");
-            //        }
+                if (!BuildAppActionResultIsError(result))
+                    foreach (var role in roleId)
+                    {
+                        var roleDb = await identityRoleRepository!.GetById(role);
+                        var resultCreateRole = await _userManager.RemoveFromRoleAsync(user!, roleDb.NormalizedName);
+                        if (!resultCreateRole.Succeeded)
+                            result = BuildAppActionResultError(result, $"Xóa quyền {role} thất bại");
+                    }
 
-            //    await _unitOfWork.SaveChangeAsync();
-            //}
-            //catch (Exception ex)
-            //{
-            //    result = BuildAppActionResultError(result, ex.Message);
-            //}
+                await _unitOfWork.SaveChangeAsync();
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
 
             return result;
         }
-
-
-
-
 
         public void SendAccountCreationEmailForSponsor(List<Account> tourGuideAccountList)
         {
@@ -622,35 +609,34 @@ namespace PRN231.TicketBooking.Service.Implementation
             return isSucess;
         }
 
-
         public async Task<AppActionResult> GetAccountsByRoleName(string roleName, int pageNumber, int pageSize)
         {
             var result = new AppActionResult();
 
-            //try
-            //{
-            //    var roleRepository = Resolve<IRepository<IdentityRole>>();
-            //    var roleDb = await roleRepository!.GetByExpression(r => r.NormalizedName.Equals(roleName.ToLower()));
-            //    if (roleDb != null)
-            //    {
-            //        var userRoleRepository = Resolve<IRepository<IdentityUserRole<string>>>();
-            //        var userRoleDb = await userRoleRepository!.GetAllDataByExpression(u => u.RoleId == roleDb.Id, 0, 0, null, false, null);
-            //        if (userRoleDb.Items != null && userRoleDb.Items.Count > 0)
-            //        {
-            //            var accountIds = userRoleDb.Items.Select(u => u.UserId).Distinct().ToList();
-            //            var accountDb = await _accountRepository.GetAllDataByExpression(a => accountIds.Contains(a.Id), pageNumber, pageSize, null, false, null);
-            //            result.Result = accountDb;
-            //        }
-            //    }
-            //    else
-            //    {
-            //        result = BuildAppActionResultError(result, $"Không tìm thấy vai trò {roleName}");
-            //    }
-            //}
-            //catch (Exception ex)
-            //{
-            //    result = BuildAppActionResultError(result, ex.Message);
-            //}
+            try
+            {
+                var roleRepository = Resolve<IRepository<IdentityRole>>();
+                var roleDb = await roleRepository!.GetByExpression(r => r.NormalizedName.Equals(roleName.ToLower()));
+                if (roleDb != null)
+                {
+                    var userRoleRepository = Resolve<IRepository<IdentityUserRole<string>>>();
+                    var userRoleDb = await userRoleRepository!.GetAllDataByExpression(u => u.RoleId == roleDb.Id, 0, 0, null, false, null);
+                    if (userRoleDb.Items != null && userRoleDb.Items.Count > 0)
+                    {
+                        var accountIds = userRoleDb.Items.Select(u => u.UserId).Distinct().ToList();
+                        var accountDb = await _accountRepository.GetAllDataByExpression(a => accountIds.Contains(a.Id), pageNumber, pageSize, null, false, null);
+                        result.Result = accountDb;
+                    }
+                }
+                else
+                {
+                    result = BuildAppActionResultError(result, $"Không tìm thấy vai trò {roleName}");
+                }
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
 
             return result;
         }
@@ -659,30 +645,30 @@ namespace PRN231.TicketBooking.Service.Implementation
         {
             var result = new AppActionResult();
 
-            //try
-            //{
-            //    var roleRepository = Resolve<IIdentityRoleRepository>();
-            //    var roleDb = await roleRepository!.GetById(Id);
-            //    if (roleDb != null)
-            //    {
-            //        var userRoleRepository = Resolve<IRepository<IdentityUserRole<string>>>();
-            //        var userRoleDb = await userRoleRepository!.GetAllDataByExpression(u => u.RoleId == roleDb.Id, 0, 0, null, false, null);
-            //        if (userRoleDb.Items != null && userRoleDb.Items.Count > 0)
-            //        {
-            //            var accountIds = userRoleDb.Items.Select(u => u.UserId).Distinct().ToList();
-            //            var accountDb = await _accountRepository.GetAllDataByExpression(a => accountIds.Contains(a.Id), pageNumber, pageSize, null, false, null);
-            //            result.Result = accountDb;
-            //        }
-            //    }
-            //    else
-            //    {
-            //        result = BuildAppActionResultError(result, $"Không tìm thấy vai trò với id {Id}");
-            //    }
-            //}
-            //catch (Exception ex)
-            //{
-            //    result = BuildAppActionResultError(result, ex.Message);
-            //}
+            try
+            {
+                var roleRepository = Resolve<IRepository<IdentityRole>>();
+                var roleDb = await roleRepository!.GetById(Id);
+                if (roleDb != null)
+                {
+                    var userRoleRepository = Resolve<IRepository<IdentityUserRole<string>>>();
+                    var userRoleDb = await userRoleRepository!.GetAllDataByExpression(u => u.RoleId == roleDb.Id, 0, 0, null, false, null);
+                    if (userRoleDb.Items != null && userRoleDb.Items.Count > 0)
+                    {
+                        var accountIds = userRoleDb.Items.Select(u => u.UserId).Distinct().ToList();
+                        var accountDb = await _accountRepository.GetAllDataByExpression(a => accountIds.Contains(a.Id), pageNumber, pageSize, null, false, null);
+                        result.Result = accountDb;
+                    }
+                }
+                else
+                {
+                    result = BuildAppActionResultError(result, $"Không tìm thấy vai trò với id {Id}");
+                }
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
 
             return result;
         }

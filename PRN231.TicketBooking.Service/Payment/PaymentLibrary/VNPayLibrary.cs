@@ -1,10 +1,10 @@
-﻿using PRN231.TicketBooking.Service.Payment.PaymentResponse;
+﻿using Microsoft.AspNetCore.Http;
+using PRN231.TicketBooking.Service.Payment.PaymentResponse;
 using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
-using Microsoft.AspNetCore.Http;
 
 namespace PRN231.TicketBooking.Service.Payment.PaymentLibrary
 {

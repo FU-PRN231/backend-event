@@ -1,13 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
-using PRN231.TicketBooking.BusinessObject.Models;
+﻿using PRN231.TicketBooking.Common.Dto;
 using PRN231.TicketBooking.Common.Dto.Request;
-using PRN231.TicketBooking.Common.Dto;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
 
 namespace PRN231.TicketBooking.Service.Contract
 {
@@ -40,8 +32,11 @@ namespace PRN231.TicketBooking.Service.Contract
         Task<AppActionResult> GoogleCallBack(string accessTokenFromGoogle);
 
         public Task<AppActionResult> SendEmailForActiveCode(string email);
+
         public Task<AppActionResult> GetAccountsByRoleName(string roleName, int pageNumber, int pageSize);
+
         public Task<AppActionResult> GetAccountsByRoleId(Guid Id, int pageNumber, int pageSize);
+
         public Task<AppActionResult> AddSponsor(CreateSponsorDto dto);
     }
 }

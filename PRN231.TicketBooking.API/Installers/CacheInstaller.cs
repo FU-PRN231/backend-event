@@ -1,5 +1,4 @@
-﻿
-using PRN231.TicketBooking.Common.ConfigurationModel;
+﻿using PRN231.TicketBooking.Common.ConfigurationModel;
 
 namespace PRN231.TicketBooking.API.Installers
 {

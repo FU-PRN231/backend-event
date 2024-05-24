@@ -3,24 +3,17 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using PRN231.TicketBooking.BusinessObject.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PRN231.TicketBooking.DAO.Data
 {
-    public class BookingTicketDbContext: IdentityDbContext<Account>, IDbContext
+    public class BookingTicketDbContext : IdentityDbContext<Account>, IDbContext
     {
         public BookingTicketDbContext()
         {
-
         }
 
-        public BookingTicketDbContext(DbContextOptions options):base(options)
+        public BookingTicketDbContext(DbContextOptions options) : base(options)
         {
-
         }
 
         public DbSet<Account> Accounts { get; set; }
@@ -39,7 +32,6 @@ namespace PRN231.TicketBooking.DAO.Data
         public DbSet<Survey> Surveys { get; set; }
         public DbSet<SurveyQuestionDetail> SurveyQuestionDetails { get; set; }
         public DbSet<SurveyResponseDetail> SurveyResponseDetails { get; set; }
-
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -95,6 +87,5 @@ namespace PRN231.TicketBooking.DAO.Data
             //optionsBuilder.UseSqlServer(
             //   "server=.;database=TicketBooking;uid=sa;pwd=12345;TrustServerCertificate=True;MultipleActiveResultSets=True;");
         }
-
     }
 }

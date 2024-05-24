@@ -5,7 +5,6 @@ using PRN231.TicketBooking.Common.ConfigurationModel;
 using PRN231.TicketBooking.Common.Util;
 using PRN231.TicketBooking.Service.Contract;
 
-
 namespace PRN231.TicketBooking.Service.Implementation;
 
 public class EmailService : GenericBackendService, IEmailService

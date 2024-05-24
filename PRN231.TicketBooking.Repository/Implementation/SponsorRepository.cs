@@ -1,17 +1,15 @@
 ﻿using PRN231.TicketBooking.BusinessObject.Models;
 using PRN231.TicketBooking.Common.Dto.Request;
-using PRN231.TicketBooking.Common.Util;
 using PRN231.TicketBooking.DAO.dao;
 using PRN231.TicketBooking.Repository.Contract;
-using PRN231.TicketBooking.Repository.Implementation;
-using System.Linq.Expressions;
 
-namespace PRN231.TicketBooking.dao.Implementation
+namespace PRN231.TicketBooking.Repository.Implementation
 {
     public class SponsorRepository : GenericRepository<Sponsor>, ISponsorRepository
     {
         private readonly IUnitOfWork _unitOfWork;
-        public SponsorRepository(IUnitOfWork unitOfWork,IGenericDAO<Sponsor> dao, IServiceProvider serviceProvider) : base(dao, serviceProvider)
+
+        public SponsorRepository(IUnitOfWork unitOfWork, IGenericDAO<Sponsor> dao, IServiceProvider serviceProvider) : base(dao, serviceProvider)
         {
             _unitOfWork = unitOfWork;
         }
@@ -22,9 +20,9 @@ namespace PRN231.TicketBooking.dao.Implementation
             try
             {
                 result = new List<Sponsor>();
-                foreach(var item in dto)
+                foreach (var item in dto)
                 {
-                    if((await GetSponsorByName(item.Value.Name)) == null)
+                    if (await GetSponsorByName(item.Value.Name) == null)
                     {
                         var sponsor = new Sponsor
                         {
@@ -34,15 +32,17 @@ namespace PRN231.TicketBooking.dao.Implementation
                             Img = string.Empty,
                             AccountId = item.Key
                         };
-                         result.Add(sponsor);
+                        result.Add(sponsor);
                         await _dao.Insert(sponsor);
-                    } else
+                    }
+                    else
                     {
                         result.Add(await GetSponsorByName(item.Value.Name));
                     }
                 }
                 //await _unitOfWork.SaveChangeAsync();
-            }catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 result = null;
             }
@@ -53,6 +53,5 @@ namespace PRN231.TicketBooking.dao.Implementation
         {
             return await _dao.GetByExpression(s => s.Name == name);
         }
-       
     }
 }

@@ -1,6 +1,4 @@
-﻿using PRN231.TicketBooking.Common.Dto.Response;
-
-namespace PRN231.TicketBooking.Common.Dto
+﻿namespace PRN231.TicketBooking.Common.Dto
 {
     public class AppActionResult
     {

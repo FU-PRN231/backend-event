@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PRN231.TicketBooking.BusinessObject.Models
 {
@@ -12,6 +7,7 @@ namespace PRN231.TicketBooking.BusinessObject.Models
     {
         [Key]
         public Guid Id { get; set; }
+
         public string Name { get; set; } = null!;
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
@@ -20,6 +16,7 @@ namespace PRN231.TicketBooking.BusinessObject.Models
         public string Description { get; set; } = null!;
         public int Quantity { get; set; }
         public Guid EventId { get; set; }
+
         [ForeignKey(nameof(EventId))]
         public Event? Event { get; set; }
     }

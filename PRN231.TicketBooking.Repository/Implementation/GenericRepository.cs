@@ -2,19 +2,15 @@
 using PRN231.TicketBooking.Common.Util;
 using PRN231.TicketBooking.DAO.dao;
 using PRN231.TicketBooking.Repository.Contract;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PRN231.TicketBooking.Repository.Implementation
 {
     public class GenericRepository<T> : Resolver, IRepository<T> where T : class
     {
         protected readonly IGenericDAO<T> _dao;
-        public GenericRepository(IGenericDAO<T> dao ,IServiceProvider serviceProvider) : base(serviceProvider)
+
+        public GenericRepository(IGenericDAO<T> dao, IServiceProvider serviceProvider) : base(serviceProvider)
         {
             _dao = dao;
         }

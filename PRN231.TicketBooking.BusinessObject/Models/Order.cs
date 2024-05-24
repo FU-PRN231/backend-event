@@ -1,11 +1,6 @@
 ﻿using PRN231.TicketBooking.BusinessObject.Enum;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PRN231.TicketBooking.BusinessObject.Models
 {
@@ -13,14 +8,18 @@ namespace PRN231.TicketBooking.BusinessObject.Models
     {
         [Key]
         public Guid Id { get; set; }
+
         public OrderStatus Status { get; set; }
         public DateTime PurchaseDate { get; set; }
         public double Total { get; set; }
         public Guid SeatRankId { get; set; }
+
         [ForeignKey(nameof(SeatRankId))]
         public SeatRank? SeatRank { get; set; }
-        public string? QR {  get; set; }
+
+        public string? QR { get; set; }
         public string AccountId { get; set; } = null!;
+
         [ForeignKey(nameof(AccountId))]
         public Account? Account { get; set; }
     }

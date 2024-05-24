@@ -1,12 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PRN231.TicketBooking.Common.Dto.Response;
 using PRN231.TicketBooking.DAO.Data;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PRN231.TicketBooking.DAO.dao
 {
@@ -20,6 +15,7 @@ namespace PRN231.TicketBooking.DAO.dao
             _context = new BookingTicketDbContext();
             _dbSet = _context.Set<T>();
         }
+
         public async Task<PagedResult<T>> GetAllDataByExpression(Expression<Func<T, bool>>? filter,
            int pageNumber, int pageSize,
            Expression<Func<T, object>>? orderBy = null,

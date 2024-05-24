@@ -1,7 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using PRN231.TicketBooking.Common.Dto.Request;
+﻿using Microsoft.AspNetCore.Mvc;
 using PRN231.TicketBooking.Common.Dto;
+using PRN231.TicketBooking.Common.Dto.Request;
 using PRN231.TicketBooking.Service.Contract;
 
 namespace PRN231.TicketBooking.API.Controllers
@@ -11,6 +10,7 @@ namespace PRN231.TicketBooking.API.Controllers
     public class AccountController : ControllerBase
     {
         private readonly IAccountService _accountService;
+
         public AccountController(IAccountService accountService)
         {
             _accountService = accountService;

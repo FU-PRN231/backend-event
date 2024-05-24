@@ -2,21 +2,18 @@
 using Microsoft.Extensions.Configuration;
 using PRN231.TicketBooking.Service.Payment.PaymentLibrary;
 using PRN231.TicketBooking.Service.Payment.PaymentRequest;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PRN231.TicketBooking.Service.Payment.PaymentService
 {
     public class PaymentGatewayService : IPaymentGatewayService
     {
         private readonly IConfiguration _configuration;
+
         public PaymentGatewayService(IConfiguration configuration)
         {
             _configuration = configuration;
         }
+
         public async Task<string> CreatePaymentUrlVnpay(PaymentInformationRequest requestDto, HttpContext httpContext)
         {
             var paymentUrl = "";
@@ -46,7 +43,6 @@ namespace PRN231.TicketBooking.Service.Payment.PaymentService
             pay.AddRequestData("vnp_ReturnUrl", urlCallBack);
             pay.AddRequestData("vnp_TxnRef", requestDto.OrderID);
             paymentUrl = pay.CreateRequestUrl(_configuration["Vnpay:BaseUrl"], _configuration["Vnpay:HashSecret"]);
-
 
             return paymentUrl;
         }

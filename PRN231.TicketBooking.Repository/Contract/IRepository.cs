@@ -1,10 +1,5 @@
 ﻿using PRN231.TicketBooking.Common.Dto.Response;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PRN231.TicketBooking.Repository.Contract
 {
@@ -15,13 +10,20 @@ namespace PRN231.TicketBooking.Repository.Contract
    Expression<Func<T, object>>? orderBy = null,
    bool isAscending = true,
    params Expression<Func<T, object>>[]? includes);
+
         Task<T> GetById(object id);
+
         Task<T?> GetByExpression(Expression<Func<T?, bool>> filter,
             params Expression<Func<T, object>>[]? includeProperties);
+
         Task<T> Insert(T entity);
+
         Task<List<T>> InsertRange(IEnumerable<T> entities);
+
         Task<List<T>> DeleteRange(IEnumerable<T> entities);
+
         Task<T> Update(T entity);
+
         Task<T?> DeleteById(object id);
     }
 }

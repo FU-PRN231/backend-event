@@ -1,6 +1,4 @@
-﻿using PRN231.TicketBooking.Common.Util;
-using PRN231.TicketBooking.dao.Implementation;
-using PRN231.TicketBooking.DAO.dao;
+﻿using PRN231.TicketBooking.DAO.dao;
 using PRN231.TicketBooking.DAO.Data;
 using PRN231.TicketBooking.Repository.Contract;
 using PRN231.TicketBooking.Repository.Implementation;
@@ -27,7 +25,6 @@ namespace PRN231.TicketBooking.API.Installers
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IFirebaseService, FirebaseService>();
             services.AddScoped<IEventService, EventService>();
-            
         }
     }
 }

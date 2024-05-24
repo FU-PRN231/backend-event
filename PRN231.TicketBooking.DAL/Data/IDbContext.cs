@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+
 namespace PRN231.TicketBooking.DAO.Data;
 
 public interface IDbContext

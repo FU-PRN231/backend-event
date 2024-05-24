@@ -2,11 +2,6 @@
 using PRN231.TicketBooking.Common.Dto;
 using PRN231.TicketBooking.Repository.Contract;
 using PRN231.TicketBooking.Service.Contract;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PRN231.TicketBooking.Service.Implementation
 {
@@ -20,6 +15,7 @@ namespace PRN231.TicketBooking.Service.Implementation
             _mapper = mapper;
             _unitOfWork = unitOfWork;
         }
+
         public Task<AppActionResult> GetAllEvent()
         {
             throw new NotImplementedException();

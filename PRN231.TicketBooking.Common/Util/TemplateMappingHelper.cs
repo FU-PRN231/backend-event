@@ -1,9 +1,7 @@
-﻿
-namespace PRN231.TicketBooking.Common.Util
+﻿namespace PRN231.TicketBooking.Common.Util
 {
     public class TemplateMappingHelper
     {
-       
         public enum ContentEmailType
         {
             VERIFICATION_CODE,
@@ -502,6 +500,7 @@ namespace PRN231.TicketBooking.Common.Util
 
 ";
                     break;
+
                 case ContentEmailType.SPONSOR_ACCOUNT_CREATION:
                     content = @"
 <html>
@@ -668,7 +667,6 @@ namespace PRN231.TicketBooking.Common.Util
             return content;
         }
 
-      
         public static string GetTemplateNotification(string name)
         {
             string body = @"

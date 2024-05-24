@@ -14,11 +14,11 @@ namespace PRN231.TicketBooking.Service.Implementation
 {
     public class FirebaseService : GenericBackendService, IFirebaseService
     {
-
         private readonly IConverter _pdfConverter;
         private AppActionResult _result;
         private FirebaseConfiguration _firebaseConfiguration;
         private readonly IConfiguration _configuration;
+
         public FirebaseService(IConverter pdfConverter, IServiceProvider serviceProvider, IConfiguration configuration) : base(serviceProvider)
         {
             _pdfConverter = pdfConverter;

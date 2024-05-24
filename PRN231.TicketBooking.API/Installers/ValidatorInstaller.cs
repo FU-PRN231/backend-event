@@ -1,6 +1,4 @@
-﻿using FluentValidation;
-
-namespace PRN231.TicketBooking.API.Installers
+﻿namespace PRN231.TicketBooking.API.Installers
 {
     public class ValidatorInstaller : IInstaller
     {
@@ -8,7 +6,6 @@ namespace PRN231.TicketBooking.API.Installers
         {
             //services.AddSingleton<HandleErrorValidator>();
             //services.AddValidatorsFromAssemblyContaining<BlogRequest>();
-            
         }
     }
 }

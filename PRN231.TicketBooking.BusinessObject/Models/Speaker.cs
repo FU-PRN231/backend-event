@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PRN231.TicketBooking.BusinessObject.Models
 {
@@ -14,6 +9,7 @@ namespace PRN231.TicketBooking.BusinessObject.Models
         public string Description { get; set; } = null!;
         public string Img { get; set; } = null!;
         public Guid EventId { get; set; }
+
         [ForeignKey(nameof(EventId))]
         public Event? Event { get; set; }
     }

@@ -2,7 +2,6 @@
 using PRN231.TicketBooking.BusinessObject.Models;
 using PRN231.TicketBooking.Common.Dto.Request;
 
-
 namespace PRN231.TicketBooking.Common.Mapping
 {
     public class MappingConfig
@@ -16,7 +15,6 @@ namespace PRN231.TicketBooking.Common.Mapping
                    .ForMember(desc => desc.Email, act => act.MapFrom(src => src.Email))
                    .ForMember(desc => desc.PhoneNumber, act => act.MapFrom(src => src.PhoneNumber))
                    .ForMember(desc => desc.FirstName, act => act.MapFrom(src => src.Name));
-
             });
             return mappingConfig;
         }
