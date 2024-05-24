@@ -1,62 +1,40 @@
 ﻿using PRN231.TicketBooking.Common.Dto.Response;
-using PRN231.TicketBooking.DAO.Data;
-using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
-using PRN231.TicketBooking.Repository.Contract;
+using PRN231.TicketBooking.Common.Util;
 using PRN231.TicketBooking.DAO.dao;
+using PRN231.TicketBooking.Repository.Contract;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace PRN231.TicketBooking.Repository.Implementation;
-
-public class GenericRepository<T> : IRepository<T> where T : class
+namespace PRN231.TicketBooking.Repository.Implementation
 {
-    private readonly GenericDAO<T> genericDAO;
+    public class GenericRepository<T> : Resolver, IRepository<T> where T : class
+    {
+        protected readonly IGenericDAO<T> _dao;
+        public GenericRepository(IGenericDAO<T> dao ,IServiceProvider serviceProvider) : base(serviceProvider)
+        {
+            _dao = dao;
+        }
 
-    public GenericRepository()
-    {
-        genericDAO = new GenericDAO<T> ();
-    }
-    public async Task<PagedResult<T>> GetAllDataByExpression(Expression<Func<T, bool>>? filter,
-       int pageNumber, int pageSize,
-       Expression<Func<T, object>>? orderBy = null,
-       bool isAscending = true,
-       params Expression<Func<T, object>>[]? includes)
-    {
-      return await genericDAO.GetAllDataByExpression(filter, pageNumber, pageSize, orderBy, isAscending, includes);
-    }
+        public async Task<T?> DeleteById(object id) => await _dao.DeleteById(id);
 
-    public async Task<T> GetById(object id)
-    {
-        return await genericDAO.GetById(id);
-    }
+        public async Task<List<T>> DeleteRange(IEnumerable<T> entities) => await _dao.DeleteRange(entities);
 
-    public async Task<T> Insert(T entity)
-    {
-        return await genericDAO.Insert(entity);
-    }
+        public async Task<PagedResult<T>> GetAllDataByExpression(Expression<Func<T, bool>>? filter, int pageNumber, int pageSize, Expression<Func<T, object>>? orderBy = null, bool isAscending = true, params Expression<Func<T, object>>[]? includes)
+        => await _dao.GetAllDataByExpression(filter, pageNumber, pageSize, orderBy, isAscending, includes);
 
-    public async Task<T> Update(T entity)
-    {
-        return await genericDAO.Update(entity);
-    }
+        public async Task<T?> GetByExpression(Expression<Func<T?, bool>> filter, params Expression<Func<T, object>>[]? includeProperties)
+        => await _dao.GetByExpression(filter, includeProperties);
 
-    public async Task<T> DeleteById(object id)
-    {
-        return await genericDAO.DeleteById(id);
-    }
+        public async Task<T> GetById(object id) => await _dao.GetById(id);
 
-    public async Task<T> GetByExpression(Expression<Func<T, bool>> filter,
-        params Expression<Func<T, object>>[] includeProperties)
-    {
-        return await genericDAO.GetByExpression(filter, includeProperties);
-    }
+        public async Task<T> Insert(T entity) => await _dao.Insert(entity);
 
-    public async Task<List<T>> InsertRange(IEnumerable<T> entities)
-    {
-       return await genericDAO.InsertRange(entities);
-    }
+        public async Task<List<T>> InsertRange(IEnumerable<T> entities) => await _dao.InsertRange(entities);
 
-    public async Task<List<T>> DeleteRange(IEnumerable<T> entities)
-    {
-        return await genericDAO.DeleteRange(entities);
+        public async Task<T> Update(T entity) => await _dao.Update(entity);
     }
 }

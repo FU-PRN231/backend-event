@@ -85,6 +85,19 @@ namespace PRN231.TicketBooking.Service.Implementation
                 
         }
 
+        public async Task<AppActionResult> GetAllSponsor()
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                result.Result = _repository.GetAllDataByExpression(null, 0, 0, null, false, null);
+            } catch(Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
+        }
+
         public Task<AppActionResult> GetAttendeeInformation(string qr)
         {
             throw new NotImplementedException();

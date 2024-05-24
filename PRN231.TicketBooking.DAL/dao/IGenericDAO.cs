@@ -6,9 +6,9 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PRN231.TicketBooking.Repository.Contract
+namespace PRN231.TicketBooking.DAO.dao
 {
-    public interface IRepository<T> where T : class
+    public interface IGenericDAO<T> where T : class
     {
         Task<PagedResult<T>> GetAllDataByExpression(Expression<Func<T, bool>>? filter,
    int pageNumber, int pageSize,

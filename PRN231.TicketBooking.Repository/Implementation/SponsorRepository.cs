@@ -1,19 +1,17 @@
 ﻿using PRN231.TicketBooking.BusinessObject.Models;
 using PRN231.TicketBooking.Common.Dto.Request;
-using PRN231.TicketBooking.DAO.Data;
+using PRN231.TicketBooking.Common.Util;
+using PRN231.TicketBooking.DAO.dao;
 using PRN231.TicketBooking.Repository.Contract;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using PRN231.TicketBooking.Repository.Implementation;
+using System.Linq.Expressions;
 
-namespace PRN231.TicketBooking.Repository.Implementation
+namespace PRN231.TicketBooking.dao.Implementation
 {
     public class SponsorRepository : GenericRepository<Sponsor>, ISponsorRepository
     {
-        public readonly IUnitOfWork _unitOfWork;
-        public SponsorRepository(IUnitOfWork unitOfWork)
+        private readonly IUnitOfWork _unitOfWork;
+        public SponsorRepository(IUnitOfWork unitOfWork,IGenericDAO<Sponsor> dao, IServiceProvider serviceProvider) : base(dao, serviceProvider)
         {
             _unitOfWork = unitOfWork;
         }
@@ -37,7 +35,7 @@ namespace PRN231.TicketBooking.Repository.Implementation
                             AccountId = item.Key
                         };
                          result.Add(sponsor);
-                        await this.Insert(sponsor);
+                        await _dao.Insert(sponsor);
                     } else
                     {
                         result.Add(await GetSponsorByName(item.Value.Name));
@@ -53,9 +51,8 @@ namespace PRN231.TicketBooking.Repository.Implementation
 
         public async Task<Sponsor> GetSponsorByName(string name)
         {
-            return await this.GetByExpression(s => s.Name == name);
+            return await _dao.GetByExpression(s => s.Name == name);
         }
-
        
     }
 }

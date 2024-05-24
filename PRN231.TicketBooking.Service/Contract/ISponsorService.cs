@@ -12,5 +12,6 @@ namespace PRN231.TicketBooking.Service.Contract
     {
         public Task<AppActionResult> AddSponsorToEvent(CreateSponsorDto dto);
         public Task<AppActionResult> GetAttendeeInformation(string qr);
+        public Task<AppActionResult> GetAllSponsor();
     }
 }

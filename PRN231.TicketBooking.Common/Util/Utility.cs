@@ -260,6 +260,8 @@ namespace PRN231.TicketBooking.Common.Util
                 string[] excelExtensions = { ".xls", ".xlsx" };
                 return Array.Exists(excelExtensions, ext => ext.Equals(fileExtension));
             }
+
+
         }
     }
 }

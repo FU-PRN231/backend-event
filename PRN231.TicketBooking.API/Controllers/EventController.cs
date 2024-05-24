@@ -19,7 +19,7 @@ namespace PRN231.TicketBooking.API.Controllers
         public async Task<AppActionResult> GetAll()
         {
 
-            return Ok();
+            return new AppActionResult();
         }
    /*     [HttpGet]
         [Route("{id:Guid}")]

@@ -1,11 +1,9 @@
-﻿
-
+﻿using PRN231.TicketBooking.Common.Util;
+using PRN231.TicketBooking.dao.Implementation;
+using PRN231.TicketBooking.DAO.dao;
 using PRN231.TicketBooking.DAO.Data;
 using PRN231.TicketBooking.Repository.Contract;
 using PRN231.TicketBooking.Repository.Implementation;
-using PRN231.TicketBooking.Service.Contract;
-using PRN231.TicketBooking.Service.Implementation;
-
 using PRN231.TicketBooking.Service.Contract;
 using PRN231.TicketBooking.Service.Implementation;
 
@@ -16,7 +14,7 @@ namespace PRN231.TicketBooking.API.Installers
         public void InstallService(IServiceCollection services, IConfiguration configuration)
         {
             services.AddHttpClient();
-            services.AddScoped(typeof(IRepository<>), typeof(GenericRepository<>));
+            services.AddScoped(typeof(IGenericDAO<>), typeof(GenericDAO<>));
             services.AddScoped<IDbContext, BookingTicketDbContext>();
             services.AddScoped<IJwtService, JwtService>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -28,7 +26,6 @@ namespace PRN231.TicketBooking.API.Installers
             services.AddScoped<ISponsorService, SponsorService>();
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IFirebaseService, FirebaseService>();
-
             services.AddScoped<IEventService, EventService>();
             
         }
