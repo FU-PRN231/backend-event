@@ -6,6 +6,9 @@ using PRN231.TicketBooking.Repository.Implementation;
 using PRN231.TicketBooking.Service.Contract;
 using PRN231.TicketBooking.Service.Implementation;
 
+using PRN231.TicketBooking.Service.Contract;
+using PRN231.TicketBooking.Service.Implementation;
+
 namespace PRN231.TicketBooking.API.Installers
 {
     public class ServiceInstaller : IInstaller
@@ -26,6 +29,8 @@ namespace PRN231.TicketBooking.API.Installers
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IFirebaseService, FirebaseService>();
 
+            services.AddScoped<IEventService, EventService>();
+            
         }
     }
 }

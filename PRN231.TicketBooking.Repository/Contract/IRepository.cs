@@ -6,10 +6,10 @@ namespace PRN231.TicketBooking.Repository.Contract
     public interface IRepository<T> where T : class
     {
         Task<PagedResult<T>> GetAllDataByExpression(Expression<Func<T, bool>>? filter,
-      int pageNumber, int pageSize,
-      Expression<Func<T, object>>? orderBy = null,
-      bool isAscending = true,
-      params Expression<Func<T, object>>[]? includes);
+    int pageNumber, int pageSize,
+    Expression<Func<T, object>>? orderBy = null,
+    bool isAscending = true,
+    params Expression<Func<T, object>>[]? includes);
         Task<T> GetById(object id);
         Task<T?> GetByExpression(Expression<Func<T?, bool>> filter,
             params Expression<Func<T, object>>[]? includeProperties);
