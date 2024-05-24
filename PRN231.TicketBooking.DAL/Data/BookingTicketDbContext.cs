@@ -38,7 +38,6 @@ namespace PRN231.TicketBooking.DAO.Data
         public DbSet<StaticFile> StaticFiles { get; set; }
         public DbSet<Survey> Surveys { get; set; }
         public DbSet<SurveyQuestionDetail> SurveyQuestionDetails { get; set; }
-        public DbSet<SurveyResponse> SurveyResponses { get; set; }
         public DbSet<SurveyResponseDetail> SurveyResponseDetails { get; set; }
 
 
