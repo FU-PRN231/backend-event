@@ -90,7 +90,7 @@ namespace PRN231.TicketBooking.Service.Implementation
             AppActionResult result = new AppActionResult();
             try
             {
-                result.Result = _repository.GetAllDataByExpression(null, 0, 0, null, false, null);
+                result.Result = await _repository.GetAllDataByExpression(null, 0, 0, null, false, null);
             } catch(Exception ex)
             {
                 result = BuildAppActionResultError(result, ex.Message);

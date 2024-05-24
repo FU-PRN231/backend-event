@@ -661,7 +661,7 @@ namespace PRN231.TicketBooking.Service.Implementation
 
             //try
             //{
-            //    var roleRepository = Resolve<IRepository<IdentityRole>>();
+            //    var roleRepository = Resolve<IIdentityRoleRepository>();
             //    var roleDb = await roleRepository!.GetById(Id);
             //    if (roleDb != null)
             //    {
