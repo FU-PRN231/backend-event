@@ -26,8 +26,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.InstallerServicesInAssembly(builder.Configuration);
-builder.Services.AddScoped<ISponsorRepository, SponsorRepository>();
-builder.Services.AddScoped<ISponsorService, SponsorService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

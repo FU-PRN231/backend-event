@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace PRN231.TicketBooking.DAO.dao
 {
-    public class GenericDAO<T> where T : class
+    public class GenericDAO<T> : IGenericDAO<T> where T : class
     {
         private readonly IDbContext _context;
         private readonly DbSet<T> _dbSet;

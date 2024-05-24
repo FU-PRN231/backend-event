@@ -1,6 +1,9 @@
-﻿using PRN231.TicketBooking.BusinessObject.Models;
+﻿using Microsoft.AspNet.Identity.EntityFramework;
+using PRN231.TicketBooking.BusinessObject.Models;
 using PRN231.TicketBooking.Common.Dto;
 using PRN231.TicketBooking.Common.Dto.Request;
+using PRN231.TicketBooking.Common.Util;
+using PRN231.TicketBooking.DAO.dao;
 using PRN231.TicketBooking.DAO.Data;
 using PRN231.TicketBooking.Repository.Contract;
 using System;
@@ -13,36 +16,26 @@ namespace PRN231.TicketBooking.Repository.Implementation
 {
     public class AccountRepository : GenericRepository<Account>, IAccountRepository
     {
-        public AccountRepository()
+        private readonly IUnitOfWork _unitOfWork;
+        public AccountRepository(IUnitOfWork unitOfWork ,IGenericDAO<Account> dao, IServiceProvider serviceProvider):base(dao, serviceProvider)
         {
+            _unitOfWork = unitOfWork;
         }
 
-        //public async Task<bool> AssignSponsorRole(List<Account> sponsors)
-        //{
-        //    bool isSucess = true;
-        //    try
-        //    {
-        //        var identityRoleRepository = Resolve<IRepository<IdentityRole>>();
-        //        var roleDb = await identityRoleRepository!.GetByExpression(r => r.Name.Equals("TOUR GUIDE"));
-        //        foreach (var account in tourGuideAccountList)
-        //        {
-        //            var accountDb = await _accountRepository.GetByExpression(a => a.PhoneNumber == account.PhoneNumber);
-        //            if (accountDb != null)
-        //            {
-        //                await AssignRoleForUserId(accountDb.Id, new List<string> { roleDb.Id });
-        //            }
-        //            else
-        //            {
-        //                isSucess = false;
-        //                break;
-        //            }
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //    }
-        //    return isSucess;
-        //}
+        public async Task<bool> AssignSponsorRole(List<Account> sponsors)
+        {
+            bool isSucess = true;
+            try
+            {
+                var identityRoleRepository =Resolve<IGenericDAO<IdentityRole>>();
+                var roleDb = await identityRoleRepository!.GetByExpression(r => r.Name.Equals("TOUR GUIDE"));
+              
+            }
+            catch (Exception ex)
+            {
+            }
+            return isSucess;
+        }
 
         public async Task<List<Account>> CreateSponsorAccount(CreateSponsorDto dto)
         {
@@ -50,9 +43,9 @@ namespace PRN231.TicketBooking.Repository.Implementation
             try
             {
                 Account curr = null;
-                foreach(var sponsor in dto.SponsorDtos)
+                foreach(var sponsor in dto.SponsorDtos!)
                 {
-                    curr = await this.GetAccountByEmail(sponsor.Email, false, null);
+                    curr = await GetAccountByEmail(sponsor.Email, false, null);
                     if (curr != null)
                     {
                         accounts.Add(curr);
@@ -71,7 +64,7 @@ namespace PRN231.TicketBooking.Repository.Implementation
                         accounts.Add(user);
                     }
                 }
-                await this.InsertRange(accounts);
+                await _dao.InsertRange(accounts);
             } catch (Exception ex)
             {
                
@@ -81,14 +74,10 @@ namespace PRN231.TicketBooking.Repository.Implementation
 
         public async Task<Account> GetAccountByEmail(string email, bool? IsDeleted = false, bool? IsVerified = true)
         {
-            return await this.GetByExpression(u =>
+            return await _dao.GetByExpression(u =>
                     u!.Email.ToLower() == email.ToLower() 
                     && (IsDeleted == null || u.IsDeleted == IsDeleted) 
                     && (IsVerified == null || u.IsVerified == IsVerified));
-        }
-
-      
-
-        
+        }    
     }
 }

@@ -20,5 +20,10 @@ namespace PRN231.TicketBooking.API.Controllers
         {
             return await _service.AddSponsorToEvent(dto);
         }
+        [HttpGet("get-all-sponsors")]
+        public async Task<AppActionResult> GetAllSponsors()
+        {
+            return await _service.GetAllSponsor();
+        }
     }
 }

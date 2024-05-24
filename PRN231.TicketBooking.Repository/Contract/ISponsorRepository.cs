@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace PRN231.TicketBooking.Repository.Contract
 {
-    public interface ISponsorRepository: IRepository<Sponsor>
+    public interface ISponsorRepository:IRepository<Sponsor>
     {
         public Task<Sponsor> GetSponsorByName(string name);
         public Task<List<Sponsor>> CreateSponsor(Dictionary<string, SponsorDto> dto);

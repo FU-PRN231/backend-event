@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace PRN231.TicketBooking.Repository.Contract
 {
-    public interface IIdentityRoleRepository:IRepository<IdentityRole>
+    public interface IIdentityRoleRepository
     {
         public Task<IdentityRole> GetIdentityRoleByName(string name);
     }
