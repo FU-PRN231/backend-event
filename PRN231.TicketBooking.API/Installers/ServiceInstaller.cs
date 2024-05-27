@@ -25,6 +25,8 @@ namespace PRN231.TicketBooking.API.Installers
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IFirebaseService, FirebaseService>();
             services.AddScoped<IEventService, EventService>();
+            services.AddScoped<ISeatRankService, ISeatRankService>();
+            services.AddScoped<ISeatRankRepository, SeatRankRepository>();
         }
     }
 }
