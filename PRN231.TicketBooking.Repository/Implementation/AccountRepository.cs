@@ -9,9 +9,11 @@ namespace PRN231.TicketBooking.Repository.Implementation
     public class AccountRepository : GenericRepository<Account>, IAccountRepository
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IGenericDAO<Account> _dao;
 
         public AccountRepository(IUnitOfWork unitOfWork, IGenericDAO<Account> dao, IServiceProvider serviceProvider) : base(dao, serviceProvider)
         {
+            _dao = dao; 
             _unitOfWork = unitOfWork;
         }
 

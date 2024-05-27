@@ -23,7 +23,6 @@ namespace PRN231.TicketBooking.Service.Implementation
             _logger = logger;
             _mapper = mapper;
             _firebaseService = firebaseService;
-            _firebaseService = firebaseService;
         }
 
         public async Task<AppActionResult> AddSponsorToEvent(CreateSponsorDto dto)

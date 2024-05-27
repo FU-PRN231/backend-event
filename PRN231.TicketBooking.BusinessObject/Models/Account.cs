@@ -13,5 +13,6 @@ namespace PRN231.TicketBooking.BusinessObject.Models
         public string? VerifyCode { get; set; }
         public string? RefreshToken { get; set; }
         public DateTime RefreshTokenExpiryTime { get; set; }
+      
     }
 }
