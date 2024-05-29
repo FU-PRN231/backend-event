@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PRN231.TicketBooking.Common.Dto;
+using PRN231.TicketBooking.Common.Dto.Request;
 using PRN231.TicketBooking.Service.Contract;
 
 namespace PRN231.TicketBooking.API.Controllers
@@ -26,19 +27,25 @@ namespace PRN231.TicketBooking.API.Controllers
         {
             return await _eventService.GetEventById(id);
         }
-/*
-        [HttpPost]
-        public async Task<AppActionResult> Create()
-        {
-            return Ok();
-        }
 
         [HttpPut]
-        [Route("{id:Guid}")]
-        public async Task<AppActionResult> Update([FromRoute] Guid id)
+        public async Task<AppActionResult> AddEvent(CreateEventRequest createEventRequest)
         {
-            return Ok();
+            return await _eventService.AddEvent(createEventRequest);
         }
-*/
+        /*
+                [HttpPost]
+                public async Task<AppActionResult> Create()
+                {
+                    return Ok();
+                }
+
+                [HttpPut]
+                [Route("{id:Guid}")]
+                public async Task<AppActionResult> Update([FromRoute] Guid id)
+                {
+                    return Ok();
+                }
+        */
     }
 }

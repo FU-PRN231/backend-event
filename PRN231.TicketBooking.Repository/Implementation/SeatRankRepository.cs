@@ -1,4 +1,5 @@
 ﻿using PRN231.TicketBooking.BusinessObject.Models;
+using PRN231.TicketBooking.Common.Dto;
 using PRN231.TicketBooking.Common.Dto.Response;
 using PRN231.TicketBooking.DAO.dao;
 using PRN231.TicketBooking.Repository.Contract;
@@ -18,5 +19,49 @@ namespace PRN231.TicketBooking.Repository.Implementation
         {
             _seatRankDAO = dao;
         }
+
+        public async Task<AppActionResult> AddSeatRankFromEvent(SeatRank seatRank)
+        {
+            var data = await _seatRankDAO.Insert(seatRank);
+            if (data == null)
+            {
+                return new AppActionResult()
+                {
+                    IsSuccess = false,
+                };
+            }
+            return new AppActionResult() { Result = data};
+        }
+
+        public async Task<SeatRank> GetSeatRankById(Guid id)
+        {
+            SeatRank result = null;
+            try
+            {
+                result = new SeatRank();
+                result = await _seatRankDAO.GetById(id);
+            }
+            catch (Exception ex)
+            {
+                result = null;
+            }
+            return result;
+        }
+
+        public async Task<PagedResult<SeatRank>> GetSeatRanks(int pageNumber, int pageSize)
+        {
+            PagedResult<SeatRank> result = null;
+            try
+            {
+                result = new PagedResult<SeatRank>();
+                result = await _seatRankDAO.GetAllDataByExpression(null, pageNumber, pageSize);
+            }
+            catch (Exception ex)
+            {
+                result = null;
+            }
+            return result;
+        }
+
     }
 }
