@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using MailKit.Search;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Internal;
 using PRN231.TicketBooking.BusinessObject.Enum;
 using PRN231.TicketBooking.BusinessObject.Models;
 using PRN231.TicketBooking.Common.Dto;
@@ -32,18 +33,20 @@ namespace PRN231.TicketBooking.Service.Implementation
 
         public async Task<AppActionResult> CreateOrderWithPayment(OrderRequestDto orderRequestDto, HttpContext context)
         {
+            var firebaseService = Resolve<IFirebaseService>();
             var result = new AppActionResult();
             using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
                     var paymentGatewayService = Resolve<IPaymentGatewayService>();
-                    var accountRepository = Resolve<IRepository<Account>>();
+                    var accountRepository = Resolve<IAccountRepository>();
                     var seatRepository = Resolve<IRepository<SeatRank>>();
-                    var accountDb = await accountRepository.GetByExpression(p => p.Id == orderRequestDto.AccountId);
+                    var accountDb = await accountRepository.GetByExpression(p => p!.Id == orderRequestDto.AccountId);
                     if (accountDb == null)
                     {
                         result = BuildAppActionResultError(result, $"Tài khoản với {orderRequestDto.AccountId} không tồn tại");
+                        return result;
                     }
                     if (string.IsNullOrEmpty(accountDb!.PhoneNumber))
                     {
@@ -51,40 +54,30 @@ namespace PRN231.TicketBooking.Service.Implementation
                         return result;
                     }
 
-                    var seatRankDb = seatRepository.GetByExpression(p => p.Id == orderRequestDto.SeatRankId);
-                    if (seatRankDb != null)
+                    var seatRankDb = await seatRepository.GetByExpression(p => p.Id == orderRequestDto.SeatRankId);
+                    if (seatRankDb == null)
                     {
                         result = BuildAppActionResultError(result, $"Hạng ghế với {orderRequestDto.SeatRankId} không tồn tại");
+                        return result;
                     }
 
-                        var order = new Order
+                    var order = new Order
                     {
                         Id = Guid.NewGuid(),
                         AccountId = accountDb.Id,
                         PurchaseDate = DateTime.Now,
                         SeatRankId = orderRequestDto.SeatRankId,
                         Status = OrderStatus.PENDING,
-                        Total = orderRequestDto.Total,
-                        };
-
-
-                    string qrContent = $"Order ID: {order.Id}\nStatus: {order.Status}";
-
-                    // Generate and store the QR code as a base64-encoded string
-                    using (var qrGenerator = new QRCodeGenerator())
-                    {
-                        var qrCodeData = qrGenerator.CreateQrCode(qrContent, QRCodeGenerator.ECCLevel.Q);
-                        var qrCode = new PngByteQRCode(qrCodeData);
-                        var qrCodeImage = qrCode.GetGraphic(20);
-                        order.QR = Convert.ToBase64String(qrCodeImage);
-                    }
-
+                        Total = seatRankDb.Price,
+                    };
+             
                     if (!BuildAppActionResultIsError(result))
                     {
                         await _orderRepository.Insert(order);
                         await _unitOfWork.SaveChangeAsync();
                         scope.Complete();
                     }
+
                     var payment = new PaymentInformationRequest
                     {
                         AccountID = order.AccountId,

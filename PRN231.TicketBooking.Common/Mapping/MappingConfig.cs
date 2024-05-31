@@ -19,7 +19,6 @@ namespace PRN231.TicketBooking.Common.Mapping
 
                 config.CreateMap<OrderRequestDto, Order>()
                      .ForMember(desc => desc.SeatRankId, act => act.MapFrom(src => src.SeatRankId))
-                     .ForMember(desc => desc.Total, act => act.MapFrom(src => src.Total))
                      .ForMember(desc => desc.AccountId, act => act.MapFrom(src => src.AccountId))
                 ;
 

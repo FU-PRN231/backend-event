@@ -10,7 +10,6 @@ namespace PRN231.TicketBooking.Common.Dto.Request
     public class OrderRequestDto
     {
         public Guid SeatRankId { get; set; }
-        public double Total { get; set; }
         public string AccountId { get; set; } = null!;
     }
 }
