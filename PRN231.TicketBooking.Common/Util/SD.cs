@@ -5,6 +5,7 @@ namespace PRN231.TicketBooking.Common.Util
     public class SD
     {
         public static int MAX_RECORD_PER_PAGE = short.MaxValue;
+        public static string QR_CODE_KEY = "AAECAwQFBgcICQoLDA0ODw==";
 
         public class DefaultAccountInformation
         {
@@ -76,6 +77,7 @@ namespace PRN231.TicketBooking.Common.Util
             public static string BLOG_PREFIX = "blog/";
             public static string SAMPLE_HOUSE_PREFIX = "sample-house/";
             public static string SPONSOR_PREFIX = "sponsor/";
+            public static string QR_PREFIX = "qr/";
         }
     }
 }

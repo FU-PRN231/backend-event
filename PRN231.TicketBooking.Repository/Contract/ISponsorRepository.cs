@@ -8,5 +8,6 @@ namespace PRN231.TicketBooking.Repository.Contract
         public Task<Sponsor> GetSponsorByName(string name);
 
         public Task<List<Sponsor>> CreateSponsor(Dictionary<string, SponsorDto> dto);
+        
     }
 }

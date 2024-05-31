@@ -38,5 +38,7 @@ namespace PRN231.TicketBooking.Service.Contract
         public Task<AppActionResult> GetAccountsByRoleId(Guid Id, int pageNumber, int pageSize);
 
         public Task<AppActionResult> AddSponsor(CreateSponsorDto dto);
+        public Task<AppActionResult> GenerateQR(string Id);
+        public Task<AppActionResult> DecodeQR(string hashedAccountData);
     }
 }

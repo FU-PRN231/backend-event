@@ -99,5 +99,17 @@ namespace PRN231.TicketBooking.API.Controllers
         {
             return await _accountService.GoogleCallBack(accessTokenFromGoogle);
         }
+
+        [HttpGet("generate-account-qr-code/{accountId}")]
+        public async Task<AppActionResult> GenerateQR(string accountId)
+        {
+            return await _accountService.GenerateQR(accountId);
+        }
+
+        [HttpGet("decode-qr/{qrString}")]
+        public async Task<AppActionResult> DecodeQR(string qrString)
+        {
+            return await _accountService.DecodeQR(qrString);
+        }
     }
 }

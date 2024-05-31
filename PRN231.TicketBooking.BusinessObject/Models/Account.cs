@@ -7,6 +7,7 @@ namespace PRN231.TicketBooking.BusinessObject.Models
         public string? PhoneNumber { get; set; }
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
+        public string? qr {  get; set; }
         public bool Gender { get; set; }
         public bool IsDeleted { get; set; } = false;
         public bool IsVerified { get; set; } = false;

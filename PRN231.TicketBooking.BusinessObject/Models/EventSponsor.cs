@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using PRN231.TicketBooking.BusinessObject.Enum;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PRN231.TicketBooking.BusinessObject.Models
@@ -7,7 +8,9 @@ namespace PRN231.TicketBooking.BusinessObject.Models
     {
         [Key]
         public Guid Id { get; set; }
-
+        public SponsorType SponsorType { get; set; }
+        public string SponsorDescription { get; set; } = null!;
+        public double? MoneySponsorAmount { get; set; }
         public Guid EventId { get; set; }
 
         [ForeignKey(nameof(EventId))]

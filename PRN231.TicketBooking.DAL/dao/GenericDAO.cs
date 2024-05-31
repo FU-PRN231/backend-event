@@ -7,12 +7,12 @@ namespace PRN231.TicketBooking.DAO.dao
 {
     public class GenericDAO<T> : IGenericDAO<T> where T : class
     {
-        private readonly IDbContext _context;
-        private readonly DbSet<T> _dbSet;
+        private  IDbContext _context;
+        private  DbSet<T> _dbSet;
 
-        public GenericDAO()
+        public GenericDAO(IDbContext context)
         {
-            _context = new BookingTicketDbContext();
+            _context = context;
             _dbSet = _context.Set<T>();
         }
 

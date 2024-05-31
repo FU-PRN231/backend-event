@@ -15,7 +15,7 @@ namespace PRN231.TicketBooking.BusinessObject.Models
         [ForeignKey(nameof(SurveyQuestionId))]
         public SurveyQuestionDetail? Question { get; set; }
 
-        public string AccountId { get; set; }
+        public string? AccountId { get; set; }
 
         [ForeignKey(nameof(AccountId))]
         public Account? Account { get; set; }

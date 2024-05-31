@@ -3,18 +3,13 @@ using PRN231.TicketBooking.Repository.Contract;
 
 namespace PRN231.TicketBooking.Repository.Implementation
 {
-    public class UnitOfWork : IUnitOfWork, IDisposable
+    public class UnitOfWork : IUnitOfWork
     {
-        private readonly IDbContext _db;
+        private  IDbContext _db;
 
         public UnitOfWork(IDbContext db)
         {
             _db = db;
-        }
-
-        public void Dispose()
-        {
-            GC.SuppressFinalize(this);
         }
 
         public async Task SaveChangeAsync()

@@ -7,13 +7,12 @@ namespace PRN231.TicketBooking.BusinessObject.Models
     {
         [Key]
         public Guid Id { get; set; }
-
+        public string? QR {  get; set; }
         public bool CheckedIn { get; set; }
-        public Guid OrderId { get; set; }
+        public Guid OrderDetailId { get; set; }
 
-        [ForeignKey(nameof(OrderId))]
-        public Order? Order { get; set; }
-
+        [ForeignKey(nameof(OrderDetailId))]
+        public OrderDetail? OrderDetail { get; set; }
         public Guid EventId { get; set; }
 
         [ForeignKey(nameof(EventId))]
