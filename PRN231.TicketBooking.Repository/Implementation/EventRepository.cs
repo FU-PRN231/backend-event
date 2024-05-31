@@ -6,11 +6,9 @@ namespace PRN231.TicketBooking.Repository.Implementation
 {
     public class EventRepository : GenericRepository<Event>, IEventRepository
     {
-        private readonly IUnitOfWork _unitOfWork;
 
-        public EventRepository(IUnitOfWork unitOfWork, IGenericDAO<Event> dao, IServiceProvider serviceProvider) : base(dao, serviceProvider)
+        public EventRepository( IGenericDAO<Event> dao, IServiceProvider serviceProvider) : base(dao, serviceProvider)
         {
-            _unitOfWork = unitOfWork;
         }
     }
 }

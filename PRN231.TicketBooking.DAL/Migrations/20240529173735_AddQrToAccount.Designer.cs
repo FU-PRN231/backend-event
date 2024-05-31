@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PRN231.TicketBooking.DAO.Data;
 
@@ -11,9 +12,10 @@ using PRN231.TicketBooking.DAO.Data;
 namespace PRN231.TicketBooking.DAO.Migrations
 {
     [DbContext(typeof(BookingTicketDbContext))]
-    partial class BookingTicketDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240529173735_AddQrToAccount")]
+    partial class AddQrToAccount
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -83,13 +85,6 @@ namespace PRN231.TicketBooking.DAO.Migrations
                             ConcurrencyStamp = "516f3f61-16de-47ee-bde9-c90e4541a272",
                             Name = "SPONSOR",
                             NormalizedName = "sponsor"
-                        },
-                        new
-                        {
-                            Id = "888f3f00-16de-47ee-bde9-c77e4541a645",
-                            ConcurrencyStamp = "888f3f00-16de-47ee-bde9-c77e4541a645",
-                            Name = "PM",
-                            NormalizedName = "pm"
                         });
                 });
 
@@ -303,17 +298,14 @@ namespace PRN231.TicketBooking.DAO.Migrations
                     b.Property<Guid>("EventId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("OrderDetailId")
+                    b.Property<Guid>("OrderId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("QR")
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("EventId");
 
-                    b.HasIndex("OrderDetailId");
+                    b.HasIndex("OrderId");
 
                     b.ToTable("Attendees");
                 });
@@ -382,18 +374,8 @@ namespace PRN231.TicketBooking.DAO.Migrations
                     b.Property<Guid>("EventId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<double?>("MoneySponsorAmount")
-                        .HasColumnType("float");
-
-                    b.Property<string>("SponsorDescription")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<Guid>("SponsorId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("SponsorType")
-                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -436,6 +418,12 @@ namespace PRN231.TicketBooking.DAO.Migrations
                     b.Property<DateTime>("PurchaseDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("QR")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("SeatRankId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
@@ -446,31 +434,9 @@ namespace PRN231.TicketBooking.DAO.Migrations
 
                     b.HasIndex("AccountId");
 
-                    b.ToTable("Orders");
-                });
-
-            modelBuilder.Entity("PRN231.TicketBooking.BusinessObject.Models.OrderDetail", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("OrderId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("SeatRankId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OrderId");
-
                     b.HasIndex("SeatRankId");
 
-                    b.ToTable("OrderDetails");
+                    b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("PRN231.TicketBooking.BusinessObject.Models.Organization", b =>
@@ -577,30 +543,6 @@ namespace PRN231.TicketBooking.DAO.Migrations
                     b.ToTable("PaymentResponses");
                 });
 
-            modelBuilder.Entity("PRN231.TicketBooking.BusinessObject.Models.Post", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("EventId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EventId");
-
-                    b.ToTable("Posts");
-                });
-
             modelBuilder.Entity("PRN231.TicketBooking.BusinessObject.Models.SeatRank", b =>
                 {
                     b.Property<Guid>("Id")
@@ -696,52 +638,22 @@ namespace PRN231.TicketBooking.DAO.Migrations
                     b.ToTable("Sponsors");
                 });
 
-            modelBuilder.Entity("PRN231.TicketBooking.BusinessObject.Models.SponsorMoneyHistory", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<double>("Amount")
-                        .HasColumnType("float");
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("EventSponsorId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("IsFromSponsor")
-                        .HasColumnType("bit");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EventSponsorId");
-
-                    b.ToTable("SponsorMoneyHistories");
-                });
-
             modelBuilder.Entity("PRN231.TicketBooking.BusinessObject.Models.StaticFile", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("EventId")
+                    b.Property<Guid>("EventId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Img")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid?>("PostId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("Id");
 
                     b.HasIndex("EventId");
-
-                    b.HasIndex("PostId");
 
                     b.ToTable("StaticFiles");
                 });
@@ -783,47 +695,58 @@ namespace PRN231.TicketBooking.DAO.Migrations
                     b.ToTable("Surveys");
                 });
 
-            modelBuilder.Entity("PRN231.TicketBooking.BusinessObject.Models.Task", b =>
+            modelBuilder.Entity("PRN231.TicketBooking.BusinessObject.Models.SurveyQuestionDetail", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<double>("Cost")
-                        .HasColumnType("float");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("EndDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("EventId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PersonInChargeName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Status")
+                    b.Property<int?>("AnswerType")
                         .HasColumnType("int");
+
+                    b.Property<string>("Question")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("RatingMax")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("SurveyId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("EventId");
+                    b.HasIndex("SurveyId");
 
-                    b.ToTable("Tasks");
+                    b.ToTable("SurveyQuestionDetails");
+                });
+
+            modelBuilder.Entity("PRN231.TicketBooking.BusinessObject.Models.SurveyResponseDetail", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AccountId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int?>("Rating")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("SurveyQuestionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("TextAnswer")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountId");
+
+                    b.HasIndex("SurveyQuestionId");
+
+                    b.ToTable("SurveyResponseDetails");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -885,15 +808,15 @@ namespace PRN231.TicketBooking.DAO.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PRN231.TicketBooking.BusinessObject.Models.OrderDetail", "OrderDetail")
+                    b.HasOne("PRN231.TicketBooking.BusinessObject.Models.Order", "Order")
                         .WithMany()
-                        .HasForeignKey("OrderDetailId")
+                        .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Event");
 
-                    b.Navigation("OrderDetail");
+                    b.Navigation("Order");
                 });
 
             modelBuilder.Entity("PRN231.TicketBooking.BusinessObject.Models.Event", b =>
@@ -956,24 +879,13 @@ namespace PRN231.TicketBooking.DAO.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Account");
-                });
-
-            modelBuilder.Entity("PRN231.TicketBooking.BusinessObject.Models.OrderDetail", b =>
-                {
-                    b.HasOne("PRN231.TicketBooking.BusinessObject.Models.Order", "Order")
-                        .WithMany()
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("PRN231.TicketBooking.BusinessObject.Models.SeatRank", "SeatRank")
                         .WithMany()
                         .HasForeignKey("SeatRankId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Order");
+                    b.Navigation("Account");
 
                     b.Navigation("SeatRank");
                 });
@@ -1015,17 +927,6 @@ namespace PRN231.TicketBooking.DAO.Migrations
                     b.Navigation("Payment");
                 });
 
-            modelBuilder.Entity("PRN231.TicketBooking.BusinessObject.Models.Post", b =>
-                {
-                    b.HasOne("PRN231.TicketBooking.BusinessObject.Models.Event", "Event")
-                        .WithMany()
-                        .HasForeignKey("EventId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Event");
-                });
-
             modelBuilder.Entity("PRN231.TicketBooking.BusinessObject.Models.SeatRank", b =>
                 {
                     b.HasOne("PRN231.TicketBooking.BusinessObject.Models.Event", "Event")
@@ -1057,30 +958,15 @@ namespace PRN231.TicketBooking.DAO.Migrations
                     b.Navigation("Account");
                 });
 
-            modelBuilder.Entity("PRN231.TicketBooking.BusinessObject.Models.SponsorMoneyHistory", b =>
-                {
-                    b.HasOne("PRN231.TicketBooking.BusinessObject.Models.EventSponsor", "EventSponsor")
-                        .WithMany()
-                        .HasForeignKey("EventSponsorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("EventSponsor");
-                });
-
             modelBuilder.Entity("PRN231.TicketBooking.BusinessObject.Models.StaticFile", b =>
                 {
                     b.HasOne("PRN231.TicketBooking.BusinessObject.Models.Event", "Event")
                         .WithMany()
-                        .HasForeignKey("EventId");
-
-                    b.HasOne("PRN231.TicketBooking.BusinessObject.Models.Post", "Post")
-                        .WithMany()
-                        .HasForeignKey("PostId");
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Event");
-
-                    b.Navigation("Post");
                 });
 
             modelBuilder.Entity("PRN231.TicketBooking.BusinessObject.Models.Survey", b =>
@@ -1108,15 +994,34 @@ namespace PRN231.TicketBooking.DAO.Migrations
                     b.Navigation("UpdateByAccount");
                 });
 
-            modelBuilder.Entity("PRN231.TicketBooking.BusinessObject.Models.Task", b =>
+            modelBuilder.Entity("PRN231.TicketBooking.BusinessObject.Models.SurveyQuestionDetail", b =>
                 {
-                    b.HasOne("PRN231.TicketBooking.BusinessObject.Models.Event", "Event")
+                    b.HasOne("PRN231.TicketBooking.BusinessObject.Models.Survey", "Survey")
                         .WithMany()
-                        .HasForeignKey("EventId")
+                        .HasForeignKey("SurveyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Event");
+                    b.Navigation("Survey");
+                });
+
+            modelBuilder.Entity("PRN231.TicketBooking.BusinessObject.Models.SurveyResponseDetail", b =>
+                {
+                    b.HasOne("PRN231.TicketBooking.BusinessObject.Models.Account", "Account")
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PRN231.TicketBooking.BusinessObject.Models.SurveyQuestionDetail", "Question")
+                        .WithMany()
+                        .HasForeignKey("SurveyQuestionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Account");
+
+                    b.Navigation("Question");
                 });
 #pragma warning restore 612, 618
         }

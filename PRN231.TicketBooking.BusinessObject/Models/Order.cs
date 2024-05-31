@@ -8,16 +8,9 @@ namespace PRN231.TicketBooking.BusinessObject.Models
     {
         [Key]
         public Guid Id { get; set; }
-
         public OrderStatus Status { get; set; }
         public DateTime PurchaseDate { get; set; }
         public double Total { get; set; }
-        public Guid SeatRankId { get; set; }
-
-        [ForeignKey(nameof(SeatRankId))]
-        public SeatRank? SeatRank { get; set; }
-
-        public string? QR { get; set; }
         public string AccountId { get; set; } = null!;
 
         [ForeignKey(nameof(AccountId))]
