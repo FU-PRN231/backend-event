@@ -1,4 +1,5 @@
 ﻿using PRN231.TicketBooking.BusinessObject.Models;
+using PRN231.TicketBooking.Common.Dto.Request;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,8 +8,8 @@ using System.Threading.Tasks;
 
 namespace PRN231.TicketBooking.Repository.Contract
 {
-    public interface IOrderRepositoty : IRepository<Order>
+    public interface ISurveyResponseDetailRepository : IRepository<SurveyResponseDetail>
     {
-        public Task<string> GetAccountId(Guid OrderId);
+        public Task<bool> AddAnswerToSurvey(List<AnswerDetail> answerDetails, string accountId);
     }
 }

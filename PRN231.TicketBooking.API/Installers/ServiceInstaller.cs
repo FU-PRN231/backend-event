@@ -18,13 +18,20 @@ namespace PRN231.TicketBooking.API.Installers
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IAccountRepository, AccountRepository>();
             services.AddScoped<IIdentityRoleRepository, IdentityRoleRepository>();
+            services.AddScoped<IOrderRepository, OrderRepository>();
             services.AddScoped<ISponsorRepository, SponsorRepository>();
+            services.AddScoped<IEventRepository, EventRepository>();
+            services.AddScoped<ISurveyRepository, SurveyRepository>();
+            services.AddScoped<ISurveyQuestionDetailRepository, SurveyQuestionDetailRepository>();
+            services.AddScoped<ISurveyResponseDetailRepository, SurveyResponseDetailRepository>();
+            services.AddScoped<IIdentityUserRoleRepository, IdentityUserRoleRepository>();
             services.AddScoped<IAccountService, AccountService>();
             services.AddScoped<ISponsorService, SponsorService>();
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IFirebaseService, FirebaseService>();
             //Event
             services.AddScoped<IEventService, EventService>();
+            services.AddScoped<ISurveyService, SurveyService>();
             services.AddScoped<IEventRepository, EventRepository>();
             //SeatRank
             services.AddScoped<ISeatRankService, SeatRankService>();
@@ -33,7 +40,6 @@ namespace PRN231.TicketBooking.API.Installers
             services.AddScoped<IAttendeeRepostory, AttendeeRepository>();
             services.AddScoped<IAttendeeService, AttendeeService>();
             //Order
-            services.AddScoped<IOrderRepositoty, OrderRepository>();
         }
     }
 }

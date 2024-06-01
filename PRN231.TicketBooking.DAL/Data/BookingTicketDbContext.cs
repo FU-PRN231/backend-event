@@ -30,8 +30,10 @@ namespace PRN231.TicketBooking.DAO.Data
         public DbSet<Speaker> Speakers { get; set; }
         public DbSet<StaticFile> StaticFiles { get; set; }
         public DbSet<Survey> Surveys { get; set; }
-        public DbSet<SurveyQuestionDetail> SurveyQuestionDetails { get; set; }
-        public DbSet<SurveyResponseDetail> SurveyResponseDetails { get; set; }
+        public DbSet<Post> Posts { get; set; }
+        public DbSet<SponsorMoneyHistory> SponsorMoneyHistories { get; set; }
+        public DbSet<OrderDetail> OrderDetails { get; set; }
+        public DbSet<BusinessObject.Models.Task> Tasks { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -70,6 +72,14 @@ namespace PRN231.TicketBooking.DAO.Data
                 ConcurrencyStamp = "516f3f61-16de-47ee-bde9-c90e4541a272",
                 NormalizedName = "sponsor"
             });
+
+            builder.Entity<IdentityRole>().HasData(new IdentityRole
+            {
+                Id = "888f3f00-16de-47ee-bde9-c77e4541a645",
+                Name = "PM",
+                ConcurrencyStamp = "888f3f00-16de-47ee-bde9-c77e4541a645",
+                NormalizedName = "pm"
+            });
             base.OnModelCreating(builder);
         }
 
@@ -79,7 +89,7 @@ namespace PRN231.TicketBooking.DAO.Data
                            .SetBasePath(Directory.GetCurrentDirectory())
                            .AddJsonFile("appsettings.json", true, true)
                            .Build();
-            string cs = config["ConnectionStrings:DB"];
+            string cs = config["ConnectionStrings:Host"];
             if (!optionsBuilder.IsConfigured)
             {
                 optionsBuilder.UseSqlServer(cs);

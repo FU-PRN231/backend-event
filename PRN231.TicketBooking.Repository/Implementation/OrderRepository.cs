@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace PRN231.TicketBooking.Repository.Implementation
 {
-    public class OrderRepository : GenericRepository<Order>, IOrderRepositoty
+    public class OrderRepository : GenericRepository<Order>, IOrderRepository
     {
         private readonly IGenericDAO<Order> _oderDAO;
 

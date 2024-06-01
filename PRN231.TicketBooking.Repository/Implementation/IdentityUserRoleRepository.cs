@@ -1,0 +1,18 @@
+﻿using Microsoft.AspNetCore.Identity;
+using PRN231.TicketBooking.DAO.dao;
+using PRN231.TicketBooking.Repository.Contract;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace PRN231.TicketBooking.Repository.Implementation
+{
+    public class IdentityUserRoleRepository : GenericRepository<IdentityUserRole<string>>, IIdentityUserRoleRepository
+    {
+        public IdentityUserRoleRepository(IGenericDAO<IdentityUserRole<string>> dao, IServiceProvider serviceProvider) : base(dao, serviceProvider)
+        {
+        }
+    }
+}
