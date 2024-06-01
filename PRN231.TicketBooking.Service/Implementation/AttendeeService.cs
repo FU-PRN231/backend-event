@@ -38,7 +38,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                     result.Messages[0] = $"Event Not Found with Id: {checkInEvent.EventId}!";
                     return result;
                 }
-                var orderRepo = Resolve<IOrderRepositoty>();
+                var orderRepo = Resolve<IOrderRepository>();
                 var accountId = await orderRepo.GetAccountId(attendeeEntity.OrderDetail.OrderId);
                 if (accountId == null || !accountId.Equals(attendeeEntity.OrderDetail.OrderId))
                 {
