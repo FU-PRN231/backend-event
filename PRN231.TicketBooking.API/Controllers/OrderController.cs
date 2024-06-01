@@ -23,22 +23,11 @@ namespace PRN231.TicketBooking.API.Controllers
             return await _orderService.CreateOrderWithPayment(orderRequestDto, HttpContext);
         }
 
-        //[HttpGet("get-all-order/{pageNumber}/{pageSize}")]
-        //public async Task<AppActionResult> GetAllOrder(int pageNumber = 1, int pageSize = 10)
-        //{
-        //    return await _orderService.GetAllOrder(pageNumber, pageSize);   
-        //}
-
-        //[HttpGet("get-all-order-by-account-id/{accountId}/{pageNumber}/{pageSize}")]
-        //public async Task<AppActionResult> GetAllOrderByAccountId(string accountId, int pageNumber = 1, int pageSize = 10)
-        //{
-        //    return await _orderService.GetAllOrderByAccountId(accountId, pageNumber, pageSize);     
-        //}
-
-        [HttpPut("update-status")]
-        public async Task<AppActionResult> UpdateStatus(Guid orderId, OrderStatus orderStatus)
+        [HttpGet("get-all-order/{pageNumber}/{pageSize}")]
+        public async Task<AppActionResult> GetAllOrder(int pageNumber = 1, int pageSize = 10)
         {
-            return await _orderService.UpdateStatus(orderId, orderStatus);  
+            return await _orderService.GetAllOrder(pageNumber, pageSize);
         }
+      
     }
 }
