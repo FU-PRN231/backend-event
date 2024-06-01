@@ -39,8 +39,8 @@ namespace PRN231.TicketBooking.Service.Implementation
                     return result;
                 }
                 var orderRepo = Resolve<IOrderRepositoty>();
-                var accountId = await orderRepo.GetAccountId(attendeeEntity.OrderId);
-                if (accountId == null || !accountId.Equals(attendeeEntity.OrderId))
+                var accountId = await orderRepo.GetAccountId(attendeeEntity.OrderDetail.OrderId);
+                if (accountId == null || !accountId.Equals(attendeeEntity.OrderDetail.OrderId))
                 {
                     result.IsSuccess = false;
                     result.Messages[0] = $"Account Not Found with Id: {checkInEvent.AccountId}!";
