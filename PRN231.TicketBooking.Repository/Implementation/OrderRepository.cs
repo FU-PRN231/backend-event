@@ -1,4 +1,5 @@
-﻿using PRN231.TicketBooking.BusinessObject.Models;
+﻿using PRN231.TicketBooking.BusinessObject.Enum;
+using PRN231.TicketBooking.BusinessObject.Models;
 using PRN231.TicketBooking.DAO.dao;
 using PRN231.TicketBooking.Repository.Contract;
 using System;
@@ -9,12 +10,23 @@ using System.Threading.Tasks;
 
 namespace PRN231.TicketBooking.Repository.Implementation
 {
-    public class OrderRepository : GenericRepository<Order>, IOrderRepository
+    public class OrderRepository : GenericRepository<Order>, IOrderRepositoty
     {
-        private readonly IUnitOfWork _unitOfWork;
-        public OrderRepository(IUnitOfWork unitOfWork,IGenericDAO<Order> dao, IServiceProvider serviceProvider) : base(dao, serviceProvider)
+        private readonly IGenericDAO<Order> _oderDAO;
+
+        public OrderRepository(IGenericDAO<Order> dao, IServiceProvider serviceProvider) : base(dao, serviceProvider)
         {
-            _unitOfWork = unitOfWork;   
+            _oderDAO = dao;
+        }
+
+        public async Task<string> GetAccountId(Guid orderId)
+        {
+             var item = await _oderDAO.GetByExpression(filter: x => x.Id == orderId);
+            if(item == null)
+            {
+                return null;
+            }
+            return item.AccountId;
         }
     }
 }

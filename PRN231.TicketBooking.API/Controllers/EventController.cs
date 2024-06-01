@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PRN231.TicketBooking.Common.Dto;
+using PRN231.TicketBooking.Common.Dto.Request;
 using PRN231.TicketBooking.Service.Contract;
 
 namespace PRN231.TicketBooking.API.Controllers
@@ -8,38 +9,43 @@ namespace PRN231.TicketBooking.API.Controllers
     [ApiController]
     public class EventController : ControllerBase
     {
-        private readonly IEventService service;
-
-        public EventController(IEventService service)
+        private readonly IEventService _eventService;
+        public EventController(IEventService eventService)
         {
-            this.service = service;
+            _eventService = eventService;
         }
 
         [HttpGet]
-        public async Task<AppActionResult> GetAll()
+        public async Task<AppActionResult> GetAllEvent([FromQuery] int pageNumber, [FromQuery] int pageSize)
         {
-            return new AppActionResult();
+            return await _eventService.GetAllEvent(pageNumber, pageSize);
         }
 
-        /*     [HttpGet]
-             [Route("{id:Guid}")]
-             public async Task<AppActionResult> GetById([FromRoute] Guid id)
-             {
-                 return Ok();
-             }
+        [HttpGet]
+        [Route("{id:Guid}")]
+        public async Task<AppActionResult> GetById([FromRoute] Guid id)
+        {
+            return await _eventService.GetEventById(id);
+        }
 
-             [HttpPost]
-             public async Task<AppActionResult> Create()
-             {
-                 return Ok();
-             }
+        [HttpPut]
+        public async Task<AppActionResult> AddEvent(CreateEventRequest createEventRequest)
+        {
+            return await _eventService.AddEvent(createEventRequest);
+        }
+        /*
+                [HttpPost]
+                public async Task<AppActionResult> Create()
+                {
+                    return Ok();
+                }
 
-             [HttpPut]
-             [Route("{id:Guid}")]
-             public async Task<AppActionResult> Update([FromRoute] Guid id)
-             {
-                 return Ok();
-             }
+                [HttpPut]
+                [Route("{id:Guid}")]
+                public async Task<AppActionResult> Update([FromRoute] Guid id)
+                {
+                    return Ok();
+                }
         */
     }
 }
