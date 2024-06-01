@@ -9,5 +9,7 @@ namespace PRN231.TicketBooking.Repository.Contract
 {
     public interface IOrderRepository : IRepository<Order>
     {
+        public Task<string> GetAccountId(Guid OrderId);
+
     }
 }
