@@ -15,37 +15,29 @@ namespace PRN231.TicketBooking.API.Controllers
             _eventService = eventService;
         }
 
-        [HttpGet]
-        public async Task<AppActionResult> GetAllEvent([FromQuery] int pageNumber, [FromQuery] int pageSize)
+        [HttpGet("get-all-event")]
+        public async Task<AppActionResult> GetAllEvent([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             return await _eventService.GetAllEvent(pageNumber, pageSize);
         }
 
-        [HttpGet]
-        [Route("{id:Guid}")]
-        public async Task<AppActionResult> GetById([FromRoute] Guid id)
+        [HttpGet("get-event-by-id/{id}")]
+        public async Task<AppActionResult> GetById(Guid id)
         {
             return await _eventService.GetEventById(id);
         }
 
-        [HttpPut]
-        public async Task<AppActionResult> AddEvent(CreateEventRequest createEventRequest)
+        [HttpPost("add-event")]
+        public async Task<AppActionResult> AddEvent([FromBody] CreateEventRequest createEventRequest)
         {
             return await _eventService.AddEvent(createEventRequest);
         }
-        /*
-                [HttpPost]
-                public async Task<AppActionResult> Create()
-                {
-                    return Ok();
-                }
 
-                [HttpPut]
-                [Route("{id:Guid}")]
-                public async Task<AppActionResult> Update([FromRoute] Guid id)
-                {
-                    return Ok();
-                }
-        */
+        [HttpPut("update-event/{id}")]
+        public async Task<AppActionResult> UpdateEvent(Guid id, [FromBody] UpdateEventRequest updateEventRequest)
+        {
+            return await _eventService.UpdateEvent(id, updateEventRequest);
+        }
+
     }
 }

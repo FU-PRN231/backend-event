@@ -29,12 +29,12 @@ namespace PRN231.TicketBooking.Service.Implementation
             {
                 var eventRepository = Resolve<IEventRepository>();
                 var data = await eventRepository.GetEvents(pageNumber, pageSize);
-                result = new AppActionResult() 
-                { 
+                result = new AppActionResult()
+                {
                     Result = data,
                     IsSuccess = true
                 };
-                return BuildAppActionResultError(result, "Get list event successfully!");
+                return BuildAppActionResultSuccess(result, "Get list event successfully!");
             }
             catch (Exception ex)
             {
@@ -64,7 +64,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                     Result = data,
                     IsSuccess = true
                 };
-                return BuildAppActionResultError(result, "Get event successfully!");
+                return BuildAppActionResultSuccess(result, "Get event successfully!");
             }
             catch (Exception ex)
             {
@@ -81,13 +81,14 @@ namespace PRN231.TicketBooking.Service.Implementation
                 var eventRepository = Resolve<IEventRepository>();
                 var eventEntity = _mapper.Map<Event>(dto);
                 eventEntity.Id = Guid.NewGuid();
-                var resulAddEvent = await eventRepository.AddEvent(eventEntity);
-                if (resulAddEvent == null || !resulAddEvent.IsSuccess)
+                eventEntity.CreateBy = dto.UserId;
+                eventEntity.CreateDate = DateTime.Now;
+                var resultAddEvent = await eventRepository.AddEvent(eventEntity);
+                if (resultAddEvent == null || !resultAddEvent.IsSuccess)
                 {
-                    return resulAddEvent;
+                    return resultAddEvent;
                 }
-                await _unitOfWork.SaveChangeAsync();
-                if (dto.createSeatRankDtoRequests!=null && dto.createSeatRankDtoRequests.Count > 0)
+                if (dto.createSeatRankDtoRequests != null && dto.createSeatRankDtoRequests.Count > 0)
                 {
                     foreach (var item in dto.createSeatRankDtoRequests)
                     {
@@ -100,13 +101,46 @@ namespace PRN231.TicketBooking.Service.Implementation
                     }
                 }
                 await _unitOfWork.SaveChangeAsync();
-                result.Result = _mapper.Map<CreateEventResponse>(eventEntity);
+                result.Result = _mapper.Map<CreateEventResponse>(dto);
+                return BuildAppActionResultSuccess(result, "Add event and seat rank successfully!");
             }
             catch (Exception ex)
             {
-                result = BuildAppActionResultError(result, ex.Message, true);
+                return BuildAppActionResultError(result, ex.Message, true);
             }
-            return result;
+        }
+
+        public async Task<AppActionResult> UpdateEvent(Guid id, UpdateEventRequest request)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                var eventRepository = Resolve<IEventRepository>();
+                var item = await eventRepository.GetEventById(id);
+                if (item == null)
+                {
+                    BuildAppActionResultError(result, $"Event not found with id: {id}", true);
+                }
+                item.Title = request.Title;
+                item.Description = request.Description;
+                item.EventDate = request.EventDate;
+                item.StartTime = request.StartTime;
+                item.EndTime = request.EndTime;
+                item.UpdateDate = DateTime.Now;
+                item.UpdateBy = request.UserId;
+                var resultUpdateEvent = await eventRepository.UpdateEvent(item);
+                if (resultUpdateEvent == null || !resultUpdateEvent.IsSuccess)
+                {
+                    return BuildAppActionResultError(result, $"Cannot update event with id: {id}", true);
+                }
+                await _unitOfWork.SaveChangeAsync();
+                result.Result = resultUpdateEvent;
+                return BuildAppActionResultSuccess(result, "Update event successfully!");
+            }
+            catch (Exception ex)
+            {
+                return BuildAppActionResultError(result, ex.Message, true);
+            }
         }
     }
 }
