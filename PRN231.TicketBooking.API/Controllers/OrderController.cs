@@ -72,25 +72,26 @@ namespace PRN231.TicketBooking.API.Controllers
         {
             return await _orderService.GetAllOrderByStatus(orderStatus, pageNumber, pageSize);  
         }
-        [HttpGet("get-all-order-by-accountId/{accountId}/{pageNumber}/{pageSize}")]
 
+        [HttpGet("get-all-order-by-accountId/{accountId}/{pageNumber}/{pageSize}")]
         public async Task<AppActionResult> GetAllOrderByAccountId(string accountId, int pageNumber = 1, int pageSize = 10)
         {
             return await _orderService.GetAllOrderByAccountId(accountId, pageNumber, pageSize); 
         }
-        [HttpGet("get-all-order-by-accountId/{orderId}/{pageNumber}/{pageSize}")]
+
+        [HttpGet("get-all-order-detail-by-order-id/{orderId}/{pageNumber}/{pageSize}")]
         public async Task<AppActionResult> GetAllOrderDetailByOrderId(Guid orderId, int pageNumber = 1, int pageSize = 10)
         {
             return await _orderService.GetAllOrderDetailByOrderId(orderId, pageNumber, pageSize);
         }
 
-        [HttpGet("get-all-order-by-accountId/{eventId}/{pageNumber}/{pageSize}")]
+        [HttpGet("get-event-order-by-status/{eventId}/{pageNumber}/{pageSize}")]
         public async Task<AppActionResult> GetEventOrderByStatus(Guid eventId, OrderStatus orderStatus, int pageNumber = 1, int pageSize = 10)
         {
             return await _orderService.GetEventOrderByStatus(eventId, orderStatus, pageNumber, pageSize);
         }
 
-        [HttpGet("get-all-order-by-accountId/{eventId}/{pageNumber}/{pageSize}")]
+        [HttpGet("get-all-order-by-event-id/{eventId}/{pageNumber}/{pageSize}")]
         public async Task<AppActionResult> GetAllOrderByEventId(Guid eventId, int pageNumber = 1, int pageSize = 10)
         {
             return await _orderService.GetAllOrderByEventId(eventId, pageNumber, pageSize);
