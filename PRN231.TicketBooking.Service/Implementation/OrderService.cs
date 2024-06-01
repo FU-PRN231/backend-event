@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using MailKit.Search;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Internal;
 using PRN231.TicketBooking.BusinessObject.Enum;
 using PRN231.TicketBooking.BusinessObject.Models;
 using PRN231.TicketBooking.Common.Dto;
@@ -66,7 +65,6 @@ namespace PRN231.TicketBooking.Service.Implementation
                         Id = Guid.NewGuid(),
                         AccountId = accountDb.Id,
                         PurchaseDate = DateTime.Now,
-                        SeatRankId = orderRequestDto.SeatRankId,
                         Status = OrderStatus.PENDING,
                         Total = seatRankDb.Price,
                     };
@@ -95,33 +93,33 @@ namespace PRN231.TicketBooking.Service.Implementation
             }
         }
 
-        public async Task<AppActionResult> GetAllOrder(int pageNumber, int pageSize)
-        {
-            var result = new AppActionResult();
-            try
-            {
-                result.Result = await _orderRepository.GetAllDataByExpression(null, pageNumber, pageSize, null, false, p => p.SeatRank!, p => p.Account!);
-            }
-            catch (Exception ex)
-            {
-                result = BuildAppActionResultError(result, ex.Message);
-            }
-            return result;
-        }
+        //public async Task<AppActionResult> GetAllOrder(int pageNumber, int pageSize)
+        //{
+        //    var result = new AppActionResult();
+        //    try
+        //    {
+        //        result.Result = await _orderRepository.GetAllDataByExpression(null, pageNumber, pageSize, null, false, p => p.SeatRank!, p => p.Account!);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        result = BuildAppActionResultError(result, ex.Message);
+        //    }
+        //    return result;
+        //}
 
-        public async Task<AppActionResult> GetAllOrderByAccountId(string accountId, int pageNumber, int pageSize)
-        {
-            var result = new AppActionResult();
-            try
-            {
-                result.Result = await _orderRepository.GetAllDataByExpression(p => p.AccountId == accountId, pageNumber, pageSize, null, false, p => p.SeatRank!, p => p.Account!);
-            }
-            catch (Exception ex)
-            {
-                result = BuildAppActionResultError(result, ex.Message);
-            }
-            return result;
-        }
+        //public async Task<AppActionResult> GetAllOrderByAccountId(string accountId, int pageNumber, int pageSize)
+        //{
+        //    var result = new AppActionResult();
+        //    try
+        //    {
+        //        result.Result = await _orderRepository.GetAllDataByExpression(p => p.AccountId == accountId, pageNumber, pageSize, null, false, p => p.SeatRank!, p => p.Account!);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        result = BuildAppActionResultError(result, ex.Message);
+        //    }
+        //    return result;
+        //}
 
         public async Task<AppActionResult> UpdateStatus(Guid orderId, OrderStatus orderStatus)
         {

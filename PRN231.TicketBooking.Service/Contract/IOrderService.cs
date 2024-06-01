@@ -13,8 +13,8 @@ namespace PRN231.TicketBooking.Service.Contract
     public interface IOrderService
     {
         Task<AppActionResult> CreateOrderWithPayment(OrderRequestDto orderRequestDto, HttpContext context);
-        Task<AppActionResult> GetAllOrder(int pageNumber, int pageSize);
-        Task<AppActionResult> GetAllOrderByAccountId(string accountId, int pageNumber , int pageSize);
+        //Task<AppActionResult> GetAllOrder(int pageNumber, int pageSize);
+        //Task<AppActionResult> GetAllOrderByAccountId(string accountId, int pageNumber , int pageSize);
         Task<AppActionResult> UpdateStatus(Guid orderId, OrderStatus orderStatus);
 
     }
