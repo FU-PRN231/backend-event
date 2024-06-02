@@ -95,6 +95,8 @@ namespace PRN231.TicketBooking.Service.Implementation
                     foreach (var item in dto.createSeatRankDtoRequests)
                     {
                         var seatRank = _mapper.Map<SeatRank>(item);
+                        seatRank.Id = Guid.NewGuid();
+                        seatRank.EventId = eventEntity.Id;
                         var data = await _seatRankRepository.AddSeatRankFromEvent(seatRank);
                         if (!data.IsSuccess)
                         {
