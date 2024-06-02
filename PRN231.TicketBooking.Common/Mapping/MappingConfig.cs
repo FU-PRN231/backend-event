@@ -31,6 +31,11 @@ namespace PRN231.TicketBooking.Common.Mapping
                    .ForMember(desc => desc.Question, act => act.MapFrom(src => src.Question))
                    .ForMember(desc => desc.AnswerType, act => act.MapFrom(src => src.AnswerType))
                    .ForMember(desc => desc.RatingMax, act => act.MapFrom(src => src.RatingMax));
+                config.CreateMap<CreateEventRequest, Event>().ReverseMap();
+                config.CreateMap<CreateSeatRankEventRequest, SeatRank>().ReverseMap();
+                config.CreateMap<CreateSeatRankEventResponse, SeatRank>().ReverseMap();
+                config.CreateMap<CreateEventRequest, CreateEventResponse>().ReverseMap();
+                config.CreateMap<GetEventByIdResponse, Event>().ReverseMap();
             });
             return mappingConfig;
 
