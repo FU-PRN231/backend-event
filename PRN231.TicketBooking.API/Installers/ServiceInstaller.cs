@@ -4,6 +4,7 @@ using PRN231.TicketBooking.Repository.Contract;
 using PRN231.TicketBooking.Repository.Implementation;
 using PRN231.TicketBooking.Service.Contract;
 using PRN231.TicketBooking.Service.Implementation;
+using PRN231.TicketBooking.Service.Payment.PaymentService;
 
 namespace PRN231.TicketBooking.API.Installers
 {
@@ -42,7 +43,7 @@ namespace PRN231.TicketBooking.API.Installers
             services.AddScoped<IAttendeeService, AttendeeService>();
             //Order
             services.AddScoped<IOrderService, OrderService>();
-
+            services.AddScoped<IPaymentGatewayService, PaymentGatewayService>();
         }
     }
 }

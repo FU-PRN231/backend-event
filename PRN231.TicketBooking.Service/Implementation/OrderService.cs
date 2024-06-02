@@ -43,7 +43,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                 {
                     var paymentGatewayService = Resolve<IPaymentGatewayService>();
                     var accountRepository = Resolve<IAccountRepository>();
-                    var seatRepository = Resolve<IRepository<SeatRank>>();
+                    var seatRepository = Resolve<ISeatRankRepository>();
                     var orderDetailsRepository = Resolve<IOrderDetailsRepository>();
                     var accountDb = await accountRepository.GetByExpression(p => p!.Id == orderRequestDto.AccountId);
                     if (accountDb == null)
