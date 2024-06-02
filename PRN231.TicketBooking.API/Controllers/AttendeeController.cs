@@ -21,5 +21,10 @@ namespace PRN231.TicketBooking.API.Controllers
         {
             return await _attendeeService.CheckInAttendee(checkInEventRequest);
         }
+        [HttpGet]
+        public IActionResult Get()
+        {
+            return Ok();
+        }
     }
 }
