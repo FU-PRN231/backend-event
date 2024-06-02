@@ -8,5 +8,6 @@ namespace PRN231.TicketBooking.Service.Contract
         public Task<AppActionResult> GetAllEvent(int pageNumber, int pageSize);
         public Task<AppActionResult> GetEventById(Guid id);
         public Task<AppActionResult> AddEvent(CreateEventRequest dto);
+        public Task<AppActionResult> UpdateEvent(Guid id, UpdateEventRequest request);
     }
 }
