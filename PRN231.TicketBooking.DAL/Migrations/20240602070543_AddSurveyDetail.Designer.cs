@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PRN231.TicketBooking.DAO.Data;
 
@@ -11,9 +12,10 @@ using PRN231.TicketBooking.DAO.Data;
 namespace PRN231.TicketBooking.DAO.Migrations
 {
     [DbContext(typeof(BookingTicketDbContext))]
-    partial class BookingTicketDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240602070543_AddSurveyDetail")]
+    partial class AddSurveyDetail
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -743,9 +745,6 @@ namespace PRN231.TicketBooking.DAO.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int?>("AnswerType")
-                        .HasColumnType("int");
-
-                    b.Property<int>("No")
                         .HasColumnType("int");
 
                     b.Property<string>("Question")

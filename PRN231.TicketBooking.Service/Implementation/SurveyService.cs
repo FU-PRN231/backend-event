@@ -2,6 +2,7 @@
 using PRN231.TicketBooking.BusinessObject.Models;
 using PRN231.TicketBooking.Common.Dto;
 using PRN231.TicketBooking.Common.Dto.Request;
+using PRN231.TicketBooking.Common.Dto.Response;
 using PRN231.TicketBooking.Repository.Contract;
 using PRN231.TicketBooking.Service.Contract;
 using System;
@@ -68,7 +69,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                 var eventDb = await eventRepository!.GetById(dto.EventId);
                 if (eventDb == null)
                 {
-                    result = BuildAppActionResultError(result, $"Không tìm thấy sự kiện với id {eventDb.Id}");
+                    result = BuildAppActionResultError(result, $"Không tìm thấy sự kiện với id {dto.EventId}");
                     return result;
                 }
 
@@ -95,19 +96,85 @@ namespace PRN231.TicketBooking.Service.Implementation
             return result;
         }
 
+        public async Task<AppActionResult> GellAllSurvey()
+        {
+            AppActionResult result = new();
+            try
+            {
+                var surveyDb = await _surveyRepository.GetAllDataByExpression(null, 0, 0, null, false, null);
+                List<SurveyQuestionResponse> data = new List<SurveyQuestionResponse>();
+                if(surveyDb.Items != null && surveyDb.Items.Count > 0) 
+                {
+                    foreach( var item in surveyDb.Items)
+                    {
+                        var surveyQuestion = await _surveyQuestionDetailRepository.GetAllDataByExpression(s => s.SurveyId == item.Id, 0, 0, null, false, null);
+                        data.Add(new SurveyQuestionResponse
+                        {
+                            Survey = item,
+                            surveyQuestionDetails = surveyQuestion.Items!
+                        });
+                    }
+                    result.Result = data;
+                }
+            } catch(Exception ex) 
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
+        }
+
+        public async Task<AppActionResult> GellSurveyOfOrganization(Guid id)
+        {
+            AppActionResult result = new();
+            try
+            {
+                var organizationRepository = Resolve<IOrganizationRepository>();
+                var organizationDb = await organizationRepository.GetById(id);
+                if(organizationDb == null) 
+                {
+                    result = BuildAppActionResultError(result, $"Không tìm thấy tổ chức với id {id}");
+                    return result;
+                }
+
+                var surveyDb = await _surveyRepository.GetAllDataByExpression(s => s.Event!.OrganizationId == id, 0, 0, null, false, null);
+                List<SurveyQuestionResponse> data = new List<SurveyQuestionResponse>();
+                if (surveyDb.Items != null && surveyDb.Items.Count > 0)
+                {
+                    foreach (var item in surveyDb.Items)
+                    {
+                        var surveyQuestion = await _surveyQuestionDetailRepository.GetAllDataByExpression(s => s.SurveyId == item.Id, 0, 0, null, false, null);
+                        data.Add(new SurveyQuestionResponse
+                        {
+                            Survey = item,
+                            surveyQuestionDetails = surveyQuestion.Items!
+                        });
+                    }
+                    result.Result = data;
+                }
+
+            } catch(Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
+        }
+
         public async Task<AppActionResult> GetSurveyById(Guid surveyId)
         {
             AppActionResult result = new AppActionResult();
             try
             {
+                SurveyQuestionResponse data = new SurveyQuestionResponse();
                 var surveyDb = await _surveyRepository.GetById(surveyId);
                 if(surveyDb == null ) 
                 {
                     result = BuildAppActionResultError(result, $"Không tìm thấy form khảo sát với id {surveyId}");
                     return result;
                 }
+                data.Survey = surveyDb;
                 var surveyQuestionDetail = await _surveyQuestionDetailRepository.GetAllDataByExpression(s => s.SurveyId == surveyId, 0, 0, null, false, null);
-                result.Result = surveyQuestionDetail;
+                data.surveyQuestionDetails = surveyQuestionDetail.Items!;
+                result.Result = data;
             }
             catch (Exception ex)
             {
