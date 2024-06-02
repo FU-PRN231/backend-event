@@ -1,4 +1,5 @@
 ﻿using Humanizer;
+using Microsoft.Extensions.Logging;
 using PRN231.TicketBooking.BusinessObject.Models;
 using PRN231.TicketBooking.Common.Dto;
 using PRN231.TicketBooking.Common.Dto.Request;
@@ -6,6 +7,8 @@ using PRN231.TicketBooking.Common.Dto.Response;
 using PRN231.TicketBooking.Common.Util;
 using PRN231.TicketBooking.DAO.dao;
 using PRN231.TicketBooking.Repository.Contract;
+using System.Data.Entity.Core.Metadata.Edm;
+using System.Drawing.Printing;
 using System.Linq.Expressions;
 
 namespace PRN231.TicketBooking.Repository.Implementation
@@ -14,11 +17,13 @@ namespace PRN231.TicketBooking.Repository.Implementation
     {
         private readonly IGenericDAO<Event> _eventDAO;
         private readonly IUnitOfWork _unitOfWork;
+        IGenericDAO<StaticFile> _staticFileDAO;
 
-        public EventRepository(IGenericDAO<Event> dao, IServiceProvider serviceProvider, IUnitOfWork unitOfWork) : base(dao, serviceProvider)
+        public EventRepository(IGenericDAO<Event> dao, IServiceProvider serviceProvider, IUnitOfWork unitOfWork, IGenericDAO<StaticFile> staticFileDAO) : base(dao, serviceProvider)
         {
             _eventDAO = dao;
             _unitOfWork = unitOfWork;
+            _staticFileDAO = staticFileDAO;
         }
 
         public async Task<AppActionResult> AddEvent(Event evnt)
@@ -44,7 +49,12 @@ namespace PRN231.TicketBooking.Repository.Implementation
             try
             {
                 result = new Event();
-                result = await _eventDAO.GetById(id);
+                result = await _eventDAO.GetByExpression(
+                                        filter: x => x.Id == id,
+                                        includeProperties: new Expression<Func<Event, object>>[] {
+                                        e => e.Location,
+                                        e => e.Organization,
+                                    });
             }
             catch (Exception ex)
             {
@@ -65,7 +75,7 @@ namespace PRN231.TicketBooking.Repository.Implementation
                     pageSize: pageSize,
                     includes: new Expression<Func<Event, object>>[] {
                         e => e.Location,
-                        e => e.Organization
+                        e => e.Organization,
                     }
                 );
             }
@@ -74,6 +84,31 @@ namespace PRN231.TicketBooking.Repository.Implementation
                 result = null;
             }
             return result;
+        }
+
+        public async Task<List<StaticFile>> GetStaticFilesByEventId(Guid eventId)
+        {
+            try
+            {
+                var eventEntity = _eventDAO.GetById(eventId);
+                if (eventEntity == null)
+                {
+                    throw new Exception($"Event not found with id: {eventId}");
+                }
+                var staticFilesPaging = await _staticFileDAO.GetAllDataByExpression(
+                                        filter: x => x.EventId == eventId,
+                                        pageNumber: 0,
+                                        pageSize: 0,
+                                        orderBy: null,
+                                        isAscending: true,
+                                        includes: null);
+                return staticFilesPaging.Items ??= new List<StaticFile>();
+
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
 
         public async Task<AppActionResult> UpdateEvent(Event eventEntity)

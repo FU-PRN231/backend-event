@@ -49,16 +49,18 @@ namespace PRN231.TicketBooking.Service.Implementation
             try
             {
                 var eventRepository = Resolve<IEventRepository>();
-                var data = await eventRepository.GetEventById(id);
-                if (data == null)
+                var eventEntity = await eventRepository.GetEventById(id);
+                if (eventEntity == null)
                 {
                     result = new AppActionResult()
                     {
-                        Result = data,
+                        Result = eventEntity,
                         IsSuccess = false
                     };
                     return BuildAppActionResultError(result, "Event not found!");
                 }
+                var data = _mapper.Map<GetEventByIdResponse>(eventEntity);
+                data.StaticFiles = await eventRepository.GetStaticFilesByEventId(eventEntity.Id);
                 result = new AppActionResult()
                 {
                     Result = data,

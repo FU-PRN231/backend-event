@@ -21,4 +21,10 @@
     <ProjectReference Include="..\PRN231.TicketBooking.Service\PRN231.TicketBooking.Service.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>

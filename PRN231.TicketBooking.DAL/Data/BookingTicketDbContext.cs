@@ -84,9 +84,9 @@ namespace PRN231.TicketBooking.DAO.Data
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             IConfiguration config = new ConfigurationBuilder()
-                           .SetBasePath(Directory.GetCurrentDirectory())
-                           .AddJsonFile("appsettings.json", true, true)
-                           .Build();
+                               .SetBasePath(Directory.GetCurrentDirectory())
+                               .AddJsonFile("appsettings.json", true, true)
+                               .Build();
             string cs = config["ConnectionStrings:DB"];
             if (!optionsBuilder.IsConfigured)
             {

@@ -35,6 +35,7 @@ namespace PRN231.TicketBooking.Common.Mapping
                 config.CreateMap<CreateSeatRankEventRequest, SeatRank>().ReverseMap();
                 config.CreateMap<CreateSeatRankEventResponse, SeatRank>().ReverseMap();
                 config.CreateMap<CreateEventRequest, CreateEventResponse>().ReverseMap();
+                config.CreateMap<GetEventByIdResponse, Event>().ReverseMap();
             });
             return mappingConfig;
 
