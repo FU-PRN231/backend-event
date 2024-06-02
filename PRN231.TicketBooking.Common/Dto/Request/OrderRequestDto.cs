@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using PRN231.TicketBooking.BusinessObject.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,9 @@ namespace PRN231.TicketBooking.Common.Dto.Request
 {
     public class OrderRequestDto
     {
-        public Guid SeatRankId { get; set; }
+        public List<SeatRankDto> SeatRank { get; set; } = null!;
         public string AccountId { get; set; } = null!;
+        public string? Content { get; set; }
+
     }
 }

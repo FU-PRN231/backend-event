@@ -12,6 +12,17 @@ namespace PRN231.TicketBooking.Common.Util
             public static string PASSWORD = "Sponsor123@";
         }
 
+        public class RoleConvert
+        {
+            public static string ADMIN = "ADMIN";
+            public static string CUSTOMER = "CUSTOMER";
+            public static string SPONSOR = "SPONSOR";
+            public static string ORGANIZER = "ORGANIZER";
+            public static string STAFF = "STAFF";
+            public static string PM = "PM";
+        }
+      
+
         public class ResponseMessage
         {
             public static string CREATE_SUCCESSFUL = "CREATE_SUCCESSFULLY";

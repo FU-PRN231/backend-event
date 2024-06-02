@@ -19,6 +19,7 @@ namespace PRN231.TicketBooking.API.Installers
             services.AddScoped<IAccountRepository, AccountRepository>();
             services.AddScoped<IIdentityRoleRepository, IdentityRoleRepository>();
             services.AddScoped<IOrderRepository, OrderRepository>();
+            services.AddScoped<IOrderDetailsRepository, OrderDetailsRepository>();
             services.AddScoped<ISponsorRepository, SponsorRepository>();
             services.AddScoped<IEventRepository, EventRepository>();
             services.AddScoped<ISurveyRepository, SurveyRepository>();
@@ -40,6 +41,8 @@ namespace PRN231.TicketBooking.API.Installers
             services.AddScoped<IAttendeeRepostory, AttendeeRepository>();
             services.AddScoped<IAttendeeService, AttendeeService>();
             //Order
+            services.AddScoped<IOrderService, OrderService>();
+
         }
     }
 }

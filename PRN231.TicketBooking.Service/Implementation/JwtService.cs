@@ -61,7 +61,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                     {
                        new Claim (ClaimTypes.Email, loginRequest.Email),
                        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                       new Claim("AccountId", user.Id)
+                       new Claim("AccountId", user.Id),
                     };
                         claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role.ToUpper())));
                         var authenKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtConfiguration.Key));

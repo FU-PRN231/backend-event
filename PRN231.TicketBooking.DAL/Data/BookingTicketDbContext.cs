@@ -23,8 +23,6 @@ namespace PRN231.TicketBooking.DAO.Data
         public DbSet<Location> Locations { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<Organization> Organizations { get; set; }
-        public DbSet<Payment> Payments { get; set; }
-        public DbSet<PaymentResponse> PaymentResponses { get; set; }
         public DbSet<SeatRank> SeatRanks { get; set; }
         public DbSet<Sponsor> Sponsors { get; set; }
         public DbSet<Speaker> Speakers { get; set; }

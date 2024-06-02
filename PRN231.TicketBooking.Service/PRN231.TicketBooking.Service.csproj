@@ -15,7 +15,7 @@
     <PackageReference Include="iTextSharp" Version="5.5.13.3" />
     <PackageReference Include="MailKit" Version="4.5.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.2.0" />
-    <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="8.0.4" />
+    <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="6.0.31" />
     <PackageReference Include="MimeKit" Version="4.5.0" />
 	  <PackageReference Include="Firebase.Auth" Version="1.0.0" />
 	  <PackageReference Include="FirebaseStorage.net" Version="1.0.3" />
