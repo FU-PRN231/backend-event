@@ -5,6 +5,7 @@ using PRN231.TicketBooking.Common.Dto.Request;
 using PRN231.TicketBooking.Common.Dto.Response;
 using PRN231.TicketBooking.Common.Util;
 using PRN231.TicketBooking.Repository.Contract;
+using PRN231.TicketBooking.Repository.Implementation;
 using PRN231.TicketBooking.Service.Contract;
 
 namespace PRN231.TicketBooking.Service.Implementation
@@ -48,25 +49,37 @@ namespace PRN231.TicketBooking.Service.Implementation
             AppActionResult result = new AppActionResult();
             try
             {
+                var seatRankRepository = Resolve<ISeatRankRepository>();
+                var speakerRepository= Resolve<ISpeakerRepository>();
+                var eventSponsorRepository = Resolve<IEventSponsorRepository>();
+                var staticFileRepository = Resolve<IStaticFileRepository>();    
+                var surveyRepository = Resolve<ISurveyRepository>();
+                var postRepository = Resolve<IPostRepository>();
+                var eventResponse = new EvenetResponse();   
                 var eventRepository = Resolve<IEventRepository>();
-                var eventEntity = await eventRepository.GetEventById(id);
-                if (eventEntity == null)
+                var eventDb = await eventRepository.GetAllDataByExpression(p => p!.Id == id, 0, 0, null, false, p => p.Organization!, p => p.Location!);
+                if (eventDb == null)
                 {
-                    result = new AppActionResult()
-                    {
-                        Result = eventEntity,
-                        IsSuccess = false
-                    };
-                    return BuildAppActionResultError(result, "Event not found!");
+                    result = BuildAppActionResultError(result, $"Sự kiện này không tồn tại với {id}");
                 }
-                var data = _mapper.Map<GetEventByIdResponse>(eventEntity);
-                data.StaticFiles = await eventRepository.GetStaticFilesByEventId(eventEntity.Id);
-                result = new AppActionResult()
+                if (eventDb!.Items!.Count > 0 && eventDb.Items != null)
                 {
-                    Result = data,
-                    IsSuccess = true
-                };
-                return BuildAppActionResultSuccess(result, "Get event successfully!");
+                    var eventItem = eventDb.Items.First();
+                    var seatRankDb = await seatRankRepository.GetAllDataByExpression(p => p.EventId == eventItem.Id, 0, 0 , null, false, null);
+                    var speakerDb = await speakerRepository.GetAllDataByExpression(p => p.EventId == eventItem.Id,0 ,0, null, false, null);
+                    var eventSponsorDb = await eventSponsorRepository.GetAllDataByExpression(p => p.EventId == eventItem.Id, 0, 0, null, false, p => p.Sponsor!);
+                    var staticFileDb = await staticFileRepository.GetAllDataByExpression(p => p.EventId == eventItem.Id, 0, 0, null, false, null );
+                    var surveyDb = await surveyRepository.GetAllDataByExpression(p => p.EventId == eventItem.Id, 0, 0, null, false, null);
+                    var postDb = await postRepository.GetAllDataByExpression(p => p.EventId == eventItem.Id, 0, 0, null, false, null);
+                    eventResponse.StaticFiles = staticFileDb.Items!;
+                    eventResponse.Speakers = speakerDb.Items!;
+                    eventResponse.SeatRanks = seatRankDb.Items!;    
+                    eventResponse.Surveys = surveyDb.Items!;
+                    eventResponse.Event = eventItem;
+                    eventResponse.EventSponsors = eventSponsorDb.Items!;
+                    eventResponse.Posts = postDb.Items!;
+                    result.Result = eventResponse;
+                }
             }
             catch (Exception ex)
             {
