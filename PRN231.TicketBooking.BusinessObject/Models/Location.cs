@@ -6,7 +6,6 @@ namespace PRN231.TicketBooking.BusinessObject.Models
     {
         [Key]
         public Guid Id { get; set; }
-
         public string Name { get; set; }
         public string Address { get; set; } = null!;
     }

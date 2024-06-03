@@ -29,8 +29,7 @@ namespace PRN231.TicketBooking.Repository.Implementation
                             Id = Guid.NewGuid(),
                             Name = item.Value.Name,
                             Description = item.Value.Description,
-                            Img = string.Empty,
-                            AccountId = item.Key
+                            Img = string.Empty
                         };
                         result.Add(sponsor);
                         await _dao.Insert(sponsor);
