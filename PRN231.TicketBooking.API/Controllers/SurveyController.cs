@@ -34,5 +34,17 @@ namespace PRN231.TicketBooking.API.Controllers
         {
             return await _service.GetSurveyById(id);
         }
+
+        [HttpGet("get-all-survey")]
+        public async Task<AppActionResult> GellAllSurvey()
+        {
+            return await _service.GellAllSurvey();
+        }
+
+        [HttpGet("get-survey-by-organization-id/{organizationId}")]
+        public async Task<AppActionResult> GellSurveyOfOrganization(Guid organizationId)
+        {
+            return await _service.GellSurveyOfOrganization(organizationId);
+        }
     }
 }

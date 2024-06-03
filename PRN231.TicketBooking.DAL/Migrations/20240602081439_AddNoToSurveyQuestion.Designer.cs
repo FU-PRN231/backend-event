@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PRN231.TicketBooking.DAO.Data;
 
@@ -11,9 +12,10 @@ using PRN231.TicketBooking.DAO.Data;
 namespace PRN231.TicketBooking.DAO.Migrations
 {
     [DbContext(typeof(BookingTicketDbContext))]
-    partial class BookingTicketDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240602081439_AddNoToSurveyQuestion")]
+    partial class AddNoToSurveyQuestion
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -247,9 +249,6 @@ namespace PRN231.TicketBooking.DAO.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
-                    b.Property<Guid?>("OrganizationId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("PasswordHash")
                         .HasColumnType("nvarchar(max)");
 
@@ -267,9 +266,6 @@ namespace PRN231.TicketBooking.DAO.Migrations
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid?>("SponsorId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("bit");
@@ -294,10 +290,6 @@ namespace PRN231.TicketBooking.DAO.Migrations
                         .HasDatabaseName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
-                    b.HasIndex("OrganizationId");
-
-                    b.HasIndex("SponsorId");
-
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
@@ -310,6 +302,9 @@ namespace PRN231.TicketBooking.DAO.Migrations
                     b.Property<bool>("CheckedIn")
                         .HasColumnType("bit");
 
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("OrderDetailId")
                         .HasColumnType("uniqueidentifier");
 
@@ -317,6 +312,8 @@ namespace PRN231.TicketBooking.DAO.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("EventId");
 
                     b.HasIndex("OrderDetailId");
 
@@ -498,6 +495,10 @@ namespace PRN231.TicketBooking.DAO.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("CreateBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime2");
 
@@ -508,19 +509,25 @@ namespace PRN231.TicketBooking.DAO.Migrations
                     b.Property<DateTime>("FoundedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Img")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UpdateBy")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("UpdateDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Website")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CreateBy");
+
+                    b.HasIndex("UpdateBy");
 
                     b.ToTable("Organizations");
                 });
@@ -622,6 +629,9 @@ namespace PRN231.TicketBooking.DAO.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("AccountId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -635,6 +645,8 @@ namespace PRN231.TicketBooking.DAO.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AccountId");
 
                     b.ToTable("Sponsors");
                 });
@@ -876,28 +888,21 @@ namespace PRN231.TicketBooking.DAO.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("PRN231.TicketBooking.BusinessObject.Models.Account", b =>
-                {
-                    b.HasOne("PRN231.TicketBooking.BusinessObject.Models.Organization", "Organization")
-                        .WithMany()
-                        .HasForeignKey("OrganizationId");
-
-                    b.HasOne("PRN231.TicketBooking.BusinessObject.Models.Sponsor", "Sponsor")
-                        .WithMany()
-                        .HasForeignKey("SponsorId");
-
-                    b.Navigation("Organization");
-
-                    b.Navigation("Sponsor");
-                });
-
             modelBuilder.Entity("PRN231.TicketBooking.BusinessObject.Models.Attendee", b =>
                 {
+                    b.HasOne("PRN231.TicketBooking.BusinessObject.Models.Event", "Event")
+                        .WithMany()
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("PRN231.TicketBooking.BusinessObject.Models.OrderDetail", "OrderDetail")
                         .WithMany()
                         .HasForeignKey("OrderDetailId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Event");
 
                     b.Navigation("OrderDetail");
                 });
@@ -984,6 +989,23 @@ namespace PRN231.TicketBooking.DAO.Migrations
                     b.Navigation("SeatRank");
                 });
 
+            modelBuilder.Entity("PRN231.TicketBooking.BusinessObject.Models.Organization", b =>
+                {
+                    b.HasOne("PRN231.TicketBooking.BusinessObject.Models.Account", "CreateByAccount")
+                        .WithMany()
+                        .HasForeignKey("CreateBy")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PRN231.TicketBooking.BusinessObject.Models.Account", "UpdateByAccount")
+                        .WithMany()
+                        .HasForeignKey("UpdateBy");
+
+                    b.Navigation("CreateByAccount");
+
+                    b.Navigation("UpdateByAccount");
+                });
+
             modelBuilder.Entity("PRN231.TicketBooking.BusinessObject.Models.Post", b =>
                 {
                     b.HasOne("PRN231.TicketBooking.BusinessObject.Models.Event", "Event")
@@ -1015,6 +1037,15 @@ namespace PRN231.TicketBooking.DAO.Migrations
                         .IsRequired();
 
                     b.Navigation("Event");
+                });
+
+            modelBuilder.Entity("PRN231.TicketBooking.BusinessObject.Models.Sponsor", b =>
+                {
+                    b.HasOne("PRN231.TicketBooking.BusinessObject.Models.Account", "Account")
+                        .WithMany()
+                        .HasForeignKey("AccountId");
+
+                    b.Navigation("Account");
                 });
 
             modelBuilder.Entity("PRN231.TicketBooking.BusinessObject.Models.SponsorMoneyHistory", b =>

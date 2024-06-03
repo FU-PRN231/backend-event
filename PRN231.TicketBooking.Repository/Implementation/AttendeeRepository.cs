@@ -27,7 +27,7 @@ namespace PRN231.TicketBooking.Repository.Implementation
 
         public async Task<Attendee> GetAttendeeByEvent(Guid eventId)
         {
-            return await _attendeeDao.GetByExpression(filter: x=> x.EventId == eventId);
+            return await _attendeeDao.GetByExpression(filter: x=> x.OrderDetail.SeatRank.EventId == eventId);
         }
     }
 }

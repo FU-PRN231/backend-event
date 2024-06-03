@@ -8,7 +8,7 @@ namespace PRN231.TicketBooking.BusinessObject.Models
     {
         [Key]
         public Guid Id { get; set; }
-
+        public int No {  get; set; }
         public string Question { get; set; } = null!;
         public AnswerType? AnswerType { get; set; }
         public int? RatingMax { get; set; }

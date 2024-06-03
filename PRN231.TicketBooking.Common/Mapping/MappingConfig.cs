@@ -29,6 +29,7 @@ namespace PRN231.TicketBooking.Common.Mapping
 
                 config.CreateMap<QuestionDetailRequest, SurveyQuestionDetail>()
                    .ForMember(desc => desc.Question, act => act.MapFrom(src => src.Question))
+                   .ForMember(desc => desc.No, act => act.MapFrom(src => src.No))
                    .ForMember(desc => desc.AnswerType, act => act.MapFrom(src => src.AnswerType))
                    .ForMember(desc => desc.RatingMax, act => act.MapFrom(src => src.RatingMax));
                 config.CreateMap<CreateEventRequest, Event>().ReverseMap();
