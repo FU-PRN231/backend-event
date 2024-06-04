@@ -13,9 +13,5 @@ namespace PRN231.TicketBooking.BusinessObject.Models
 
         [ForeignKey(nameof(OrderDetailId))]
         public OrderDetail? OrderDetail { get; set; }
-        public Guid EventId { get; set; }
-
-        [ForeignKey(nameof(EventId))]
-        public Event? Event { get; set; }
     }
 }

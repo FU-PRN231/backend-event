@@ -34,6 +34,7 @@ namespace PRN231.TicketBooking.Repository.Implementation
                     });
                 }
                 await this.InsertRange(data);
+                result = true;
             }
             catch (Exception ex)
             {

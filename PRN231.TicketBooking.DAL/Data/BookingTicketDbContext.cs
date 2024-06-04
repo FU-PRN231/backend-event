@@ -32,6 +32,8 @@ namespace PRN231.TicketBooking.DAO.Data
         public DbSet<SponsorMoneyHistory> SponsorMoneyHistories { get; set; }
         public DbSet<OrderDetail> OrderDetails { get; set; }
         public DbSet<BusinessObject.Models.Task> Tasks { get; set; }
+        public DbSet<SurveyQuestionDetail> SurveyQuestionDetails { get; set; }
+        public DbSet<SurveyResponseDetail> SurveyResponseDetails { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

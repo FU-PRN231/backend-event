@@ -17,6 +17,7 @@ namespace PRN231.TicketBooking.Common.Dto.Request
 
     public class QuestionDetailRequest
     {
+        public int No { get; set; }
         public string Question { get; set; } = null!;
         public AnswerType? AnswerType { get; set; }
         public int? RatingMax { get; set; }
