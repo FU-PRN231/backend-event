@@ -21,6 +21,48 @@ namespace PRN231.TicketBooking.Common.Mapping
                 .ForMember(desc => desc.PhoneNumber, act => act.MapFrom(src => src.PhoneNumber))
                 .ForMember(desc => desc.UserName, act => act.MapFrom(src => src.UserName))
                 ;
+
+                config.CreateMap<BusinessObject.Models.Task, TaskDetails>()
+               .ForMember(desc => desc.Name, act => act.MapFrom(src => src.Name))
+               .ForMember(desc => desc.Description, act => act.MapFrom(src => src.Description))
+               .ForMember(desc => desc.PersonInChargeName, act => act.MapFrom(src => src.PersonInChargeName))
+               .ForMember(desc => desc.PhoneNumber, act => act.MapFrom(src => src.PhoneNumber))
+               .ForMember(desc => desc.Cost, act => act.MapFrom(src => src.Cost))
+               .ForMember(desc => desc.TaskStatus, act => act.MapFrom(src => src.Status))
+               .ForMember(desc => desc.PersonInChargeName, act => act.MapFrom(src => src.PersonInChargeName))
+               .ForMember(desc => desc.CreatedDate, act => act.MapFrom(src => src.CreatedDate))
+               .ForMember(desc => desc.EndDate, act => act.MapFrom(src => src.EndDate))
+               .ReverseMap()
+               ;
+
+                config.CreateMap<Post, UpdatePostDto>()
+                .ForMember(desc => desc.Id, act => act.MapFrom(src => src.Id))
+                .ForMember(desc => desc.EventId, act => act.MapFrom(src => src.EventId))
+                .ForMember(desc => desc.Title, act => act.MapFrom(src => src.Title))
+                .ForMember(desc => desc.Content, act => act.MapFrom(src => src.Content))
+                .ReverseMap();
+
+                config.CreateMap<Post, CreatePostDto>()
+            .ForMember(desc => desc.EventId, act => act.MapFrom(src => src.EventId))
+            .ForMember(desc => desc.Title, act => act.MapFrom(src => src.Title))
+            .ForMember(desc => desc.Content, act => act.MapFrom(src => src.Content))
+            .ReverseMap();
+
+
+                config.CreateMap<BusinessObject.Models.Task, UpdateTask>()
+              .ForMember(desc => desc.Id, act => act.MapFrom(src => src.Id))
+              .ForMember(desc => desc.Name, act => act.MapFrom(src => src.Name))
+              .ForMember(desc => desc.Description, act => act.MapFrom(src => src.Description))
+              .ForMember(desc => desc.PersonInChargeName, act => act.MapFrom(src => src.PersonInChargeName))
+              .ForMember(desc => desc.PhoneNumber, act => act.MapFrom(src => src.PhoneNumber))
+              .ForMember(desc => desc.Cost, act => act.MapFrom(src => src.Cost))
+              .ForMember(desc => desc.TaskStatus, act => act.MapFrom(src => src.Status))
+              .ForMember(desc => desc.PersonInChargeName, act => act.MapFrom(src => src.PersonInChargeName))
+              .ForMember(desc => desc.CreatedDate, act => act.MapFrom(src => src.CreatedDate))
+              .ForMember(desc => desc.EndDate, act => act.MapFrom(src => src.EndDate))
+              .ReverseMap()
+              ;
+
                 config.CreateMap<SponsorDto, Account>()
                    .ForMember(desc => desc.UserName, act => act.MapFrom(src => src.Email))
                    .ForMember(desc => desc.Email, act => act.MapFrom(src => src.Email))
