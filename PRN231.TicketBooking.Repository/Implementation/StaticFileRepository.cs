@@ -34,5 +34,39 @@ namespace PRN231.TicketBooking.Repository.Implementation
                 throw new Exception(ex.Message);
             }
         }
+
+        public async Task<StaticFile> GetStaticFileById(Guid id)
+        {
+            try
+            {
+                var result = await _dao.GetById(id);
+                if (result == null)
+                {
+                    return null;
+                }
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<StaticFile> UploadStaticFile(StaticFile staticFile)
+        {
+            try
+            {
+                var result = await _dao.Update(staticFile);
+                if (result == null)
+                {
+                    return null;
+                }
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
     }
 }
