@@ -1,10 +1,14 @@
 ﻿using AutoMapper;
+using DocumentFormat.OpenXml.ExtendedProperties;
+using Humanizer;
+using Microsoft.Extensions.Logging;
 using PRN231.TicketBooking.BusinessObject.Models;
 using PRN231.TicketBooking.Common.Dto;
 using PRN231.TicketBooking.Common.Dto.Request;
 using PRN231.TicketBooking.Common.Util;
 using PRN231.TicketBooking.Repository.Contract;
 using PRN231.TicketBooking.Service.Contract;
+using System.Transactions;
 
 namespace PRN231.TicketBooking.Service.Implementation
 {
@@ -23,6 +27,59 @@ namespace PRN231.TicketBooking.Service.Implementation
             _logger = logger;
             _mapper = mapper;
             _firebaseService = firebaseService;
+        }
+
+        public async Task<AppActionResult> AddSponsorMoneytoEvent(AddSponsorMoneyDto dto)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                var eventSponsorRepository = Resolve<IEventSponsorRepository>();
+                var sponsorHistoryRepository = Resolve<ISponsorMoneyHistoryRepository>();
+                var eventRepository = Resolve<IEventRepository>();
+                var eventDb = await eventRepository!.GetById(dto.EventId);
+                if (eventDb == null)
+                {
+                    result = BuildAppActionResultError(result, $"Không tồn tại sự kiện với Id {dto.EventId}");
+                    return result;
+                }
+                var sponsorRepository = Resolve<ISponsorRepository>();
+                double totalSponsorMoney = 0;
+                foreach (var item in dto.SponsorItems)
+                {
+                    var sponsorDb = await sponsorRepository.GetByExpression(p => p.Id == item.SponsorId);
+                    if (sponsorDb == null)
+                    {
+                        result = BuildAppActionResultError(result, $"Không tồn tại nhà tài trợ với Id {item.SponsorId}");
+                        return result;
+                    }
+                    var evenSponsor = new EventSponsor
+                    {
+                        Id = Guid.NewGuid(),
+                        EventId = dto.EventId,
+                        MoneySponsorAmount = item.MoneySponsorAmount,
+                        SponsorDescription = item.SponsorDescription,
+                        SponsorType = item.SponsorType,
+                        SponsorId = item.SponsorId,
+                    };
+                    totalSponsorMoney += item.MoneySponsorAmount ?? 0;
+                    await eventSponsorRepository.Insert(evenSponsor);
+                }
+                var sponsorHistory = new SponsorMoneyHistory
+                {
+                    Id = Guid.NewGuid(),
+                    Amount = totalSponsorMoney,
+                    Date = DateTime.Now,
+                    EventSponsorId = dto.EventId,
+                };
+                await sponsorHistoryRepository.Insert(sponsorHistory);
+                await _unitOfWork.SaveChangeAsync();
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
         }
 
         public async Task<AppActionResult> AddSponsorToEvent(CreateSponsorDto dto)
@@ -90,9 +147,56 @@ namespace PRN231.TicketBooking.Service.Implementation
             return result;
         }
 
+        public async Task<AppActionResult> GetAllSponsorItemOfAnEvent(Guid eventId, int pageNumber, int pageSize)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                var eventSponsorRepository = Resolve<IEventSponsorRepository>();
+                var eventRepository = Resolve<IEventRepository>();
+                var eventDb = await eventRepository.GetByExpression(p => p.Id == eventId);
+                if (eventDb == null)
+                {
+                    result = BuildAppActionResultError(result, $"Không tồn tại sự kiện với Id {eventId}");
+                    return result;
+                }
+                result.Result = await eventSponsorRepository.GetAllDataByExpression(p => p.EventId == eventId, pageNumber, pageSize, null, false, p => p.Sponsor!);
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
+        }
+
         public Task<AppActionResult> GetAttendeeInformation(string qr)
         {
             throw new NotImplementedException();
         }
+
+        public async Task<AppActionResult> GetSponsorHistoryByEventId(Guid eventId, int pageNumber, int pageSize)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                var eventSponsorRepository = Resolve<IEventSponsorRepository>();
+                var sponsorHistoryRepository = Resolve<ISponsorMoneyHistoryRepository>();
+                var eventRepository = Resolve<IEventRepository>();
+                var eventDb = await eventRepository!.GetById(eventId);
+                if (eventDb == null)
+                {
+                    result = BuildAppActionResultError(result, $"Không tồn tại sự kiện với Id {eventId}");
+                    return result;
+                }
+                var sponsorHistoryDb = sponsorHistoryRepository.GetAllDataByExpression(p => p.EventSponsor!.EventId == eventId, pageNumber, pageNumber, null, false, p => p.EventSponsor!.Event!, p => p.EventSponsor!.Sponsor!);
+                result.Result = sponsorHistoryDb;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
+        }
+        
     }
 }
