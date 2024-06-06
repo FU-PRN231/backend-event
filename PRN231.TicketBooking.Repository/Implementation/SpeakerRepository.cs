@@ -15,7 +15,17 @@ namespace PRN231.TicketBooking.Repository.Implementation
 
         public SpeakerRepository(IGenericDAO<Speaker> dao, IServiceProvider serviceProvider) : base(dao, serviceProvider)
         {
-            _dao = dao; 
+            _dao = dao;
+        }
+
+        public async Task<Speaker> AddSpeakerFromEvent(Speaker speaker)
+        {
+            var data = await _dao.Insert(speaker);
+            if (data == null)
+            {
+                return null;
+            }
+            return data;
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Org.BouncyCastle.Asn1.Ocsp;
 using PRN231.TicketBooking.BusinessObject.Models;
 using PRN231.TicketBooking.Common.Dto;
 using PRN231.TicketBooking.Common.Dto.Request;
@@ -15,12 +16,15 @@ namespace PRN231.TicketBooking.Service.Implementation
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ISeatRankRepository _seatRankRepository;
+        private readonly IFirebaseService _firebaseService;
 
-        public EventService(IServiceProvider serviceProvider, IMapper mapper, IUnitOfWork unitOfWork, ISeatRankRepository seatRankRepository) : base(serviceProvider)
+        public EventService(IServiceProvider serviceProvider, IMapper mapper, IUnitOfWork unitOfWork,
+            ISeatRankRepository seatRankRepository, IFirebaseService firebaseService) : base(serviceProvider)
         {
             _mapper = mapper;
             _unitOfWork = unitOfWork;
             _seatRankRepository = seatRankRepository;
+            _firebaseService = firebaseService;
         }
 
         public async Task<AppActionResult> GetAllEvent(int pageNumber, int pageSize)
@@ -50,12 +54,12 @@ namespace PRN231.TicketBooking.Service.Implementation
             try
             {
                 var seatRankRepository = Resolve<ISeatRankRepository>();
-                var speakerRepository= Resolve<ISpeakerRepository>();
+                var speakerRepository = Resolve<ISpeakerRepository>();
                 var eventSponsorRepository = Resolve<IEventSponsorRepository>();
-                var staticFileRepository = Resolve<IStaticFileRepository>();    
+                var staticFileRepository = Resolve<IStaticFileRepository>();
                 var surveyRepository = Resolve<ISurveyRepository>();
                 var postRepository = Resolve<IPostRepository>();
-                var eventResponse = new EvenetResponse();   
+                var eventResponse = new EvenetResponse();
                 var eventRepository = Resolve<IEventRepository>();
                 var eventDb = await eventRepository.GetAllDataByExpression(p => p!.Id == id, 0, 0, null, false, p => p.Organization!, p => p.Location!);
                 if (eventDb == null)
@@ -65,15 +69,15 @@ namespace PRN231.TicketBooking.Service.Implementation
                 if (eventDb!.Items!.Count > 0 && eventDb.Items != null)
                 {
                     var eventItem = eventDb.Items.First();
-                    var seatRankDb = await seatRankRepository.GetAllDataByExpression(p => p.EventId == eventItem.Id, 0, 0 , null, false, null);
-                    var speakerDb = await speakerRepository.GetAllDataByExpression(p => p.EventId == eventItem.Id,0 ,0, null, false, null);
+                    var seatRankDb = await seatRankRepository.GetAllDataByExpression(p => p.EventId == eventItem.Id, 0, 0, null, false, null);
+                    var speakerDb = await speakerRepository.GetAllDataByExpression(p => p.EventId == eventItem.Id, 0, 0, null, false, null);
                     var eventSponsorDb = await eventSponsorRepository.GetAllDataByExpression(p => p.EventId == eventItem.Id, 0, 0, null, false, p => p.Sponsor!);
-                    var staticFileDb = await staticFileRepository.GetAllDataByExpression(p => p.EventId == eventItem.Id, 0, 0, null, false, null );
+                    var staticFileDb = await staticFileRepository.GetAllDataByExpression(p => p.EventId == eventItem.Id, 0, 0, null, false, null);
                     var surveyDb = await surveyRepository.GetAllDataByExpression(p => p.EventId == eventItem.Id, 0, 0, null, false, null);
                     var postDb = await postRepository.GetAllDataByExpression(p => p.EventId == eventItem.Id, 0, 0, null, false, null);
                     eventResponse.StaticFiles = staticFileDb.Items!;
                     eventResponse.Speakers = speakerDb.Items!;
-                    eventResponse.SeatRanks = seatRankDb.Items!;    
+                    eventResponse.SeatRanks = seatRankDb.Items!;
                     eventResponse.Surveys = surveyDb.Items!;
                     eventResponse.Event = eventItem;
                     eventResponse.EventSponsors = eventSponsorDb.Items!;
@@ -94,6 +98,11 @@ namespace PRN231.TicketBooking.Service.Implementation
             try
             {
                 var eventRepository = Resolve<IEventRepository>();
+                var eventSponsorRepository = Resolve<IEventSponsorRepository>();
+                var sponsorRepository = Resolve<ISponsorRepository>();
+                var staticFileRepository = Resolve<IStaticFileRepository>();
+                var speakerRepository = Resolve<ISpeakerRepository>();
+
                 var eventEntity = _mapper.Map<Event>(dto);
                 eventEntity.Id = Guid.NewGuid();
                 eventEntity.CreateBy = dto.UserId;
@@ -103,9 +112,10 @@ namespace PRN231.TicketBooking.Service.Implementation
                 {
                     return resultAddEvent;
                 }
-                if (dto.createSeatRankDtoRequests != null && dto.createSeatRankDtoRequests.Count > 0)
+                //Create SeatRank
+                if (dto.CreateSeatRankDtoRequests != null && dto.CreateSeatRankDtoRequests.Count > 0)
                 {
-                    foreach (var item in dto.createSeatRankDtoRequests)
+                    foreach (var item in dto.CreateSeatRankDtoRequests)
                     {
                         var seatRank = _mapper.Map<SeatRank>(item);
                         seatRank.Id = Guid.NewGuid();
@@ -117,6 +127,74 @@ namespace PRN231.TicketBooking.Service.Implementation
                         }
                     }
                 }
+                //Create Event Sponsor
+                if (dto.CreateEventSponsorEvents != null && dto.CreateEventSponsorEvents.Count > 0)
+                {
+                    foreach (var item in dto.CreateEventSponsorEvents)
+                    {
+                        var sponsor = sponsorRepository.GetById(item.SponsorId);
+                        if (sponsor == null)
+                        {
+                            return BuildAppActionResultError(
+                                       new AppActionResult(), $"Sponsor not found by id: {item.SponsorId}!"
+                                   );
+                        }
+                        var eventSponsor = _mapper.Map<EventSponsor>(item);
+                        eventSponsor.Id = Guid.NewGuid();
+                        eventSponsor.SponsorId = item.SponsorId;
+                        eventSponsor.EventId = eventEntity.Id;
+                        var resultEventSponsor = await eventSponsorRepository.AddEventSponsorFromEvent(eventSponsor);
+                        if (resultEventSponsor==null)
+                        {
+                            return BuildAppActionResultError(new AppActionResult(), "Cannot add event sponsor!");
+                        }
+                    }
+                }
+                //Create Speaker
+                if (dto.createSpeakerEvents != null && dto.createSpeakerEvents.Count > 0)
+                {
+                    foreach (var item in dto.createSpeakerEvents)
+                    {
+                        var speaker = _mapper.Map<Speaker>(item);
+                        speaker.Id = Guid.NewGuid();
+                        speaker.EventId = eventEntity.Id;
+                        var url = await _firebaseService
+                                        .UploadFileToFirebase(item.Img, $"{SD.FirebasePathName.SPEAKER}{speaker.Id}");
+                        if (!url.IsSuccess)
+                        {
+                            return BuildAppActionResultError(url, "Cannot upload file!");
+                        }
+                        speaker.Img = (string)url.Result;
+                        var saveSuccess = await speakerRepository.AddSpeakerFromEvent(speaker);
+                        if (saveSuccess == null)
+                        {
+                            return BuildAppActionResultError(new AppActionResult(), "Cannot add static File!");
+                        }
+                    }
+                }
+                //Create StaticFile
+                if (dto.CreateStaticFilesEvent != null && dto.CreateStaticFilesEvent.Count > 0)
+                {
+                    foreach (var item in dto.CreateStaticFilesEvent)
+                    {
+                        var staticFile = new StaticFile();
+                        staticFile.Id = Guid.NewGuid();
+                        staticFile.EventId = eventEntity.Id;
+                        var url = await _firebaseService
+                                        .UploadFileToFirebase(item.Img, $"{SD.FirebasePathName.EVENT}{staticFile.Id}");
+                        if (!url.IsSuccess)
+                        {
+                            return BuildAppActionResultError(url, "Cannot upload file!");
+                        }
+                        staticFile.Img = (string)url.Result;
+                        var saveSuccess = await staticFileRepository.AddStaticFileFromEvent(staticFile);
+                        if (!saveSuccess)
+                        {
+                            return BuildAppActionResultError(new AppActionResult(), "Cannot add static File!");
+                        }
+                    }
+                }
+
                 await _unitOfWork.SaveChangeAsync();
                 result.Result = _mapper.Map<CreateEventResponse>(dto);
                 return BuildAppActionResultSuccess(result, "Add event and seat rank successfully!");

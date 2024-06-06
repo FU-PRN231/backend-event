@@ -9,5 +9,6 @@ namespace PRN231.TicketBooking.Repository.Contract
 {
     public interface ISpeakerRepository : IRepository<Speaker>
     {
+        public Task<Speaker> AddSpeakerFromEvent(Speaker speaker);
     }
 }

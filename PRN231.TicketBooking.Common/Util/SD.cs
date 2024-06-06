@@ -89,6 +89,8 @@ namespace PRN231.TicketBooking.Common.Util
             public static string SAMPLE_HOUSE_PREFIX = "sample-house/";
             public static string SPONSOR_PREFIX = "sponsor/";
             public static string QR_PREFIX = "qr/";
+            public static string EVENT = "event/";
+            public static string SPEAKER = "speaker/";
         }
     }
 }

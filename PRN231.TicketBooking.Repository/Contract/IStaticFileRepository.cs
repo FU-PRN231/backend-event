@@ -9,5 +9,6 @@ namespace PRN231.TicketBooking.Repository.Contract
 {
     public interface IStaticFileRepository : IRepository<StaticFile>
     {
+        public Task<bool> AddStaticFileFromEvent(StaticFile staticFile);
     }
 }

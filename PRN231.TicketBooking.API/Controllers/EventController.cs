@@ -28,7 +28,7 @@ namespace PRN231.TicketBooking.API.Controllers
         }
 
         [HttpPost("add-event")]
-        public async Task<AppActionResult> AddEvent([FromBody] CreateEventRequest createEventRequest)
+        public async Task<AppActionResult> AddEvent([FromForm] CreateEventRequest createEventRequest)
         {
             return await _eventService.AddEvent(createEventRequest);
         }
