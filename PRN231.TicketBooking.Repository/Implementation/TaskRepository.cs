@@ -9,10 +9,10 @@ using System.Threading.Tasks;
 
 namespace PRN231.TicketBooking.Repository.Implementation
 {
-    public class TaskRepository : GenericRepository<TaskModel>, ITaskRepository
+    public class TaskRepository : GenericRepository<BusinessObject.Models.Task>, ITaskRepository
     {
-        private readonly IGenericDAO<TaskModel> _dao;
-        public TaskRepository(IGenericDAO<TaskModel> dao, IServiceProvider serviceProvider) : base(dao, serviceProvider)
+        private readonly IGenericDAO<BusinessObject.Models.Task> _dao;
+        public TaskRepository(IGenericDAO<BusinessObject.Models.Task> dao, IServiceProvider serviceProvider) : base(dao, serviceProvider)
         {
             _dao = dao; 
         }

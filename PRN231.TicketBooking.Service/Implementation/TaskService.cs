@@ -30,14 +30,14 @@ namespace PRN231.TicketBooking.Service.Implementation
             try
             {
                 var eventRepository = Resolve<IEventRepository>();
-                var eventDb = eventRepository.GetByExpression(p => p!.Id == taskRequestDto.EventId);
+                var eventDb = await eventRepository.GetByExpression(p => p!.Id == taskRequestDto.EventId);
                 if (eventDb == null)
                 {
                     result = BuildAppActionResultError(result, $"Sự kiện với {taskRequestDto.EventId} không tồn tại");
                 }
                 foreach (var item in taskRequestDto.TaskDetails)
                 {
-                    var task = new TaskModel
+                    var task = new BusinessObject.Models.Task
                     {
                         Id = Guid.NewGuid(),
                         Name = item.Name,
@@ -51,8 +51,8 @@ namespace PRN231.TicketBooking.Service.Implementation
                         Status = item.TaskStatus
                     };
                     await _taskRepository.Insert(task);
-                    await _unitOfWork.SaveChangeAsync();
                 }
+                await _unitOfWork.SaveChangeAsync();
                 result.Messages.Add("Tạo task thành công");
             }
             catch (Exception ex)
@@ -97,7 +97,8 @@ namespace PRN231.TicketBooking.Service.Implementation
                 {
                     result = BuildAppActionResultError(result, $"Sự kiện với {eventId} không tìm thấy");
                 }
-                var taskDb = _taskRepository.GetAllDataByExpression(p => p.EventId == eventId && p.Status == taskStatus, pageNumber, pageSize, null, false, p => p.Event!) ;
+                var taskDb = await _taskRepository.GetAllDataByExpression(p => p.EventId == eventId && p.Status == taskStatus, pageNumber, pageSize, null, false, p => p.Event!) ;
+                result.Result = taskDb; 
             }
             catch (Exception ex)
             {
@@ -117,7 +118,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                 {
                     result = BuildAppActionResultError(result, $"Sự kiện với {eventId} không tìm thấy");
                 }
-                var taskDb = await _taskRepository.GetAllDataByExpression(p => p.Id == eventId, pageNumber, pageSize, null, false, p => p.Event!);
+                var taskDb = await _taskRepository.GetAllDataByExpression(p => p.EventId == eventId, pageNumber, pageSize, null, false, p => p.Event!);
                 result.Result = taskDb;
             }
             catch (Exception ex)

@@ -22,7 +22,7 @@ namespace PRN231.TicketBooking.Common.Mapping
                 .ForMember(desc => desc.UserName, act => act.MapFrom(src => src.UserName))
                 ;
 
-                config.CreateMap<TaskModel, TaskDetails>()
+                config.CreateMap<BusinessObject.Models.Task, TaskDetails>()
                .ForMember(desc => desc.Name, act => act.MapFrom(src => src.Name))
                .ForMember(desc => desc.Description, act => act.MapFrom(src => src.Description))
                .ForMember(desc => desc.PersonInChargeName, act => act.MapFrom(src => src.PersonInChargeName))
@@ -35,7 +35,21 @@ namespace PRN231.TicketBooking.Common.Mapping
                .ReverseMap()
                ;
 
-                config.CreateMap<TaskModel, UpdateTask>()
+                config.CreateMap<Post, UpdatePostDto>()
+                .ForMember(desc => desc.Id, act => act.MapFrom(src => src.Id))
+                .ForMember(desc => desc.EventId, act => act.MapFrom(src => src.EventId))
+                .ForMember(desc => desc.Title, act => act.MapFrom(src => src.Title))
+                .ForMember(desc => desc.Content, act => act.MapFrom(src => src.Content))
+                .ReverseMap();
+
+                config.CreateMap<Post, CreatePostDto>()
+            .ForMember(desc => desc.EventId, act => act.MapFrom(src => src.EventId))
+            .ForMember(desc => desc.Title, act => act.MapFrom(src => src.Title))
+            .ForMember(desc => desc.Content, act => act.MapFrom(src => src.Content))
+            .ReverseMap();
+
+
+                config.CreateMap<BusinessObject.Models.Task, UpdateTask>()
               .ForMember(desc => desc.Id, act => act.MapFrom(src => src.Id))
               .ForMember(desc => desc.Name, act => act.MapFrom(src => src.Name))
               .ForMember(desc => desc.Description, act => act.MapFrom(src => src.Description))

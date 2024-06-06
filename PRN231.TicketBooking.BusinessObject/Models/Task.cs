@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace PRN231.TicketBooking.BusinessObject.Models
 {
-    public class TaskModel
+    public class Task
     {
         [Key]
         public Guid Id { get; set; }

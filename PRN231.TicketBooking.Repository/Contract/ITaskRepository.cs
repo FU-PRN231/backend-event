@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace PRN231.TicketBooking.Repository.Contract
 {
-    public interface ITaskRepository : IRepository<TaskModel>
+    public interface ITaskRepository : IRepository<BusinessObject.Models.Task>
     {
     }
 }

@@ -29,7 +29,7 @@ namespace PRN231.TicketBooking.Service.Implementation
             _firebaseService = firebaseService;
         }
 
-        public async Task<AppActionResult> AddSponsorMoneytoEvent(AddSponsorMoneyDto dto)
+        public async Task<AppActionResult> AddSponsorMoneyToEvent(AddSponsorMoneyDto dto)
         {
             AppActionResult result = new AppActionResult();
             try
