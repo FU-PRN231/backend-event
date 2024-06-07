@@ -7,7 +7,7 @@ namespace PRN231.TicketBooking.Service.Contract
     {
         public Task<AppActionResult> AddSponsorToEvent(CreateSponsorDto dto);
         public Task<AppActionResult> GetAttendeeInformation(string qr);
-        public Task<AppActionResult> GetAllSponsor();
+        public Task<AppActionResult> GetAllSponsor(int pageNumber, int pageSize);
         public Task<AppActionResult> AddSponsorMoneyToEvent(AddSponsorMoneyDto dto);
         public Task<AppActionResult> GetAllSponsorItemOfAnEvent(Guid eventId, int pageNumber, int pageSize);
         public Task<AppActionResult> GetSponsorHistoryByEventId(Guid eventId, int pageNumber, int pageSize);

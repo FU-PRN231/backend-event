@@ -10,6 +10,7 @@ namespace PRN231.TicketBooking.Service.Contract
 {
     public interface IPostService
     {
+        Task<AppActionResult> GetAllPost(int pageNumeber, int pageSize);
         Task<AppActionResult> CreatePostforEvent(CreatePostDto createPostDto);
         Task<AppActionResult> UpdatePost(UpdatePostDto updatePostDto);
         Task<AppActionResult> GetAllPostOfEvent(Guid eventId, int pageNumber, int pageSize);

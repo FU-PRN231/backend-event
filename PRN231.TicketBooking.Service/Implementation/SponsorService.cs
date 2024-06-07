@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using DocumentFormat.OpenXml.ExtendedProperties;
+using DocumentFormat.OpenXml.Office.Word;
 using Humanizer;
 using Microsoft.Extensions.Logging;
 using PRN231.TicketBooking.BusinessObject.Models;
@@ -44,7 +45,6 @@ namespace PRN231.TicketBooking.Service.Implementation
                     return result;
                 }
                 var sponsorRepository = Resolve<ISponsorRepository>();
-                double totalSponsorMoney = 0;
                 foreach (var item in dto.SponsorItems)
                 {
                     var sponsorDb = await sponsorRepository.GetByExpression(p => p.Id == item.SponsorId);
@@ -53,7 +53,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                         result = BuildAppActionResultError(result, $"Không tồn tại nhà tài trợ với Id {item.SponsorId}");
                         return result;
                     }
-                    var evenSponsor = new EventSponsor
+                    var eventSponsor = new EventSponsor
                     {
                         Id = Guid.NewGuid(),
                         EventId = dto.EventId,
@@ -62,17 +62,17 @@ namespace PRN231.TicketBooking.Service.Implementation
                         SponsorType = item.SponsorType,
                         SponsorId = item.SponsorId,
                     };
-                    totalSponsorMoney += item.MoneySponsorAmount ?? 0;
-                    await eventSponsorRepository.Insert(evenSponsor);
+                    await eventSponsorRepository.Insert(eventSponsor);
+
+                    var sponsorHistory = new SponsorMoneyHistory
+                    {
+                        Id = Guid.NewGuid(),
+                        Amount = eventSponsor.MoneySponsorAmount ?? 0,
+                        Date = DateTime.Now,
+                        EventSponsorId = eventSponsor.Id,
+                    };
+                    await sponsorHistoryRepository.Insert(sponsorHistory);
                 }
-                var sponsorHistory = new SponsorMoneyHistory
-                {
-                    Id = Guid.NewGuid(),
-                    Amount = totalSponsorMoney,
-                    Date = DateTime.Now,
-                    EventSponsorId = dto.EventId,
-                };
-                await sponsorHistoryRepository.Insert(sponsorHistory);
                 await _unitOfWork.SaveChangeAsync();
             }
             catch (Exception ex)
@@ -133,12 +133,12 @@ namespace PRN231.TicketBooking.Service.Implementation
             //}
         }
 
-        public async Task<AppActionResult> GetAllSponsor()
+        public async Task<AppActionResult> GetAllSponsor(int pageNumber, int pagesize)
         {
             AppActionResult result = new AppActionResult();
             try
             {
-                result.Result = await _repository.GetAllDataByExpression(null, 0, 0, null, false, null);
+                result.Result = await _repository.GetAllDataByExpression(null, pageNumber, pagesize, null, false, null);
             }
             catch (Exception ex)
             {
@@ -169,9 +169,18 @@ namespace PRN231.TicketBooking.Service.Implementation
             return result;
         }
 
-        public Task<AppActionResult> GetAttendeeInformation(string qr)
+        public async Task<AppActionResult> GetAttendeeInformation(string qr)
         {
-            throw new NotImplementedException();
+            AppActionResult result = new AppActionResult();
+            try
+            {
+
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
         }
 
         public async Task<AppActionResult> GetSponsorHistoryByEventId(Guid eventId, int pageNumber, int pageSize)
@@ -188,7 +197,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                     result = BuildAppActionResultError(result, $"Không tồn tại sự kiện với Id {eventId}");
                     return result;
                 }
-                var sponsorHistoryDb = sponsorHistoryRepository.GetAllDataByExpression(p => p.EventSponsor!.EventId == eventId, pageNumber, pageNumber, null, false, p => p.EventSponsor!.Event!, p => p.EventSponsor!.Sponsor!);
+                var sponsorHistoryDb = await sponsorHistoryRepository.GetAllDataByExpression(p => p.EventSponsor!.EventId == eventId, pageNumber, pageNumber, null, false, p => p.EventSponsor!.Event!, p => p.EventSponsor!.Sponsor!);
                 result.Result = sponsorHistoryDb;
             }
             catch (Exception ex)
