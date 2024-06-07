@@ -38,6 +38,5 @@ namespace PRN231.TicketBooking.API.Controllers
         {
             return await _eventService.UpdateEvent(id, updateEventRequest);
         }
-
     }
 }

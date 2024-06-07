@@ -151,9 +151,9 @@ namespace PRN231.TicketBooking.Service.Implementation
                     }
                 }
                 //Create Speaker
-                if (dto.createSpeakerEvents != null && dto.createSpeakerEvents.Count > 0)
+                if (dto.CreateSpeakerEvents != null && dto.CreateSpeakerEvents.Count > 0)
                 {
-                    foreach (var item in dto.createSpeakerEvents)
+                    foreach (var item in dto.CreateSpeakerEvents)
                     {
                         var speaker = _mapper.Map<Speaker>(item);
                         speaker.Id = Guid.NewGuid();
@@ -173,15 +173,15 @@ namespace PRN231.TicketBooking.Service.Implementation
                     }
                 }
                 //Create StaticFile
-                if (dto.CreateStaticFilesEvent != null && dto.CreateStaticFilesEvent.Count > 0)
+                if (dto.CreateSpeakerEvents != null && dto.CreateSpeakerEvents.Count > 0)
                 {
-                    foreach (var item in dto.CreateStaticFilesEvent)
+                    foreach (var item in dto.CreateStaticFilesEvents)
                     {
                         var staticFile = new StaticFile();
                         staticFile.Id = Guid.NewGuid();
                         staticFile.EventId = eventEntity.Id;
                         var url = await _firebaseService
-                                        .UploadFileToFirebase(item.Img, $"{SD.FirebasePathName.EVENT}{staticFile.Id}");
+                                        .UploadFileToFirebase(item, $"{SD.FirebasePathName.EVENT}{staticFile.Id}");
                         if (!url.IsSuccess)
                         {
                             return BuildAppActionResultError(url, "Cannot upload file!");
