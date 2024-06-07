@@ -23,7 +23,7 @@ namespace PRN231.TicketBooking.Common.Dto.Request
         public List<CreateSeatRankEventRequest> CreateSeatRankDtoRequests { get; set; } = new List<CreateSeatRankEventRequest>();
         public List<CreateEventSponsorEvent> CreateEventSponsorEvents { get; set; } = new List<CreateEventSponsorEvent>();
         public List<CreateSpeakerEvent> CreateSpeakerEvents { get; set; } = new List<CreateSpeakerEvent>();
-        public List<IFormFile> CreateStaticFilesEvents { get; set; } = new List<IFormFile>();
+        public List<IFormFile> Img { get; set; } = new List<IFormFile>();
     }
 
     public class CreateSeatRankEventRequest
