@@ -41,6 +41,8 @@ namespace PRN231.TicketBooking.Common.Mapping
                 config.CreateMap<UpdateEventRequest, Event>().ReverseMap();
                 config.CreateMap<UpdateSeatRankEventRequest, SeatRank>().ReverseMap();
                 config.CreateMap<UpdateSpeakerEventRequest, Speaker>().ReverseMap();
+                config.CreateMap<CreateEventSponsorEvent, EventSponsor>().ReverseMap();
+                config.CreateMap<CreateSpeakerEvent, Speaker>().ReverseMap();
 
             });
             return mappingConfig;

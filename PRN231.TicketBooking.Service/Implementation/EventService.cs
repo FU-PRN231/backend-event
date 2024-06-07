@@ -102,7 +102,19 @@ namespace PRN231.TicketBooking.Service.Implementation
                 var sponsorRepository = Resolve<ISponsorRepository>();
                 var staticFileRepository = Resolve<IStaticFileRepository>();
                 var speakerRepository = Resolve<ISpeakerRepository>();
+                var organizationRepository = Resolve<IOrganizationRepository>();
+                var locationRepository = Resolve<ILocationRepository>();
 
+                var existLocation = locationRepository.GetById(dto.LocationId);
+                if (existLocation == null)
+                {
+                    return BuildAppActionResultError(new AppActionResult(), $"Not found location with id {dto.LocationId}!");
+                }
+                var existOrganization = organizationRepository.GetById(dto.OrganizationId);
+                if (existOrganization == null)
+                {
+                    return BuildAppActionResultError(new AppActionResult(), $"Not found organization with id {dto.OrganizationId}!");
+                }
                 var eventEntity = _mapper.Map<Event>(dto);
                 eventEntity.Id = Guid.NewGuid();
                 eventEntity.CreateBy = dto.UserId;
@@ -158,6 +170,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                         var speaker = _mapper.Map<Speaker>(item);
                         speaker.Id = Guid.NewGuid();
                         speaker.EventId = eventEntity.Id;
+                        await _firebaseService.DeleteFileFromFirebase($"{SD.FirebasePathName.SPEAKER}{speaker.Id}");
                         var url = await _firebaseService
                                         .UploadFileToFirebase(item.Img, $"{SD.FirebasePathName.SPEAKER}{speaker.Id}");
                         if (!url.IsSuccess)
@@ -175,11 +188,13 @@ namespace PRN231.TicketBooking.Service.Implementation
                 //Create StaticFile
                 if (dto.CreateSpeakerEvents != null && dto.CreateSpeakerEvents.Count > 0)
                 {
-                    foreach (var item in dto.CreateStaticFilesEvents)
+                    foreach (var item in dto.Img)
                     {
                         var staticFile = new StaticFile();
                         staticFile.Id = Guid.NewGuid();
                         staticFile.EventId = eventEntity.Id;
+                        await _firebaseService.DeleteFileFromFirebase($"{SD.FirebasePathName.EVENT}{staticFile.Id}");
+
                         var url = await _firebaseService
                                         .UploadFileToFirebase(item, $"{SD.FirebasePathName.EVENT}{staticFile.Id}");
                         if (!url.IsSuccess)
