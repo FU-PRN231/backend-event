@@ -102,7 +102,19 @@ namespace PRN231.TicketBooking.Service.Implementation
                 var sponsorRepository = Resolve<ISponsorRepository>();
                 var staticFileRepository = Resolve<IStaticFileRepository>();
                 var speakerRepository = Resolve<ISpeakerRepository>();
+                var organizationRepository = Resolve<IOrganizationRepository>();
+                var locationRepository = Resolve<ILocationRepository>();
 
+                var existLocation = locationRepository.GetById(dto.LocationId);
+                if (existLocation == null)
+                {
+                    return BuildAppActionResultError(new AppActionResult(), $"Not found location with id {dto.LocationId}!");
+                }
+                var existOrganization = organizationRepository.GetById(dto.OrganizationId);
+                if (existOrganization == null)
+                {
+                    return BuildAppActionResultError(new AppActionResult(), $"Not found organization with id {dto.OrganizationId}!");
+                }
                 var eventEntity = _mapper.Map<Event>(dto);
                 eventEntity.Id = Guid.NewGuid();
                 eventEntity.CreateBy = dto.UserId;
@@ -144,20 +156,21 @@ namespace PRN231.TicketBooking.Service.Implementation
                         eventSponsor.SponsorId = item.SponsorId;
                         eventSponsor.EventId = eventEntity.Id;
                         var resultEventSponsor = await eventSponsorRepository.AddEventSponsorFromEvent(eventSponsor);
-                        if (resultEventSponsor==null)
+                        if (resultEventSponsor == null)
                         {
                             return BuildAppActionResultError(new AppActionResult(), "Cannot add event sponsor!");
                         }
                     }
                 }
                 //Create Speaker
-                if (dto.createSpeakerEvents != null && dto.createSpeakerEvents.Count > 0)
+                if (dto.CreateSpeakerEvents != null && dto.CreateSpeakerEvents.Count > 0)
                 {
-                    foreach (var item in dto.createSpeakerEvents)
+                    foreach (var item in dto.CreateSpeakerEvents)
                     {
                         var speaker = _mapper.Map<Speaker>(item);
                         speaker.Id = Guid.NewGuid();
                         speaker.EventId = eventEntity.Id;
+                        await _firebaseService.DeleteFileFromFirebase($"{SD.FirebasePathName.SPEAKER}{speaker.Id}");
                         var url = await _firebaseService
                                         .UploadFileToFirebase(item.Img, $"{SD.FirebasePathName.SPEAKER}{speaker.Id}");
                         if (!url.IsSuccess)
@@ -173,13 +186,15 @@ namespace PRN231.TicketBooking.Service.Implementation
                     }
                 }
                 //Create StaticFile
-                if (dto.Img != null && dto.Img.Count > 0)
+                if (dto.CreateSpeakerEvents != null && dto.CreateSpeakerEvents.Count > 0)
                 {
                     foreach (var item in dto.Img)
                     {
                         var staticFile = new StaticFile();
                         staticFile.Id = Guid.NewGuid();
                         staticFile.EventId = eventEntity.Id;
+                        await _firebaseService.DeleteFileFromFirebase($"{SD.FirebasePathName.EVENT}{staticFile.Id}");
+
                         var url = await _firebaseService
                                         .UploadFileToFirebase(item, $"{SD.FirebasePathName.EVENT}{staticFile.Id}");
                         if (!url.IsSuccess)
@@ -211,22 +226,80 @@ namespace PRN231.TicketBooking.Service.Implementation
             try
             {
                 var eventRepository = Resolve<IEventRepository>();
-                var item = await eventRepository.GetEventById(id);
-                if (item == null)
+                var seatRankRepository = Resolve<ISeatRankRepository>();
+                var staticFileRepository = Resolve<IStaticFileRepository>();
+                var speakerRepository = Resolve<ISpeakerRepository>();
+                var eventEntity = await eventRepository.GetEventById(id);
+                if (eventEntity == null)
                 {
                     BuildAppActionResultError(result, $"Event not found with id: {id}", true);
                 }
-                item.Title = request.Title;
-                item.Description = request.Description;
-                item.EventDate = request.EventDate;
-                item.StartTime = request.StartTime;
-                item.EndTime = request.EndTime;
-                item.UpdateDate = DateTime.Now;
-                item.UpdateBy = request.UserId;
-                var resultUpdateEvent = await eventRepository.UpdateEvent(item);
+                var updateEvent = _mapper.Map<Event>(request);
+                eventEntity.UpdateDate = DateTime.Now;
+                eventEntity.UpdateBy = request.UserId;
+                var resultUpdateEvent = await eventRepository.UpdateEvent(eventEntity);
                 if (resultUpdateEvent == null || !resultUpdateEvent.IsSuccess)
                 {
                     return BuildAppActionResultError(result, $"Cannot update event with id: {id}", true);
+                }
+                //Update SeatRank
+                foreach (var seatRank in request.SeatRanks)
+                {
+                    var seatRankEntity = await seatRankRepository.GetSeatRankById(seatRank.Id);
+                    if (seatRankEntity == null)
+                    {
+                        return BuildAppActionResultError(result, $"Not found seat rank with id: {seatRank.Id}", true);
+                    }
+                    var updateSeatRankentity = _mapper.Map<SeatRank>(seatRank);
+                    updateSeatRankentity.EventId = eventEntity.Id;
+                    var resultUpdate = await seatRankRepository.UpdateSeatRank(seatRankEntity);
+                    if (resultUpdate == null)
+                    {
+                        return BuildAppActionResultError(result, $"Cannot update seat rank with id: {seatRank.Id}", true);
+                    }
+                }
+                //Update Static file
+                foreach (var staticFile in request.StaticFiles)
+                    if (staticFile.ImgFormFile != null)
+                    {
+                        var staticFileEntity = await staticFileRepository.GetStaticFileById(staticFile.Id);
+                        if (staticFileEntity == null)
+                        {
+                            return BuildAppActionResultError(result, $"Not found static file with id: {staticFile.Id}", true);
+                        }
+                        var url = await _firebaseService.UploadFileToFirebase(staticFile.ImgFormFile, $"{SD.FirebasePathName.EVENT}{staticFile.Id}");
+                        if (!url.IsSuccess)
+                        {
+                            return BuildAppActionResultError(url, $"Cannot upload file with static file id {staticFile.Id}!");
+                        }
+                        staticFileEntity.Img = (string)url.Result;
+                        var resultUpdate = await staticFileRepository.UploadStaticFile(staticFileEntity);
+                        if (resultUpdate == null)
+                        {
+                            return BuildAppActionResultError(result, $"Cannot update static file with id: {staticFile.Id}", true);
+                        }
+                    }
+                //Update speaker event
+                foreach (var speaker in request.Speakers)
+                {
+                    var speakerEntity = await speakerRepository.GetById(speaker.Id);
+                    if (speakerEntity == null)
+                    {
+                        return BuildAppActionResultError(result, $"Not found speaker with id: {speaker.Id}", true);
+                    }
+                    var url = await _firebaseService.UploadFileToFirebase(speaker.ImgFormFile, $"{SD.FirebasePathName.SPEAKER}{speaker.Id}");
+                    if (!url.IsSuccess)
+                    {
+                        return BuildAppActionResultError(url, $"Cannot upload file with speaker id {speaker.Id}!");
+                    }
+                    var updateSpeakertity = _mapper.Map<Speaker>(speaker);
+                    updateSpeakertity.EventId = eventEntity.Id;
+                    updateSpeakertity.Img = (string)url.Result;
+                    var resultUpdate = await speakerRepository.Update(updateSpeakertity);
+                    if (resultUpdate == null)
+                    {
+                        return BuildAppActionResultError(result, $"Cannot update speaker with id: {speaker.Id}", true);
+                    }
                 }
                 await _unitOfWork.SaveChangeAsync();
                 result.Result = resultUpdateEvent;

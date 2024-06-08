@@ -34,10 +34,9 @@ namespace PRN231.TicketBooking.API.Controllers
         }
 
         [HttpPut("update-event/{id}")]
-        public async Task<AppActionResult> UpdateEvent(Guid id, [FromBody] UpdateEventRequest updateEventRequest)
+        public async Task<AppActionResult> UpdateEvent(Guid id, [FromForm] UpdateEventRequest updateEventRequest)
         {
             return await _eventService.UpdateEvent(id, updateEventRequest);
         }
-
     }
 }
