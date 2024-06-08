@@ -17,7 +17,7 @@ namespace PRN231.TicketBooking.API.Controllers
         }
 
         [HttpGet]
-        public async Task<AppActionResult> GetAllEvent([FromQuery] int pageNumber=1, [FromQuery] int pageSize = 10)
+        public async Task<AppActionResult> GetAllEvent([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             return await _seatRankService.GetAllSeatRank(pageNumber, pageSize);
         }

@@ -63,6 +63,19 @@ namespace PRN231.TicketBooking.Common.Mapping
               .ReverseMap()
               ;
 
+                config.CreateMap<SeatRank, UpdateSeatRankDto>()
+              .ForMember(desc => desc.Id, act => act.MapFrom(src => src.Id))
+              .ForMember(desc => desc.Name, act => act.MapFrom(src => src.Name))
+              .ForMember(desc => desc.EventId, act => act.MapFrom(src => src.EventId))
+              .ForMember(desc => desc.Quantity, act => act.MapFrom(src => src.Quantity))
+              .ForMember(desc => desc.Price, act => act.MapFrom(src => src.Price))
+              .ForMember(desc => desc.StartTime, act => act.MapFrom(src => src.StartTime))
+              .ForMember(desc => desc.EndTime, act => act.MapFrom(src => src.EndTime))
+              .ForMember(desc => desc.Description, act => act.MapFrom(src => src.Description))
+              .ForMember(desc => desc.RemainingCapacity, act => act.MapFrom(src => src.RemainingCapacity))
+              .ForMember(desc => desc.RemainingCapacity, act => act.MapFrom(src => src.RemainingCapacity))
+              .ReverseMap();
+
                 config.CreateMap<SponsorDto, Account>()
                    .ForMember(desc => desc.UserName, act => act.MapFrom(src => src.Email))
                    .ForMember(desc => desc.Email, act => act.MapFrom(src => src.Email))
