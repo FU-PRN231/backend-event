@@ -32,7 +32,7 @@ namespace PRN231.TicketBooking.API.Controllers
         [HttpGet("get-all-seat-rank-by-event/{eventId}/{pageNumber}/{pageSize}")]
         public async Task<AppActionResult> GetAllSeatRankByEvent(Guid eventId, int pageNumber = 1, int pageSize = 10)
         {
-            return await _seatRankService.GetAllSeatRankByEvent(eventId,  pageNumber,  pageSize)
+            return await _seatRankService.GetAllSeatRankByEvent(eventId, pageNumber, pageSize);
         }
 
         [HttpGet("get-seat-rank-by-filter/{pageNumber}/{pageSize}")]

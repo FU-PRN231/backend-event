@@ -63,5 +63,16 @@ namespace PRN231.TicketBooking.Repository.Implementation
             return result;
         }
 
+        public async Task<SeatRank> UpdateSeatRank(SeatRank seatRank)
+        {
+            try
+            {
+               return await _seatRankDAO.Update(seatRank);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
     }
 }

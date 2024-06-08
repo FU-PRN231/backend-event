@@ -22,8 +22,8 @@ namespace PRN231.TicketBooking.Common.Dto.Request
         public Guid OrganizationId { get; set; }
         public List<CreateSeatRankEventRequest> CreateSeatRankDtoRequests { get; set; } = new List<CreateSeatRankEventRequest>();
         public List<CreateEventSponsorEvent> CreateEventSponsorEvents { get; set; } = new List<CreateEventSponsorEvent>();
-        public List<CreateSpeakerEvent> createSpeakerEvents { get; set; } = new List<CreateSpeakerEvent>();
-        public List<IFormFile> Img { get; set; } = null!;
+        public List<CreateSpeakerEvent> CreateSpeakerEvents { get; set; } = new List<CreateSpeakerEvent>();
+        public List<IFormFile> Img { get; set; } = new List<IFormFile>();
     }
 
     public class CreateSeatRankEventRequest
@@ -51,4 +51,8 @@ namespace PRN231.TicketBooking.Common.Dto.Request
         public string Description { get; set; } = null!;
         public IFormFile Img { get; set; } = null!;
     }
+
+    //public class CreateStaticFilesEvent {
+    //    public IFormFile Img { get; set; } = null!;
+    //}
 }
