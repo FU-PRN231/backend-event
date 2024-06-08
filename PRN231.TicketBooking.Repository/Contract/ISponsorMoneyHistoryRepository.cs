@@ -1,4 +1,5 @@
 ﻿using PRN231.TicketBooking.BusinessObject.Models;
+using PRN231.TicketBooking.Repository.Implementation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,8 +8,7 @@ using System.Threading.Tasks;
 
 namespace PRN231.TicketBooking.Repository.Contract
 {
-    public interface IEventSponsorRepository : IRepository<EventSponsor>
+    public interface ISponsorMoneyHistoryRepository : IRepository<SponsorMoneyHistory>
     {
-        public Task<EventSponsor> AddEventSponsorFromEvent(EventSponsor eventSponsor);
     }
 }

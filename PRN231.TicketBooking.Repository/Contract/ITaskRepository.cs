@@ -7,8 +7,7 @@ using System.Threading.Tasks;
 
 namespace PRN231.TicketBooking.Repository.Contract
 {
-    public interface IEventSponsorRepository : IRepository<EventSponsor>
+    public interface ITaskRepository : IRepository<BusinessObject.Models.Task>
     {
-        public Task<EventSponsor> AddEventSponsorFromEvent(EventSponsor eventSponsor);
     }
 }
