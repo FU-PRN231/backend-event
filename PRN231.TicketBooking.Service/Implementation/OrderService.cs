@@ -72,8 +72,8 @@ namespace PRN231.TicketBooking.Service.Implementation
 
                     foreach (var item in orderRequestDto.SeatRank)
                     {
-                        var seatRankDb = await seatRepository!.GetAllDataByExpression(p => p.Id == item.Id, 0, 0, null, false, p => p.Event!.Organization!);
-                        if (seatRankDb.Items == null)
+                        var seatRankDb = await seatRepository!.GetByExpression(p => p.Id == item.Id, p => p.Event!.Organization!);
+                        if (seatRankDb == null) 
                         {
                             result = BuildAppActionResultError(result, $"Loại ghế với Id {item.Id} không tồn tại hoặc sản phẩm không đủ số lượng");
                             return result;
@@ -86,7 +86,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                             OrderId = order.Id,
                         };
 
-                        var seatRankItem = seatRankDb.Items.First();
+                        var seatRankItem = seatRankDb;
                         if (seatRankItem.RemainingCapacity < item.Quantity)
                         {
                             result = BuildAppActionResultError(result, $"Số lượng ghế còn lại không đủ cho loại ghế với Id {item.Id}");
