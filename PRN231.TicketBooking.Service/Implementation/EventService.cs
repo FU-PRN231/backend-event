@@ -61,29 +61,87 @@ namespace PRN231.TicketBooking.Service.Implementation
                 var postRepository = Resolve<IPostRepository>();
                 var eventResponse = new EvenetResponse();
                 var eventRepository = Resolve<IEventRepository>();
-                var eventDb = await eventRepository.GetAllDataByExpression(p => p!.Id == id, 0, 0, null, false, p => p.Organization!, p => p.Location!);
-                if (eventDb == null)
+
+                var eventDb = await eventRepository.GetAllDataByExpression(
+                    p => p!.Id == id,
+                    0,
+                    0,
+                    null,
+                    false,
+                    p => p.Organization!,
+                    p => p.Location!
+                );
+
+                if (eventDb == null || eventDb.Items == null || eventDb.Items.Count == 0)
                 {
                     result = BuildAppActionResultError(result, $"Sự kiện này không tồn tại với {id}");
+                    return result;
                 }
-                if (eventDb!.Items!.Count > 0 && eventDb.Items != null)
-                {
-                    var eventItem = eventDb.Items.First();
-                    var seatRankDb = await seatRankRepository.GetAllDataByExpression(p => p.EventId == eventItem.Id, 0, 0, null, false, p => p.Event!);
-                    var speakerDb = await speakerRepository.GetAllDataByExpression(p => p.EventId == eventItem.Id, 0, 0, null, false, p => p.Event!);
-                    var eventSponsorDb = await eventSponsorRepository.GetAllDataByExpression(p => p.EventId == eventItem.Id, 0, 0, null, false, p => p.Sponsor!);
-                    var staticFileDb = await staticFileRepository.GetAllDataByExpression(p => p.EventId == eventItem.Id, 0, 0, null, false, p => p.Event!, p => p.Post!);
-                    var surveyDb = await surveyRepository.GetAllDataByExpression(p => p.EventId == eventItem.Id, 0, 0, null, false, p => p.Event!);
-                    var postDb = await postRepository.GetAllDataByExpression(p => p.EventId == eventItem.Id, 0, 0, null, false, p => p.EventId!);
-                    eventResponse.StaticFiles = staticFileDb.Items!;
-                    eventResponse.Speakers = speakerDb.Items!;
-                    eventResponse.SeatRanks = seatRankDb.Items!;
-                    eventResponse.Surveys = surveyDb.Items!;
-                    eventResponse.Event = eventItem;
-                    eventResponse.EventSponsors = eventSponsorDb.Items!;
-                    eventResponse.Posts = postDb.Items!;
-                    result.Result = eventResponse;
-                }
+
+                var eventItem = eventDb.Items.First();
+
+                var seatRankDb = await seatRankRepository.GetAllDataByExpression(
+                    p => p.EventId == eventItem.Id,
+                    0,
+                    0,
+                    null,
+                    false,
+                    p => p.Event!
+                );
+
+                var speakerDb = await speakerRepository.GetAllDataByExpression(
+                    p => p.EventId == eventItem.Id,
+                    0,
+                    0,
+                    null,
+                    false,
+                    p => p.Event!
+                );
+
+                var eventSponsorDb = await eventSponsorRepository.GetAllDataByExpression(
+                    p => p.EventId == eventItem.Id,
+                    0,
+                    0,
+                    null,
+                    false,
+                    p => p.Sponsor!
+                );
+
+                var staticFileDb = await staticFileRepository.GetAllDataByExpression(
+                    p => p.EventId == eventItem.Id,
+                    0,
+                    0,
+                    null,
+                    false,
+                    p => p.Event!
+                );
+
+                var surveyDb = await surveyRepository.GetAllDataByExpression(
+                    p => p.EventId == eventItem.Id,
+                    0,
+                    0,
+                    null,
+                    false,
+                    p => p.Event!
+                );
+
+                var postDb = await postRepository.GetAllDataByExpression(
+                    p => p.EventId == eventItem.Id,
+                    0,
+                    0,
+                    null,
+                    false,
+                    p => p.Event!
+                );
+
+                eventResponse.StaticFiles = staticFileDb.Items!;
+                eventResponse.Speakers = speakerDb.Items!;
+                eventResponse.SeatRanks = seatRankDb.Items!;
+                eventResponse.Surveys = surveyDb.Items!;
+                eventResponse.Event = eventItem;
+                eventResponse.EventSponsors = eventSponsorDb.Items!;
+                eventResponse.Posts = postDb.Items!;
+                result.Result = eventResponse;
             }
             catch (Exception ex)
             {
@@ -91,6 +149,7 @@ namespace PRN231.TicketBooking.Service.Implementation
             }
             return result;
         }
+
 
         public async Task<AppActionResult> AddEvent(CreateEventRequest dto)
         {
