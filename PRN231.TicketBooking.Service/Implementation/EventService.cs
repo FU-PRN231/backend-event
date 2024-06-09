@@ -71,7 +71,6 @@ namespace PRN231.TicketBooking.Service.Implementation
                     p => p.Organization!,
                     p => p.Location!
                 );
-
                 if (eventDb == null || eventDb.Items == null || eventDb.Items.Count == 0)
                 {
                     result = BuildAppActionResultError(result, $"Sự kiện này không tồn tại với {id}");
@@ -305,7 +304,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                 {
                     return BuildAppActionResultSuccess(result, $"Not found organization with id: {request.OrganizationId}");
                 }
-                var updateEvent = _mapper.Map<Event>(request);
+                _mapper.Map(request, eventEntity);
                 eventEntity.UpdateDate = DateTime.Now;
                 eventEntity.UpdateBy = request.UserId;
                 var resultUpdateEvent = await eventRepository.UpdateEvent(eventEntity);
@@ -321,8 +320,8 @@ namespace PRN231.TicketBooking.Service.Implementation
                     {
                         return BuildAppActionResultSuccess(result, $"Not found seat rank with id: {seatRank.Id}");
                     }
-                    var updateSeatRankentity = _mapper.Map<SeatRank>(seatRank);
-                    updateSeatRankentity.EventId = eventEntity.Id;
+                    _mapper.Map(seatRank, seatRankEntity);
+                    seatRankEntity.EventId = eventEntity.Id;
                     var resultUpdate = await seatRankRepository.UpdateSeatRank(seatRankEntity);
                     if (resultUpdate == null)
                     {
@@ -345,6 +344,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                             return BuildAppActionResultSuccess(new AppActionResult() { IsSuccess=false}, $"Cannot upload file with static file id {staticFile.Id}!");
                         }
                         staticFileEntity.Img = (string)url.Result;
+                        staticFileEntity.EventId = eventEntity.Id;
                         var resultUpdate = await staticFileRepository.UploadStaticFile(staticFileEntity);
                         if (resultUpdate == null)
                         {
@@ -365,10 +365,10 @@ namespace PRN231.TicketBooking.Service.Implementation
                     {
                         return BuildAppActionResultError(new AppActionResult() { IsSuccess = false }, $"Cannot upload file with speaker id {speaker.Id}!");
                     }
-                    var updateSpeakertity = _mapper.Map<Speaker>(speaker);
-                    updateSpeakertity.EventId = eventEntity.Id;
-                    updateSpeakertity.Img = (string)url.Result;
-                    var resultUpdate = await speakerRepository.Update(updateSpeakertity);
+                    _mapper.Map(speaker, speakerEntity);
+                    speakerEntity.EventId = eventEntity.Id;
+                    speakerEntity.Img = (string)url.Result;
+                    var resultUpdate = await speakerRepository.Update(speakerEntity);
                     if (resultUpdate == null)
                     {
                         return BuildAppActionResultSuccess(new AppActionResult() { IsSuccess = false }, $"Cannot update speaker with id: {speaker.Id}");
