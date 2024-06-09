@@ -69,12 +69,12 @@ namespace PRN231.TicketBooking.Service.Implementation
                 if (eventDb!.Items!.Count > 0 && eventDb.Items != null)
                 {
                     var eventItem = eventDb.Items.First();
-                    var seatRankDb = await seatRankRepository.GetAllDataByExpression(p => p.EventId == eventItem.Id, 0, 0, null, false, null);
-                    var speakerDb = await speakerRepository.GetAllDataByExpression(p => p.EventId == eventItem.Id, 0, 0, null, false, null);
+                    var seatRankDb = await seatRankRepository.GetAllDataByExpression(p => p.EventId == eventItem.Id, 0, 0, null, false, p => p.Event!);
+                    var speakerDb = await speakerRepository.GetAllDataByExpression(p => p.EventId == eventItem.Id, 0, 0, null, false, p => p.Event!);
                     var eventSponsorDb = await eventSponsorRepository.GetAllDataByExpression(p => p.EventId == eventItem.Id, 0, 0, null, false, p => p.Sponsor!);
-                    var staticFileDb = await staticFileRepository.GetAllDataByExpression(p => p.EventId == eventItem.Id, 0, 0, null, false, null);
-                    var surveyDb = await surveyRepository.GetAllDataByExpression(p => p.EventId == eventItem.Id, 0, 0, null, false, null);
-                    var postDb = await postRepository.GetAllDataByExpression(p => p.EventId == eventItem.Id, 0, 0, null, false, null);
+                    var staticFileDb = await staticFileRepository.GetAllDataByExpression(p => p.EventId == eventItem.Id, 0, 0, null, false, p => p.Event!, p => p.Post!);
+                    var surveyDb = await surveyRepository.GetAllDataByExpression(p => p.EventId == eventItem.Id, 0, 0, null, false, p => p.Event!);
+                    var postDb = await postRepository.GetAllDataByExpression(p => p.EventId == eventItem.Id, 0, 0, null, false, p => p.EventId!);
                     eventResponse.StaticFiles = staticFileDb.Items!;
                     eventResponse.Speakers = speakerDb.Items!;
                     eventResponse.SeatRanks = seatRankDb.Items!;
