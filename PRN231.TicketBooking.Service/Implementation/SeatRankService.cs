@@ -119,14 +119,14 @@ namespace PRN231.TicketBooking.Service.Implementation
                         Result = data,
                         IsSuccess = false
                     };
-                    return BuildAppActionResultError(result, "Seat rank not found!");
+                    return BuildAppActionResultError(result, $"Không tìm thấy seatrank với id: {id}!");
                 }
                 result = new AppActionResult()
                 {
                     Result = data,
                     IsSuccess = true
                 };
-                return BuildAppActionResultError(result, "Get seat rank successfully!");
+                return BuildAppActionResultSuccess(result, "Get seat rank successfully!");
             }
             catch (Exception ex)
             {

@@ -17,6 +17,8 @@ namespace PRN231.TicketBooking.Common.Dto.Request
         public DateTime EventDate { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
+        public Guid LocationId { get; set; }
+        public Guid OrganizationId { get; set; }
         public List<UpdateSeatRankEventRequest> SeatRanks { get; set; }
         public List<UpdateStaticFileEventRequest> StaticFiles { get; set; }
         public List<UpdateSpeakerEventRequest> Speakers { get; set; }
