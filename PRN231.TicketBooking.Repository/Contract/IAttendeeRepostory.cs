@@ -10,7 +10,8 @@ namespace PRN231.TicketBooking.Repository.Contract
 {
     public interface IAttendeeRepostory : IRepository<Attendee>
     {
-        public Task<Attendee> GetAttendeeByEvent(Guid eventId);
+        public Task<PagedResult<Attendee>> GetAttendeeByEvent(Guid eventId);
         public Task<Attendee> CheckInAttendee(Attendee attendee);
+        public Task<Attendee> GetAttendeeByAccountIdAndEventId(string accountId, Guid eventId);
     }
 }

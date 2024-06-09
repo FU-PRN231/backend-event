@@ -21,10 +21,11 @@ namespace PRN231.TicketBooking.API.Controllers
         {
             return await _attendeeService.CheckInAttendee(checkInEventRequest);
         }
-        [HttpGet]
-        public IActionResult Get()
+
+        [HttpGet("get-all-attendee-by-eventId/{eventId}")]
+        public async Task<AppActionResult> GetAllAttendeeByEventId(Guid eventId)
         {
-            return Ok();
+            return await _attendeeService.GetAllAttendeeByEventId(eventId);
         }
     }
 }

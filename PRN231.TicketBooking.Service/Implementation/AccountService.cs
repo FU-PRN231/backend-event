@@ -17,6 +17,8 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Drawing;
 using IronBarCode;
+using Firebase.Auth;
+using System.Data.Entity.Core.Metadata.Edm;
 
 
 namespace PRN231.TicketBooking.Service.Implementation
@@ -187,10 +189,31 @@ namespace PRN231.TicketBooking.Service.Implementation
 
         public async Task<AppActionResult> GetAccountByUserId(string id)
         {
+         
             var result = new AppActionResult();
             try
             {
+                var organizationRepository = Resolve<IOrganizationRepository>();
+                var sponsorRepository = Resolve<ISponsorRepository>();
                 var account = await _accountRepository.GetById(id);
+                if (account.OrganizationId != null)
+                {
+                    var organizationDb = await organizationRepository.GetByExpression(p => p!.Id == account.OrganizationId);
+                    if (organizationDb == null)
+                    {
+                        result = BuildAppActionResultError(result, $"Tổ chức với {account.OrganizationId} không tồn tại");
+                    }
+                    account.Organization = organizationDb;
+                }
+                else if (account.SponsorId != null)
+                {
+                    var sponsorDb = await sponsorRepository.GetByExpression(p => p.Id == account.SponsorId);
+                    if (sponsorDb == null)
+                    {
+                        result = BuildAppActionResultError(result, $"Nhà tài trợ với {account.SponsorId} không tồn tại");
+                    }
+                    account.Sponsor = sponsorDb;    
+                }
                 if (account == null) result = BuildAppActionResultError(result, $"Tài khoản với id {id} không tồn tại !");
                 if (!BuildAppActionResultIsError(result)) result.Result = account;
             }
@@ -809,21 +832,23 @@ namespace PRN231.TicketBooking.Service.Implementation
                 //if(decryptData != null)
                 //{
                 //}
-                    string[] data = hashedAccountData.Split(',');
-                    result.Result = new QRAccountResponse
-                    {
-                        FullName = data[0],
-                        PhoneNumber = data[1],
-                        Email = data[2]
-                    };
-            } catch(Exception ex)
+                string[] data = hashedAccountData.Split(',');
+                result.Result = new QRAccountResponse
+                {
+                    FullName = data[0],
+                    PhoneNumber = data[1],
+                    Email = data[2]
+                };
+            }
+            catch (Exception ex)
             {
                 result = BuildAppActionResultError(result, ex.Message);
             }
             return result;
         }
 
-        private string DecryptData(string encryptedData, string key) {
+        private string DecryptData(string encryptedData, string key)
+        {
             using (Aes aes = Aes.Create())
             {
                 aes.Key = Convert.FromBase64String(key);

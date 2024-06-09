@@ -13,9 +13,9 @@ namespace PRN231.TicketBooking.BusinessObject.Models
     {
         [Key]
         public Guid Id { get; set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public string PersonInChargeName { get; set; }
+        public string Name { get; set; } = null!;   
+        public string Description { get; set; } = null!;    
+        public string PersonInChargeName { get; set; } = null!;
         public string? PhoneNumber { get; set; }
         public double Cost { get; set; }
         public DateTime CreatedDate { get; set; }

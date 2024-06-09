@@ -69,12 +69,12 @@ namespace PRN231.TicketBooking.Service.Implementation
                 if (eventDb!.Items!.Count > 0 && eventDb.Items != null)
                 {
                     var eventItem = eventDb.Items.First();
-                    var seatRankDb = await seatRankRepository.GetAllDataByExpression(p => p.EventId == eventItem.Id, 0, 0, null, false, null);
-                    var speakerDb = await speakerRepository.GetAllDataByExpression(p => p.EventId == eventItem.Id, 0, 0, null, false, null);
+                    var seatRankDb = await seatRankRepository.GetAllDataByExpression(p => p.EventId == eventItem.Id, 0, 0, null, false, p => p.Event!);
+                    var speakerDb = await speakerRepository.GetAllDataByExpression(p => p.EventId == eventItem.Id, 0, 0, null, false, p => p.Event!);
                     var eventSponsorDb = await eventSponsorRepository.GetAllDataByExpression(p => p.EventId == eventItem.Id, 0, 0, null, false, p => p.Sponsor!);
-                    var staticFileDb = await staticFileRepository.GetAllDataByExpression(p => p.EventId == eventItem.Id, 0, 0, null, false, null);
-                    var surveyDb = await surveyRepository.GetAllDataByExpression(p => p.EventId == eventItem.Id, 0, 0, null, false, null);
-                    var postDb = await postRepository.GetAllDataByExpression(p => p.EventId == eventItem.Id, 0, 0, null, false, null);
+                    var staticFileDb = await staticFileRepository.GetAllDataByExpression(p => p.EventId == eventItem.Id, 0, 0, null, false, p => p.Event!, p => p.Post!);
+                    var surveyDb = await surveyRepository.GetAllDataByExpression(p => p.EventId == eventItem.Id, 0, 0, null, false, p => p.Event!);
+                    var postDb = await postRepository.GetAllDataByExpression(p => p.EventId == eventItem.Id, 0, 0, null, false, p => p.EventId!);
                     eventResponse.StaticFiles = staticFileDb.Items!;
                     eventResponse.Speakers = speakerDb.Items!;
                     eventResponse.SeatRanks = seatRankDb.Items!;
@@ -105,12 +105,12 @@ namespace PRN231.TicketBooking.Service.Implementation
                 var organizationRepository = Resolve<IOrganizationRepository>();
                 var locationRepository = Resolve<ILocationRepository>();
 
-                var existLocation = locationRepository.GetById(dto.LocationId);
+                var existLocation = await locationRepository.GetById(dto.LocationId);
                 if (existLocation == null)
                 {
                     return BuildAppActionResultError(new AppActionResult(), $"Not found location with id {dto.LocationId}!");
                 }
-                var existOrganization = organizationRepository.GetById(dto.OrganizationId);
+                var existOrganization = await organizationRepository.GetById(dto.OrganizationId);
                 if (existOrganization == null)
                 {
                     return BuildAppActionResultError(new AppActionResult(), $"Not found organization with id {dto.OrganizationId}!");
