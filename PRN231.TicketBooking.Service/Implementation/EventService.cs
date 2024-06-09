@@ -59,7 +59,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                 var staticFileRepository = Resolve<IStaticFileRepository>();
                 var surveyRepository = Resolve<ISurveyRepository>();
                 var postRepository = Resolve<IPostRepository>();
-                var eventResponse = new EvenetResponse();
+                var eventResponse = new EventResponse();
                 var eventRepository = Resolve<IEventRepository>();
                 var eventDb = await eventRepository.GetAllDataByExpression(p => p!.Id == id, 0, 0, null, false, p => p.Organization!, p => p.Location!);
                 if (eventDb == null)
@@ -225,7 +225,7 @@ namespace PRN231.TicketBooking.Service.Implementation
             AppActionResult result = new AppActionResult();
             try
             {
-                var eventRepository = Resolve<IEventRepository>();
+                var eventRepository = Resolve<IEventRepository>();      
                 var seatRankRepository = Resolve<ISeatRankRepository>();
                 var staticFileRepository = Resolve<IStaticFileRepository>();
                 var speakerRepository = Resolve<ISpeakerRepository>();

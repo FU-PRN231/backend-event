@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace PRN231.TicketBooking.Common.Dto.Response
 {
-    public class EvenetResponse
+    public class EventResponse
     {
         public Event Event { get; set; } = null!;
         public List<SeatRank> SeatRanks { get; set; } = null!;
