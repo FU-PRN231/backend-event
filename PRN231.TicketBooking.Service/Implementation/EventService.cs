@@ -105,12 +105,12 @@ namespace PRN231.TicketBooking.Service.Implementation
                 var organizationRepository = Resolve<IOrganizationRepository>();
                 var locationRepository = Resolve<ILocationRepository>();
 
-                var existLocation = locationRepository.GetById(dto.LocationId);
+                var existLocation = await locationRepository.GetById(dto.LocationId);
                 if (existLocation == null)
                 {
                     return BuildAppActionResultError(new AppActionResult(), $"Not found location with id {dto.LocationId}!");
                 }
-                var existOrganization = organizationRepository.GetById(dto.OrganizationId);
+                var existOrganization = await organizationRepository.GetById(dto.OrganizationId);
                 if (existOrganization == null)
                 {
                     return BuildAppActionResultError(new AppActionResult(), $"Not found organization with id {dto.OrganizationId}!");

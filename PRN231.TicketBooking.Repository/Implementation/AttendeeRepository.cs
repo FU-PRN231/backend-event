@@ -25,9 +25,15 @@ namespace PRN231.TicketBooking.Repository.Implementation
             return item;
         }
 
-        public async Task<Attendee> GetAttendeeByEvent(Guid eventId)
+        public async Task<Attendee> GetAttendeeByAccountIdAndEventId(string accountId, Guid eventId)
         {
-            return await _attendeeDao.GetByExpression(filter: x=> x.OrderDetail.SeatRank.EventId == eventId);
+            return await _attendeeDao.GetByExpression(a => a.OrderDetail.Order.AccountId == accountId 
+                                                        && a.OrderDetail.SeatRank.EventId == eventId, a => a.OrderDetail)!;
+        }
+
+        public async Task<PagedResult<Attendee>> GetAttendeeByEvent(Guid eventId)
+        {
+            return await _attendeeDao.GetAllDataByExpression(a => a.OrderDetail.SeatRank.EventId == eventId, 0, 0, null, false, a => a.OrderDetail.Order.Account, a => a.OrderDetail.SeatRank.Event);
         }
     }
 }

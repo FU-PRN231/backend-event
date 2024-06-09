@@ -16,11 +16,13 @@ namespace PRN231.TicketBooking.Service.Implementation
 {
     public class AttendeeService : GenericBackendService, IAttendeeService
     {
+        private readonly IAttendeeRepostory _repository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
-        public AttendeeService(IServiceProvider serviceProvider, IUnitOfWork unitOfWork, IMapper mapper) : base(serviceProvider)
+        public AttendeeService(IServiceProvider serviceProvider, IAttendeeRepostory repostory, IUnitOfWork unitOfWork, IMapper mapper) : base(serviceProvider)
         {
+            _repository = repostory;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
@@ -31,7 +33,7 @@ namespace PRN231.TicketBooking.Service.Implementation
             try
             {
                 var attendeeRepo = Resolve<IAttendeeRepostory>();
-                var attendeeEntity = await attendeeRepo.GetAttendeeByEvent(checkInEvent.EventId);
+                var attendeeEntity = await attendeeRepo.GetAttendeeByAccountIdAndEventId(checkInEvent.AccountId ,checkInEvent.EventId);
                 if (attendeeEntity == null)
                 {
                     result.IsSuccess = false;
@@ -53,6 +55,20 @@ namespace PRN231.TicketBooking.Service.Implementation
                 result.Result = _mapper.Map<UpdateAttendeeReponse>(item);
             }
             catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
+        }
+
+        public async Task<AppActionResult> GetAllAttendeeByEventId(Guid eventId)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                var attendeeDb = await _repository.GetAttendeeByEvent(eventId);
+                result.Result = attendeeDb;
+            } catch(Exception ex)
             {
                 result = BuildAppActionResultError(result, ex.Message);
             }
