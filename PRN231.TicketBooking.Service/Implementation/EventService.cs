@@ -229,10 +229,22 @@ namespace PRN231.TicketBooking.Service.Implementation
                 var seatRankRepository = Resolve<ISeatRankRepository>();
                 var staticFileRepository = Resolve<IStaticFileRepository>();
                 var speakerRepository = Resolve<ISpeakerRepository>();
+                var locationRepository = Resolve<ILocationRepository>();
+                var organizationRepository = Resolve<IOrganizationRepository>();
                 var eventEntity = await eventRepository.GetEventById(id);
                 if (eventEntity == null)
                 {
-                    BuildAppActionResultError(result, $"Event not found with id: {id}", true);
+                    BuildAppActionResultSuccess(result, $"Event not found with id {id}");
+                }
+                var existLocation = await locationRepository.GetById(request.LocationId);
+                if (existLocation == null)
+                {
+                    return BuildAppActionResultSuccess(result, $"Not found location with id: {request.LocationId}");
+                }
+                Organization existOrganization = await organizationRepository.GetById(request.OrganizationId);
+                if (existLocation == null)
+                {
+                    return BuildAppActionResultSuccess(result, $"Not found organization with id: {request.OrganizationId}");
                 }
                 var updateEvent = _mapper.Map<Event>(request);
                 eventEntity.UpdateDate = DateTime.Now;
@@ -240,7 +252,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                 var resultUpdateEvent = await eventRepository.UpdateEvent(eventEntity);
                 if (resultUpdateEvent == null || !resultUpdateEvent.IsSuccess)
                 {
-                    return BuildAppActionResultError(result, $"Cannot update event with id: {id}", true);
+                    return BuildAppActionResultSuccess(result, $"Cannot update event with id: {id}");
                 }
                 //Update SeatRank
                 foreach (var seatRank in request.SeatRanks)
@@ -248,14 +260,14 @@ namespace PRN231.TicketBooking.Service.Implementation
                     var seatRankEntity = await seatRankRepository.GetSeatRankById(seatRank.Id);
                     if (seatRankEntity == null)
                     {
-                        return BuildAppActionResultError(result, $"Not found seat rank with id: {seatRank.Id}", true);
+                        return BuildAppActionResultSuccess(result, $"Not found seat rank with id: {seatRank.Id}");
                     }
                     var updateSeatRankentity = _mapper.Map<SeatRank>(seatRank);
                     updateSeatRankentity.EventId = eventEntity.Id;
                     var resultUpdate = await seatRankRepository.UpdateSeatRank(seatRankEntity);
                     if (resultUpdate == null)
                     {
-                        return BuildAppActionResultError(result, $"Cannot update seat rank with id: {seatRank.Id}", true);
+                        return BuildAppActionResultSuccess(result, $"Cannot update seat rank with id: {seatRank.Id}");
                     }
                 }
                 //Update Static file
@@ -265,18 +277,19 @@ namespace PRN231.TicketBooking.Service.Implementation
                         var staticFileEntity = await staticFileRepository.GetStaticFileById(staticFile.Id);
                         if (staticFileEntity == null)
                         {
-                            return BuildAppActionResultError(result, $"Not found static file with id: {staticFile.Id}", true);
+                            return BuildAppActionResultSuccess(result, $"Not found static file with id: {staticFile.Id}");
                         }
+                        await _firebaseService.DeleteFileFromFirebase($"{SD.FirebasePathName.EVENT}{staticFile.Id}");
                         var url = await _firebaseService.UploadFileToFirebase(staticFile.ImgFormFile, $"{SD.FirebasePathName.EVENT}{staticFile.Id}");
                         if (!url.IsSuccess)
                         {
-                            return BuildAppActionResultError(url, $"Cannot upload file with static file id {staticFile.Id}!");
+                            return BuildAppActionResultSuccess(new AppActionResult() { IsSuccess=false}, $"Cannot upload file with static file id {staticFile.Id}!");
                         }
                         staticFileEntity.Img = (string)url.Result;
                         var resultUpdate = await staticFileRepository.UploadStaticFile(staticFileEntity);
                         if (resultUpdate == null)
                         {
-                            return BuildAppActionResultError(result, $"Cannot update static file with id: {staticFile.Id}", true);
+                            return BuildAppActionResultSuccess(new AppActionResult() { IsSuccess = false }, $"Cannot update static file with id: {staticFile.Id}");
                         }
                     }
                 //Update speaker event
@@ -285,12 +298,13 @@ namespace PRN231.TicketBooking.Service.Implementation
                     var speakerEntity = await speakerRepository.GetById(speaker.Id);
                     if (speakerEntity == null)
                     {
-                        return BuildAppActionResultError(result, $"Not found speaker with id: {speaker.Id}", true);
+                        return BuildAppActionResultSuccess(new AppActionResult() { IsSuccess = false }, $"Not found speaker with id: {speaker.Id}");
                     }
+                    await _firebaseService.DeleteFileFromFirebase($"{SD.FirebasePathName.SPEAKER}{speaker.Id}");
                     var url = await _firebaseService.UploadFileToFirebase(speaker.ImgFormFile, $"{SD.FirebasePathName.SPEAKER}{speaker.Id}");
                     if (!url.IsSuccess)
                     {
-                        return BuildAppActionResultError(url, $"Cannot upload file with speaker id {speaker.Id}!");
+                        return BuildAppActionResultError(new AppActionResult() { IsSuccess = false }, $"Cannot upload file with speaker id {speaker.Id}!");
                     }
                     var updateSpeakertity = _mapper.Map<Speaker>(speaker);
                     updateSpeakertity.EventId = eventEntity.Id;
@@ -298,12 +312,12 @@ namespace PRN231.TicketBooking.Service.Implementation
                     var resultUpdate = await speakerRepository.Update(updateSpeakertity);
                     if (resultUpdate == null)
                     {
-                        return BuildAppActionResultError(result, $"Cannot update speaker with id: {speaker.Id}", true);
+                        return BuildAppActionResultSuccess(new AppActionResult() { IsSuccess = false }, $"Cannot update speaker with id: {speaker.Id}");
                     }
                 }
                 await _unitOfWork.SaveChangeAsync();
                 result.Result = resultUpdateEvent;
-                return BuildAppActionResultSuccess(result, "Update event successfully!");
+                return BuildAppActionResultSuccess(new AppActionResult() { IsSuccess = false }, "Update event successfully!");
             }
             catch (Exception ex)
             {
