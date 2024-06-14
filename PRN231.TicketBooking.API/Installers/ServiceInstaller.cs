@@ -56,6 +56,7 @@ namespace PRN231.TicketBooking.API.Installers
             services.AddScoped<ITaskService, TaskService>();
             services.AddScoped<ISponsorMoneyHistoryRepository, SponsorMoneyHistoryRepository>();
             services.AddScoped<IPostService, PostService>();
+            services.AddScoped<ISponsorEventHistoryService, SponsorHistoryService>();
         }
     }
 }

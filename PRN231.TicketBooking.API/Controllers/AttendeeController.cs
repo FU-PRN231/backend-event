@@ -6,7 +6,7 @@ using PRN231.TicketBooking.Service.Contract;
 
 namespace PRN231.TicketBooking.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("attendee")]
     [ApiController]
     public class AttendeeController : ControllerBase
     {
