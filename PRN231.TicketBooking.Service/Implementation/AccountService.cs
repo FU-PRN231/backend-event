@@ -869,5 +869,49 @@ namespace PRN231.TicketBooking.Service.Implementation
                 }
             }
         }
-    }
+
+		public async Task<AppActionResult> AssignRole(string userId, string roleName)
+		{
+			AppActionResult result = new AppActionResult();
+			try
+			{
+                var accountDb = await _accountRepository.GetById(userId);
+                if(accountDb == null)
+                {
+                    result = BuildAppActionResultError(result, $"Không tìm thấy tài khoản với id {userId}");
+                    return result;
+                }
+                var roleRepository = Resolve<IIdentityRoleRepository>();
+
+                var roleDb = await roleRepository.GetIdentityRoleByName(roleName);
+                if(roleDb == null)
+                {
+					result = BuildAppActionResultError(result, $"Không tìm thấy phân quyền với tên {roleName}");
+					return result;
+				}
+
+				var userRoleRepository = Resolve<IIdentityUserRoleRepository>();
+                var roleListDb = await userRoleRepository.GetRoleListByAccountId(userId);
+                if(roleListDb.Count != 0) {
+                    if (roleListDb.Contains(roleDb.Id))
+                    {
+						result = BuildAppActionResultError(result, $"Tài khoản với id {userId} đã có phân quyền {roleName}");
+						return result;
+					}
+                }
+
+                bool isSuccessful = await userRoleRepository.AssignRole(userId, roleDb.Id);
+                if (!isSuccessful)
+                {
+					result = BuildAppActionResultError(result, $"Thêm phân quyền không thành công, vui lòng thử lại sau");
+					return result;
+				}
+			}
+			catch (Exception ex)
+			{
+				result = BuildAppActionResultError(result, ex.Message);
+			}
+			return result;
+		}
+	}
 }

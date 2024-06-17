@@ -9,5 +9,7 @@ namespace PRN231.TicketBooking.Repository.Contract
 {
     public interface IIdentityUserRoleRepository : IRepository<IdentityUserRole<string>>
     {
-    }
+        public Task<bool> AssignRole(string userId, string roleId);
+        public Task<List<string>> GetRoleListByAccountId(string userId);
+	}
 }
