@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using DocumentFormat.OpenXml.Drawing.Charts;
+using DocumentFormat.OpenXml.InkML;
 using MailKit.Search;
 using Microsoft.AspNetCore.Http;
 using PRN231.TicketBooking.BusinessObject.Enum;
@@ -13,6 +14,7 @@ using PRN231.TicketBooking.Service.Contract;
 using PRN231.TicketBooking.Service.Payment.PaymentRequest;
 using PRN231.TicketBooking.Service.Payment.PaymentService;
 using QRCoder;
+using StackExchange.Redis;
 using System.Transactions;
 using Order = PRN231.TicketBooking.BusinessObject.Models.Order;
 
@@ -31,6 +33,27 @@ namespace PRN231.TicketBooking.Service.Implementation
             _mapper = mapper;
             _orderRepository = orderRepository;
             _unitOfWork = unitOfWork;
+        }
+
+        public async Task<AppActionResult> CancelOrder(Guid orderId)
+        {
+            var result = new AppActionResult();
+            try
+            {
+                var orderDb = await _orderRepository.GetByExpression(p => p.Id == orderId);
+                if (orderDb == null)
+                {
+                    result = BuildAppActionResultError(result, $"Không tìm thấy đơn hàng với id {orderId}");
+                }
+                orderDb!.PaymentStatus = PaymentStatus.CANCELED;
+                await _unitOfWork.SaveChangeAsync();
+                result.Messages.Add("Bạn đã hủy đơn đặt hàng thành công");
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
         }
 
         public async Task<AppActionResult> CreateOrderWithPayment(OrderRequestDto orderRequestDto, HttpContext context)
@@ -325,6 +348,43 @@ namespace PRN231.TicketBooking.Service.Implementation
                 result = BuildAppActionResultError(result, ex.Message);
             }
             return result;
+        }
+
+        public async Task<AppActionResult> PurchaseOrder(Guid orderId, HttpContext context)
+        {
+            var result = new AppActionResult();
+            try
+            {
+                var paymentGatewayService = Resolve<IPaymentGatewayService>();
+                var orderDb = await _orderRepository.GetByExpression(p => p!.Id == orderId, p => p.Account!);
+                if (orderDb == null)
+                {
+                    result = BuildAppActionResultError(result, $"Không tìm thấy đơn hàng với id {orderId}");
+                }
+                if (orderDb!.PaymentStatus == PaymentStatus.PENDING)
+                {
+                    var payment = new PaymentInformationRequest
+                    {
+                        AccountID = orderDb.AccountId,
+                        Amount = (double)orderDb.Total,
+                        CustomerName = $"{orderDb.Account!.FirstName} {orderDb.Account.LastName}",
+                        OrderID = orderDb.Id.ToString(),
+                    };
+                    result.Result = await paymentGatewayService!.CreatePaymentUrlVnpay(payment, context);
+                }
+                else
+                {
+                    result.Messages.Add("Đơn hàng này đã được thanh toán hoặc đã hủy");
+                    result.IsSuccess = true;
+                    return result;
+                }
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
+
         }
 
         public async Task<AppActionResult> UpdateStatus(Guid orderId, bool isSuccessful)
