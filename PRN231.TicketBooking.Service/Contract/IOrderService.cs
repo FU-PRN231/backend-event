@@ -20,6 +20,7 @@ namespace PRN231.TicketBooking.Service.Contract
         Task<AppActionResult> UpdateStatus(Guid orderId, bool isSuccessful);
         Task<AppActionResult> GetEventOrderByStatus(Guid eventId, OrderStatus orderStatus, int pageNumber, int pageSize);
         Task<AppActionResult> GetAllOrderByEventId(Guid eventId, int pageNumber, int pageSize);
-
+        Task<AppActionResult> CancelOrder(Guid orderId);
+        Task<AppActionResult> PurchaseOrder(Guid orderId, HttpContext context);
     }
 }
