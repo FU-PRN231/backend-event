@@ -12,5 +12,5 @@ namespace PRN231.TicketBooking.Service.Contract
     {
         public Task<AppActionResult> CheckInAttendee(CheckInEventRequest checkInEvent);
         public Task<AppActionResult> GetAllAttendeeByEventId(Guid eventId);
-    }
+	}
 }
