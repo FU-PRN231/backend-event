@@ -39,5 +39,37 @@ namespace PRN231.TicketBooking.Repository.Implementation
             }
             return result;
         }
+
+        public async Task<List<Location>> GetAllLocation(DateTime StartTime, DateTime EndTime)
+        {
+            List<Location> result = null;
+            try
+            {
+                result = new List<Location>();
+                var eventEntities = await _eventDAO.GetAllDataByExpression(filter: x=>x.StartTime<EndTime && x.EndTime>StartTime, 0, 0);
+                if (eventEntities.Items == null || eventEntities.Items.Count==0)
+                {
+                     var item = await _locationDAO.GetAllDataByExpression(null, 0, 0);
+                    if (item != null)
+                    {
+                        result = item.Items;
+                    }
+                }
+                else
+                {
+                    var occupiedLocationIds = eventEntities.Items.Select(e => e.LocationId).Distinct().ToList();
+                    var item = await _locationDAO.GetAllDataByExpression(filter: x => !occupiedLocationIds.Contains(x.Id), 0, 0);
+                    if(item != null)
+                    {
+                        result = item.Items;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                result = null;
+            }
+            return result;
+        }
     }
 }

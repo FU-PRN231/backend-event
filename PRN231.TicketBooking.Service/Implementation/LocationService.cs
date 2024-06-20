@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using DocumentFormat.OpenXml.Wordprocessing;
+using Microsoft.Extensions.Logging;
 using PRN231.TicketBooking.Common.Dto;
 using PRN231.TicketBooking.Repository.Contract;
 using PRN231.TicketBooking.Service.Contract;
@@ -17,6 +18,27 @@ namespace PRN231.TicketBooking.Service.Implementation
         private readonly IUnitOfWork _unitOfWork;
         public LocationService(IServiceProvider serviceProvider, IMapper mapper, IUnitOfWork unitOfWork) : base(serviceProvider)
         {
+        }
+
+        public async Task<AppActionResult> GetAllLocation(DateTime StartTime, DateTime EndTime)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                var locationRepository = Resolve<ILocationRepository>();
+                var data = await locationRepository.GetAllLocation(StartTime, EndTime);
+                result = new AppActionResult()
+                {
+                    Result = data,
+                    IsSuccess = true
+                };
+                return BuildAppActionResultSuccess(result, "Get location by  event id successfully");
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
         }
 
         public async Task<AppActionResult> GetLocationByEventId(Guid eventId)

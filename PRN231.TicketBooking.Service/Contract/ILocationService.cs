@@ -10,7 +10,7 @@ namespace PRN231.TicketBooking.Service.Contract
 {
     public interface ILocationService
     {
-        public Task<AppActionResult> GetLocationByEventId(Guid eventId);
-        public Task<AppActionResult> GetAllLocation();
+        Task<AppActionResult> GetLocationByEventId(Guid eventId);
+        Task<AppActionResult> GetAllLocation(DateTime StartTimeEvent, DateTime EndTimeEvent);
     }
 }
