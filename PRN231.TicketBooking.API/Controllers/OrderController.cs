@@ -24,13 +24,13 @@ namespace PRN231.TicketBooking.API.Controllers
             return await _orderService.CreateOrderWithPayment(orderRequestDto, HttpContext);
         }
 
-        [HttpPost("purchase-order")]
+        [HttpPost("purchase-order/{orderId}")]
         public async Task<AppActionResult> PurchaseOrder(Guid orderId)
         {
             return await _orderService.PurchaseOrder(orderId, HttpContext);     
         }
 
-        [HttpPost("cancel-order")]
+        [HttpPost("cancel-order/{orderId}")]
         public async Task<AppActionResult> CancelOrder(Guid orderId)
         {
             return await _orderService.CancelOrder(orderId);

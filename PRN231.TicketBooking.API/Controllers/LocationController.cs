@@ -21,5 +21,11 @@ namespace PRN231.TicketBooking.API.Controllers
         {
             return await _locationService.GetLocationByEventId(id);
         }
+
+        [HttpGet("get-available-location/{startTime}/{endTime}")]
+        public async Task<AppActionResult> GetLocationByEventId(DateTime startTime, DateTime endTime)
+        {
+            return await _locationService.GetAvailableLocation(startTime, endTime);
+        }
     }
 }

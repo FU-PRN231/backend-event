@@ -46,7 +46,7 @@ namespace PRN231.TicketBooking.Repository.Implementation
             try
             {
                 result = new List<Location>();
-                var eventEntities = await _eventDAO.GetAllDataByExpression(filter: x=>x.StartTime<EndTime && x.EndTime>StartTime, 0, 0);
+                var eventEntities = await _eventDAO.GetAllDataByExpression(filter: x=>x.StartEventDate<EndTime && x.EndEventDate>StartTime, 0, 0);
                 if (eventEntities.Items == null || eventEntities.Items.Count==0)
                 {
                      var item = await _locationDAO.GetAllDataByExpression(null, 0, 0);

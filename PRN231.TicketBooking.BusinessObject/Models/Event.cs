@@ -11,8 +11,9 @@ namespace PRN231.TicketBooking.BusinessObject.Models
 
         public string Title { get; set; } = null!;
         public string Description { get; set; } = null!;
-        public DateTime EventDate { get; set; }
-        public DateTime StartTime { get; set; }
+        public DateTime StartEventDate { get; set; }
+        public DateTime EndEventDate { get; set; }
+		public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public Guid LocationId { get; set; }
 

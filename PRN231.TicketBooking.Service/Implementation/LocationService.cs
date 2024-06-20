@@ -22,7 +22,7 @@ namespace PRN231.TicketBooking.Service.Implementation
             _mapper = mapper;
         }
 
-        public async Task<AppActionResult> GetAllLocation(DateTime StartTime, DateTime EndTime)
+        public async Task<AppActionResult> GetAvailableLocation(DateTime StartTime, DateTime EndTime)
         {
             AppActionResult result = new AppActionResult();
             try
@@ -34,7 +34,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                     Result = data,
                     IsSuccess = true
                 };
-                return BuildAppActionResultSuccess(result, "Get location by  event id successfully");
+                return BuildAppActionResultSuccess(result, "Thành công");
             }
             catch (Exception ex)
             {

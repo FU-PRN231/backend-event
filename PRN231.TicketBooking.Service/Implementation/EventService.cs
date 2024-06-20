@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Humanizer;
 using Org.BouncyCastle.Asn1.Ocsp;
 using PRN231.TicketBooking.BusinessObject.Models;
 using PRN231.TicketBooking.Common.Dto;
@@ -185,12 +186,12 @@ namespace PRN231.TicketBooking.Service.Implementation
                 var existLocation = await locationRepository.GetById(dto.LocationId);
                 if (existLocation == null)
                 {
-                    return BuildAppActionResultError(new AppActionResult(), $"Not found location with id {dto.LocationId}!");
+                    return BuildAppActionResultError(new AppActionResult(), $"Không tìm thấy địa điểm với id {dto.LocationId}!");
                 }
                 var existOrganization = await organizationRepository.GetById(dto.OrganizationId);
                 if (existOrganization == null)
                 {
-                    return BuildAppActionResultError(new AppActionResult(), $"Not found organization with id {dto.OrganizationId}!");
+                    return BuildAppActionResultError(new AppActionResult(), $"Không tìm thấy tổ chức với id {dto.OrganizationId}!");
                 }
                 var eventEntity = _mapper.Map<Event>(dto);
                 eventEntity.Id = Guid.NewGuid();
@@ -206,14 +207,21 @@ namespace PRN231.TicketBooking.Service.Implementation
                 {
                     foreach (var item in dto.CreateSeatRankDtoRequests)
                     {
-                        var seatRank = _mapper.Map<SeatRank>(item);
-                        seatRank.Id = Guid.NewGuid();
-                        seatRank.EventId = eventEntity.Id;
-                        seatRank.RemainingCapacity = seatRank.Quantity; //define Reamining capacity of seatrank
-                        var data = await _seatRankRepository.AddSeatRankFromEvent(seatRank);
-                        if (!data.IsSuccess)
+                        if (item.StartTime>=dto.StartTime && item.EndTime<=dto.EndTime)
                         {
-                            return BuildAppActionResultError(data, "Cannot add seat rank!");
+                            var seatRank = _mapper.Map<SeatRank>(item);
+                            seatRank.Id = Guid.NewGuid();
+                            seatRank.EventId = eventEntity.Id;
+                            seatRank.RemainingCapacity = seatRank.Quantity; //define Reamining capacity of seatrank
+                            var data = await _seatRankRepository.AddSeatRankFromEvent(seatRank);
+                            if (!data.IsSuccess)
+                            {
+                                return BuildAppActionResultError(data, "Không thể tạo hạng vé");
+                            }
+                        }
+                        else
+                        {
+                            return BuildAppActionResultError(new AppActionResult(), $"Thời gian bán vé hạng vé {item.Name} không nằm trong thời gian từ {dto.StartTime.Hour}:{dto.StartTime.Minute} đến {dto.EndTime.Hour}:{dto.EndTime.Minute}");
                         }
                     }
                 }
@@ -226,7 +234,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                         if (sponsor == null)
                         {
                             return BuildAppActionResultError(
-                                       new AppActionResult(), $"Sponsor not found by id: {item.SponsorId}!"
+                                       new AppActionResult(), $"Không tìm thấy nhà tài trợ với id: {item.SponsorId}!"
                                    );
                         }
                         var eventSponsor = _mapper.Map<EventSponsor>(item);
@@ -290,7 +298,7 @@ namespace PRN231.TicketBooking.Service.Implementation
 
                 await _unitOfWork.SaveChangeAsync();
                 result.Result = _mapper.Map<CreateEventResponse>(dto);
-                return BuildAppActionResultSuccess(result, "Add event successfully!");
+                return BuildAppActionResultSuccess(result, "Tạo sự kiện thành công");
             }
             catch (Exception ex)
             {
@@ -340,12 +348,19 @@ namespace PRN231.TicketBooking.Service.Implementation
                     {
                         return BuildAppActionResultSuccess(result, $"Not found seat rank with id: {seatRank.Id}");
                     }
-                    _mapper.Map(seatRank, seatRankEntity);
-                    seatRankEntity.EventId = eventEntity.Id;
-                    var resultUpdate = await seatRankRepository.UpdateSeatRank(seatRankEntity);
-                    if (resultUpdate == null)
+                    if (seatRank.StartTime >= request.StartTime && seatRank.EndTime <= request.EndTime)
                     {
-                        return BuildAppActionResultSuccess(result, $"Cannot update seat rank with id: {seatRank.Id}");
+                        _mapper.Map(seatRank, seatRankEntity);
+                        seatRankEntity.EventId = eventEntity.Id;
+                        var resultUpdate = await seatRankRepository.UpdateSeatRank(seatRankEntity);
+                        if (resultUpdate == null)
+                        {
+                            return BuildAppActionResultSuccess(result, $"Cannot update seat rank with id: {seatRank.Id}");
+                        }
+                    }
+                    else
+                    {
+                        return BuildAppActionResultError(new AppActionResult(), $"Thời gian bán vé hạng vé {seatRank.Name} không nằm trong thời gian từ {request.StartTime.Hour}:{request.StartTime.Minute} đến {request.EndTime.Hour}:{request.EndTime.Minute}");
                     }
                 }
                 //Update Static file
@@ -355,20 +370,20 @@ namespace PRN231.TicketBooking.Service.Implementation
                         var staticFileEntity = await staticFileRepository.GetStaticFileById(staticFile.Id);
                         if (staticFileEntity == null)
                         {
-                            return BuildAppActionResultSuccess(result, $"Not found static file with id: {staticFile.Id}");
+                            return BuildAppActionResultError(result, $"không tìm thấy static file với id: {staticFile.Id}");
                         }
                         await _firebaseService.DeleteFileFromFirebase($"{SD.FirebasePathName.EVENT}{staticFile.Id}");
                         var url = await _firebaseService.UploadFileToFirebase(staticFile.ImgFormFile, $"{SD.FirebasePathName.EVENT}{staticFile.Id}");
                         if (!url.IsSuccess)
                         {
-                            return BuildAppActionResultSuccess(new AppActionResult() { IsSuccess=false}, $"Cannot upload file with static file id {staticFile.Id}!");
+                            return BuildAppActionResultError(new AppActionResult() { IsSuccess=false}, $"Cannot upload file with static file id {staticFile.Id}!");
                         }
                         staticFileEntity.Img = (string)url.Result;
                         staticFileEntity.EventId = eventEntity.Id;
                         var resultUpdate = await staticFileRepository.UploadStaticFile(staticFileEntity);
                         if (resultUpdate == null)
                         {
-                            return BuildAppActionResultSuccess(new AppActionResult() { IsSuccess = false }, $"Cannot update static file with id: {staticFile.Id}");
+                            return BuildAppActionResultError(new AppActionResult() { IsSuccess = false }, $"Cannot update static file with id: {staticFile.Id}");
                         }
                     }
                 //Update speaker event
@@ -391,7 +406,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                     var resultUpdate = await speakerRepository.Update(speakerEntity);
                     if (resultUpdate == null)
                     {
-                        return BuildAppActionResultSuccess(new AppActionResult() { IsSuccess = false }, $"Cannot update speaker with id: {speaker.Id}");
+                        return BuildAppActionResultError(new AppActionResult() { IsSuccess = false }, $"Cannot update speaker with id: {speaker.Id}");
                     }
                 }
                 await _unitOfWork.SaveChangeAsync();
@@ -403,5 +418,15 @@ namespace PRN231.TicketBooking.Service.Implementation
                 return BuildAppActionResultError(result, ex.Message, true);
             }
         }
-    }
+
+		public Task<AppActionResult> GetEventByStatus(bool happened, int pageNumber, int pageSize)
+		{
+			throw new NotImplementedException();
+		}
+
+		public Task<AppActionResult> CountingEventByStatus(Guid? organizationId, int timePeriod)
+		{
+			throw new NotImplementedException();
+		}
+	}
 }
