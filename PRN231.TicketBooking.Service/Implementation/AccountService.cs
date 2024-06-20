@@ -529,7 +529,27 @@ namespace PRN231.TicketBooking.Service.Implementation
 
             _tokenDto.Token = token;
             _tokenDto.RefreshToken = user.RefreshToken;
-            result.Result = _tokenDto;
+			var userRoleRepository = Resolve<IIdentityUserRoleRepository>();
+			var roleListDb = await userRoleRepository.GetRoleListByAccountId(user.Id);
+			var roleRepository = Resolve<IIdentityRoleRepository>();
+			var roleNameList = await roleRepository.GetRoleNameListById(roleListDb);
+            if (roleNameList.Contains("ADMIN"))
+            {
+                _tokenDto.MainRole = "ADMIN";
+            }
+            else if (roleNameList.Contains("ORGANIZER"))
+            {
+                _tokenDto.MainRole = "ORGANIZER";
+			} else if(roleNameList.Count > 0)
+            {
+                _tokenDto.MainRole = roleNameList.FirstOrDefault(n => !n.Equals("CUSTOMER"));
+            }
+            else
+            {
+                _tokenDto.MainRole = "CUSTOMER";
+			}
+
+			result.Result = _tokenDto;
             await _unitOfWork.SaveChangeAsync();
 
             return result;

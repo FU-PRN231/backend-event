@@ -16,5 +16,14 @@ namespace PRN231.TicketBooking.Repository.Implementation
             return await this.GetByExpression(i => i.NormalizedName.Equals(name.ToLower()));
         }
 
-    }
+		public async Task<List<string>> GetRoleNameListById(List<string> roleIds)
+		{
+            var roleList = await this.GetAllDataByExpression(i => roleIds.Contains(i.Id), 0, 0, null, false, null);
+            if(roleList.Items.Count > 0)
+            {
+                return roleList.Items.DistinctBy(i => i.Id).Select(i => i.Name).ToList();
+            }
+            return new List<string>();
+		}
+	}
 }
