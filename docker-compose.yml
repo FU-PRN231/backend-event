@@ -1,0 +1,25 @@
+version: '3.4'
+
+services:
+  backend.event.database:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: backend.event.db
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "03122002Hq@@"
+    volumes:
+      - ./.containers/travelcapstone.backend.db:/var/lib/mssql/data
+    ports:
+      - "1433:1433"
+  backend.event.api:
+    image: ${DOCKER_REGISTRY-}backendeventapi
+    container_name: backend.event.api
+    build:
+      context: .
+      dockerfile: PRN231.TicketBooking.API/Dockerfile
+    depends_on:
+      backend.event.database:
+        condition: service_started
+    ports:
+      - "3000:80"
+      - "3001:443"
