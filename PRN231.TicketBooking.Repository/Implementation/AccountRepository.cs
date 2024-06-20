@@ -31,40 +31,6 @@ namespace PRN231.TicketBooking.Repository.Implementation
             return isSucess;
         }
 
-        public async Task<List<Account>> CreateSponsorAccount(CreateSponsorDto dto)
-        {
-            List<Account> accounts = new List<Account>();
-            try
-            {
-                Account curr = null;
-                foreach (var sponsor in dto.SponsorDtos!)
-                {
-                    curr = await GetAccountByEmail(sponsor.Email, false, null);
-                    if (curr != null)
-                    {
-                        accounts.Add(curr);
-                    }
-                    else
-                    {
-                        var user = new Account
-                        {
-                            Id = Guid.NewGuid().ToString(),
-                            Email = sponsor.Email,
-                            UserName = sponsor.Email,
-                            FirstName = sponsor.Name,
-                            PhoneNumber = sponsor.PhoneNumber,
-                            VerifyCode = null,
-                        };
-                        accounts.Add(user);
-                    }
-                }
-                await _dao.InsertRange(accounts);
-            }
-            catch (Exception ex)
-            {
-            }
-            return accounts;
-        }
 
         public async Task<Account> GetAccountByEmail(string email, bool? IsDeleted = false, bool? IsVerified = true)
         {

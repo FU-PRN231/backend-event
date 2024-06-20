@@ -16,11 +16,7 @@ namespace PRN231.TicketBooking.API.Controllers
             _service = service;
         }
 
-        [HttpPost("add-sponsor")]
-        public async Task<AppActionResult> AddSponsorToEvent([FromForm] CreateSponsorDto dto)
-        {
-            return await _service.AddSponsorToEvent(dto);
-        }
+       
 
         [HttpPost("add-sponsor-money-to-event")]
         public async Task<AppActionResult> AddSponsorMoneytoEvent(AddSponsorMoneyDto dto)
