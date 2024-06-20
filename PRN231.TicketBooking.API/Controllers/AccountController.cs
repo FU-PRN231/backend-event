@@ -118,5 +118,11 @@ namespace PRN231.TicketBooking.API.Controllers
 		{
 			return await _accountService.AssignRole(userId, roleName);
 		}
+
+		[HttpPost("add-sponsor")]
+		public async Task<AppActionResult> AddSponsor([FromForm]CreateSponsorDto dto)
+		{
+			return await _accountService.AddSponsor(dto);
+		}
 	}
 }

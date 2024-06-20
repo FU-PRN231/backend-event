@@ -36,5 +36,7 @@ namespace PRN231.TicketBooking.Repository.Implementation
 			}
 			return roleListDb.Items.Select(r => r.RoleId).ToList();
 		}
+
+		
 	}
 }
