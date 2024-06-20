@@ -5,7 +5,7 @@ using PRN231.TicketBooking.Service.Contract;
 
 namespace PRN231.TicketBooking.API.Controllers
 {
-    [Route("location]")]
+    [Route("location")]
     [ApiController]
     public class LocationController : ControllerBase
     {
@@ -15,10 +15,11 @@ namespace PRN231.TicketBooking.API.Controllers
         {
             _locationService = locationService;
         }
-        [HttpGet("get-location-by-eventid")]
-        public async Task<AppActionResult> GetAllEvent([FromRoute] Guid eventId)
+
+        [HttpGet("get-location-by-eventid/{id}")]
+        public async Task<AppActionResult> GetLocationByEventId(Guid id)
         {
-            return await _locationService.GetLocationByEventId(eventId);
+            return await _locationService.GetLocationByEventId(id);
         }
     }
 }

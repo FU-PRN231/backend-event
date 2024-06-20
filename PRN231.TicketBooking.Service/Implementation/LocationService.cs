@@ -18,6 +18,8 @@ namespace PRN231.TicketBooking.Service.Implementation
         private readonly IUnitOfWork _unitOfWork;
         public LocationService(IServiceProvider serviceProvider, IMapper mapper, IUnitOfWork unitOfWork) : base(serviceProvider)
         {
+            _unitOfWork = unitOfWork;
+            _mapper = mapper;
         }
 
         public async Task<AppActionResult> GetAllLocation(DateTime StartTime, DateTime EndTime)
@@ -48,6 +50,10 @@ namespace PRN231.TicketBooking.Service.Implementation
             {
                 var locationRepository = Resolve<ILocationRepository>();
                 var data = await locationRepository.GetLocationByEventId(eventId);
+                if (data == null)
+                {
+                    return BuildAppActionResultSuccess(result, $"Không tìm thấy location với event id {eventId}");
+                }
                 result = new AppActionResult()
                 {
                     Result = data,
