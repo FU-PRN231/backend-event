@@ -5,7 +5,7 @@ using PRN231.TicketBooking.Service.Contract;
 
 namespace PRN231.TicketBooking.API.Controllers
 {
-    [Route("orrganization")]
+    [Route("organization")]
     [ApiController]
     public class OrganizationController : ControllerBase
     {
