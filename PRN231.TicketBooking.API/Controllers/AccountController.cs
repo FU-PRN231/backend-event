@@ -112,5 +112,11 @@ namespace PRN231.TicketBooking.API.Controllers
         {
             return await _accountService.DecodeQR(qrString);
         }
-    }
+
+		[HttpPost("assign-role")]
+		public async Task<AppActionResult> AssignRole(string userId, string roleName)
+		{
+			return await _accountService.AssignRole(userId, roleName);
+		}
+	}
 }
