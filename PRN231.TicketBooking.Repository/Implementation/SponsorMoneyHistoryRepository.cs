@@ -16,5 +16,15 @@ namespace PRN231.TicketBooking.Repository.Implementation
         {
             _dao = dao; 
         }
-    }
+
+		public async Task<List<SponsorMoneyHistory>> GetAllSponsorMoneyHistoryByEventId(Guid eventId)
+		{
+            var moneyHistory = await GetAllDataByExpression(m => m.EventSponsor.EventId == eventId, 0, 0, null, false, m => m.EventSponsor);
+            if(moneyHistory.Items.Count == 0)
+            {
+                return new List<SponsorMoneyHistory>();
+            }
+            return moneyHistory.Items;
+		}
+	}
 }

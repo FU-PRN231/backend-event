@@ -5,7 +5,7 @@ namespace PRN231.TicketBooking.Repository.Contract
 {
     public interface IAccountRepository : IRepository<Account>
     {
-        public Task<List<Account>> CreateSponsorAccount(CreateSponsorDto dto);
+        //public Task<List<Account>> CreateSponsorAccount(CreateSponsorDto dto);
 
         public Task<Account> GetAccountByEmail(string email, bool? IsDeleted = false, bool? IsVerified = true);
     }

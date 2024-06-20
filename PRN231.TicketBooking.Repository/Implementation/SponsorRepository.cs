@@ -14,33 +14,24 @@ namespace PRN231.TicketBooking.Repository.Implementation
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<List<Sponsor>> CreateSponsor(Dictionary<string, SponsorDto> dto)
+        public async Task<Sponsor> CreateSponsor(CreateSponsorDto dto)
         {
-            List<Sponsor> result = null;
+			var result = await GetSponsorByName(dto.Name);
             try
             {
-                result = new List<Sponsor>();
-                foreach (var item in dto)
-                {
-                    if (await GetSponsorByName(item.Value.Name) == null)
-                    {
-                        var sponsor = new Sponsor
-                        {
-                            Id = Guid.NewGuid(),
-                            Name = item.Value.Name,
-                            Description = item.Value.Description,
-                            Img = string.Empty
-                        };
-                        result.Add(sponsor);
-                        await _dao.Insert(sponsor);
-                    }
-                    else
-                    {
-                        result.Add(await GetSponsorByName(item.Value.Name));
-                    }
-                }
-                //await _unitOfWork.SaveChangeAsync();
-            }
+				if (result == null)
+				{
+					var sponsor = new Sponsor
+					{
+						Id = Guid.NewGuid(),
+						Name = dto.Name,
+						Description = dto.Description,
+						Img = string.Empty
+					};
+					await _dao.Insert(sponsor);
+					result = sponsor;
+				}
+			}
             catch (Exception ex)
             {
                 result = null;
@@ -48,7 +39,41 @@ namespace PRN231.TicketBooking.Repository.Implementation
             return result;
         }
 
-        public async Task<Sponsor> GetSponsorByName(string name)
+		public async Task<List<Sponsor>> CreateListSponsor(Dictionary<string, CreateSponsorDto> dto)
+		{
+			List<Sponsor> result = null;
+			try
+			{
+				result = new List<Sponsor>();
+				foreach (var item in dto)
+				{
+					if (await GetSponsorByName(item.Value.Name) == null)
+					{
+						var sponsor = new Sponsor
+						{
+							Id = Guid.NewGuid(),
+							Name = item.Value.Name,
+							Description = item.Value.Description,
+							Img = string.Empty
+						};
+						result.Add(sponsor);
+						await _dao.Insert(sponsor);
+					}
+					else
+					{
+						result.Add(await GetSponsorByName(item.Value.Name));
+					}
+				}
+				//await _unitOfWork.SaveChangeAsync();
+			}
+			catch (Exception ex)
+			{
+				result = null;
+			}
+			return result;
+		}
+
+		public async Task<Sponsor> GetSponsorByName(string name)
         {
             return await _dao.GetByExpression(s => s.Name == name);
         }

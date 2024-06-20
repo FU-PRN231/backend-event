@@ -76,7 +76,7 @@ namespace PRN231.TicketBooking.Common.Mapping
               .ForMember(desc => desc.RemainingCapacity, act => act.MapFrom(src => src.RemainingCapacity))
               .ReverseMap();
 
-                config.CreateMap<SponsorDto, Account>()
+                config.CreateMap<CreateSponsorDto, Account>()
                    .ForMember(desc => desc.UserName, act => act.MapFrom(src => src.Email))
                    .ForMember(desc => desc.Email, act => act.MapFrom(src => src.Email))
                    .ForMember(desc => desc.PhoneNumber, act => act.MapFrom(src => src.PhoneNumber))

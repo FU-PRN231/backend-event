@@ -712,33 +712,35 @@ namespace PRN231.TicketBooking.Service.Implementation
             AppActionResult result = new AppActionResult();
             try
             {
-                List<Account> sponsorList = new List<Account>();
-                Dictionary<string, SponsorDto> data = new Dictionary<string, SponsorDto>();
-                foreach (var record in dto.SponsorDtos)
+                var sponsorRepository = Resolve<ISponsorRepository>();
+                var sponsorDb = await sponsorRepository.CreateSponsor(dto);
+				var sponsor = _mapper.Map<Account>(dto);
+				sponsor.Id = Guid.NewGuid().ToString();
+				sponsor.UserName = dto.Email;
+				sponsor.IsDeleted = false;
+				sponsor.IsVerified = true;
+				sponsor.VerifyCode = null;
+				string pathName = SD.FirebasePathName.QR_PREFIX + sponsor.Id;
+				var url = await _firebaseService.UploadFileToFirebase(dto.Img, pathName);
+                if(url.IsSuccess) {
+					sponsorDb.Img = (string)url.Result;
+				} else
                 {
-                    var sponsor = _mapper.Map<Account>(record);
-                    sponsor.Id = Guid.NewGuid().ToString();
-                    sponsor.UserName = record.Email;
-                    sponsor.IsDeleted = false;
-                    sponsor.IsVerified = true;
-                    sponsor.VerifyCode = null;
-                    var resultCreateUser = await _userManager.CreateAsync(sponsor, SD.DefaultAccountInformation.PASSWORD);
-                    if (!resultCreateUser.Succeeded)
-                    {
-                        result.Messages.Add($"Creation of the account for sponsor with name {record.Name} failed.");
-                    }
-                    else
-                    {
-                        sponsorList.Add(sponsor);
-                        data.Add(sponsor.Id, record);
-                    }
-                }
-                bool isSuccessful = await AssignSponsorRole(sponsorList);
+					result = BuildAppActionResultError(result, $"Tải hình nhà tài trợ thất bại, vui lòng thử lại");
+				}
+				var resultCreateUser = await _userManager.CreateAsync(sponsor, SD.DefaultAccountInformation.PASSWORD);
+				if (!resultCreateUser.Succeeded)
+				{
+					result = BuildAppActionResultError(result, $"Creation of the account for sponsor with name {dto.Name} failed.");
+				}
+				bool isSuccessful = await AssignSponsorRole(new List<Account> { sponsor });
                 if (isSuccessful)
                 {
-                    SendAccountCreationEmailForSponsor(sponsorList);
+                    await sponsorRepository.Insert(sponsorDb);
+                    await _unitOfWork.SaveChangeAsync();
+                    SendAccountCreationEmailForSponsor(new List<Account> { sponsor });
                 }
-                result.Result = data;
+                result.Result = sponsor;
             }
             catch (Exception ex)
             {
@@ -892,7 +894,7 @@ namespace PRN231.TicketBooking.Service.Implementation
 
 				var userRoleRepository = Resolve<IIdentityUserRoleRepository>();
                 var roleListDb = await userRoleRepository.GetRoleListByAccountId(userId);
-                if(roleListDb.Count != 0) {
+                if(roleListDb.Count() != 0) {
                     if (roleListDb.Contains(roleDb.Id))
                     {
 						result = BuildAppActionResultError(result, $"Tài khoản với id {userId} đã có phân quyền {roleName}");

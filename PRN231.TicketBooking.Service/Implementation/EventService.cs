@@ -383,5 +383,15 @@ namespace PRN231.TicketBooking.Service.Implementation
                 return BuildAppActionResultError(result, ex.Message, true);
             }
         }
-    }
+
+		public Task<AppActionResult> GetEventByStatus(bool happened, int pageNumber, int pageSize)
+		{
+			throw new NotImplementedException();
+		}
+
+		public Task<AppActionResult> CountingEventByStatus(Guid? organizationId, int timePeriod)
+		{
+			throw new NotImplementedException();
+		}
+	}
 }

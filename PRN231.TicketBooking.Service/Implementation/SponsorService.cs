@@ -82,56 +82,7 @@ namespace PRN231.TicketBooking.Service.Implementation
             return result;
         }
 
-        public async Task<AppActionResult> AddSponsorToEvent(CreateSponsorDto dto)
-        {
-            //using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
-            //{
-            AppActionResult result = new AppActionResult();
-            try
-            {
-                // Save Account => Save Sponsor =>
-                var eventRepository = Resolve<IEventRepository>();
-                var eventDb = await eventRepository!.GetById(dto.EventId);
-                if (eventDb == null)
-                {
-                    result = BuildAppActionResultError(result, $"Không tồn tại sự kiện với Id {dto.EventId}");
-                    return result;
-                }
-                var accountService = Resolve<IAccountService>();
-                var staticFileRepository = Resolve<IRepository<StaticFile>>();
-                var data = await accountService.AddSponsor(dto);
-                List<Sponsor> sponsors = await _repository.CreateSponsor((Dictionary<string, SponsorDto>)data.Result!);
-                string pathName;
-                foreach (var sponsor in dto.SponsorDtos!)
-                {
-                    var sponsorDb = sponsors.Where(s => s.Name == sponsor.Name).FirstOrDefault();
-                    pathName = SD.FirebasePathName.SPONSOR_PREFIX + sponsorDb!.Id;
-                    var upload = await _firebaseService.UploadFileToFirebase(sponsor.Img, pathName);
-                    sponsorDb!.Img = upload.Result!.ToString()!;
-                    await _repository.Update(sponsorDb);
-                }
-                await _unitOfWork.SaveChangeAsync();
-                var eventSponsorRepository = Resolve<IRepository<EventSponsor>>();
-                foreach (var sponsor in sponsors)
-                {
-                    await eventSponsorRepository.Insert(
-                        new EventSponsor
-                        {
-                            Id = Guid.NewGuid(),
-                            SponsorId = sponsor.Id,
-                            EventId = dto.EventId
-                        });
-                };
-                await _unitOfWork.SaveChangeAsync();
-                //scope.Complete();
-            }
-            catch (Exception ex)
-            {
-                result = BuildAppActionResultError(result, ex.Message);
-            }
-            return result;
-            //}
-        }
+       
 
         public async Task<AppActionResult> GetAllSponsor(int pageNumber, int pagesize)
         {

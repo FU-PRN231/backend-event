@@ -10,5 +10,6 @@ namespace PRN231.TicketBooking.Repository.Contract
 {
     public interface ISponsorMoneyHistoryRepository : IRepository<SponsorMoneyHistory>
     {
+        public Task<List<SponsorMoneyHistory>> GetAllSponsorMoneyHistoryByEventId(Guid eventId);
     }
 }
