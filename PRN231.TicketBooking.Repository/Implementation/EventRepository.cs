@@ -63,7 +63,12 @@ namespace PRN231.TicketBooking.Repository.Implementation
             return result;
         }
 
-        public async Task<PagedResult<Event>> GetEvents(int pageNumber, int pageSize)
+		public Task<AppActionResult> GetEventReport(Guid? EventId, int timePeriod)
+		{
+			throw new NotImplementedException();
+		}
+
+		public async Task<PagedResult<Event>> GetEvents(int pageNumber, int pageSize)
         {
             PagedResult<Event> result = null;
             try
