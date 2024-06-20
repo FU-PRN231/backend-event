@@ -720,18 +720,20 @@ namespace PRN231.TicketBooking.Service.Implementation
 				sponsor.IsDeleted = false;
 				sponsor.IsVerified = true;
 				sponsor.VerifyCode = null;
-				string pathName = SD.FirebasePathName.QR_PREFIX + sponsor.Id;
+				string pathName = SD.FirebasePathName.SPONSOR_PREFIX + sponsor.Id;
 				var url = await _firebaseService.UploadFileToFirebase(dto.Img, pathName);
                 if(url.IsSuccess) {
 					sponsorDb.Img = (string)url.Result;
 				} else
                 {
 					result = BuildAppActionResultError(result, $"Tải hình nhà tài trợ thất bại, vui lòng thử lại");
+                    return result;
 				}
 				var resultCreateUser = await _userManager.CreateAsync(sponsor, SD.DefaultAccountInformation.PASSWORD);
 				if (!resultCreateUser.Succeeded)
 				{
 					result = BuildAppActionResultError(result, $"Creation of the account for sponsor with name {dto.Name} failed.");
+                    return result;
 				}
 				bool isSuccessful = await AssignSponsorRole(new List<Account> { sponsor });
                 if (isSuccessful)
@@ -739,8 +741,8 @@ namespace PRN231.TicketBooking.Service.Implementation
                     await sponsorRepository.Insert(sponsorDb);
                     await _unitOfWork.SaveChangeAsync();
                     SendAccountCreationEmailForSponsor(new List<Account> { sponsor });
+                    result.Result = sponsor;
                 }
-                result.Result = sponsor;
             }
             catch (Exception ex)
             {
