@@ -13,6 +13,5 @@ namespace PRN231.TicketBooking.Common.Dto.Request
         public List<SeatRankDto> SeatRank { get; set; } = null!;
         public string AccountId { get; set; } = null!;
         public string? Content { get; set; }
-
     }
 }

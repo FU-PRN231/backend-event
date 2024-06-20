@@ -72,6 +72,25 @@ namespace PRN231.TicketBooking.Repository.Implementation
                 result = await _eventDAO.GetAllDataByExpression(
                     filter: null,
                     pageNumber: pageNumber,
+                    pageSize: pageSize
+                );
+            }
+            catch (Exception ex)
+            {
+                result = null;
+            }
+            return result;
+        }
+
+        public async Task<PagedResult<Event>> GetAvailableEvents(int pageNumber, int pageSize)
+        {
+            PagedResult<Event> result = null;
+            try
+            {
+                result = new PagedResult<Event>();
+                result = await _eventDAO.GetAllDataByExpression(
+                    filter: x=>x.StartTime>=DateTime.Now,
+                    pageNumber: pageNumber,
                     pageSize: pageSize,
                     includes: new Expression<Func<Event, object>>[] {
                         e => e.Location,

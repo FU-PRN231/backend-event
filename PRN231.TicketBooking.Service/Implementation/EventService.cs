@@ -47,7 +47,26 @@ namespace PRN231.TicketBooking.Service.Implementation
             }
             return result;
         }
-
+        public async Task<AppActionResult> GetAvailableEvent(int pageNumber, int pageSize)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                var eventRepository = Resolve<IEventRepository>();
+                var data = await eventRepository.GetAvailableEvents(pageNumber, pageSize);
+                result = new AppActionResult()
+                {
+                    Result = data,
+                    IsSuccess = true
+                };
+                return BuildAppActionResultSuccess(result, "Get list event successfully!");
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
+        }
         public async Task<AppActionResult> GetEventById(Guid id)
         {
             AppActionResult result = new AppActionResult();
@@ -190,6 +209,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                         var seatRank = _mapper.Map<SeatRank>(item);
                         seatRank.Id = Guid.NewGuid();
                         seatRank.EventId = eventEntity.Id;
+                        seatRank.RemainingCapacity = seatRank.Quantity; //define Reamining capacity of seatrank
                         var data = await _seatRankRepository.AddSeatRankFromEvent(seatRank);
                         if (!data.IsSuccess)
                         {
@@ -270,7 +290,7 @@ namespace PRN231.TicketBooking.Service.Implementation
 
                 await _unitOfWork.SaveChangeAsync();
                 result.Result = _mapper.Map<CreateEventResponse>(dto);
-                return BuildAppActionResultSuccess(result, "Add event and seat rank successfully!");
+                return BuildAppActionResultSuccess(result, "Add event successfully!");
             }
             catch (Exception ex)
             {

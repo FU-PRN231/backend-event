@@ -9,5 +9,6 @@ namespace PRN231.TicketBooking.Repository.Contract
 {
     public interface ILocationRepository : IRepository<Location>
     {
+        public Task<Location> GetLocationByEventId(Guid eventId);
     }
 }
