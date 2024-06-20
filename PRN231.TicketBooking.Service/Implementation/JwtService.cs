@@ -58,12 +58,47 @@ namespace PRN231.TicketBooking.Service.Implementation
                     if (roles != null)
                     {
                         var claims = new List<Claim>
-                    {
-                       new Claim (ClaimTypes.Email, loginRequest.Email),
-                       new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                       new Claim("AccountId", user.Id),
-                    };
-                        claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role.ToUpper())));
+                {
+                    new Claim(ClaimTypes.Email, loginRequest.Email),
+                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                    new Claim("AccountId", user.Id),
+                };
+
+                        // Check for admin role first
+                        if (roles.Contains("admin", StringComparer.OrdinalIgnoreCase))
+                        {
+                            claims.Add(new Claim(ClaimTypes.Role, "ADMIN"));
+                        }
+                        else
+                        {
+                            // Check for other specific roles in priority order
+                            if (roles.Contains("SPONSOR", StringComparer.OrdinalIgnoreCase))
+                            {
+                                claims.Add(new Claim(ClaimTypes.Role, "SPONSOR"));
+                            }
+                            else if (roles.Contains("ORGANIZER", StringComparer.OrdinalIgnoreCase))
+                            {
+                                claims.Add(new Claim(ClaimTypes.Role, "ORGANIZER"));
+                            }
+                            else if (roles.Contains("PM", StringComparer.OrdinalIgnoreCase))
+                            {
+                                claims.Add(new Claim(ClaimTypes.Role, "PM"));
+                            }
+                            else
+                            {
+                                // If none of the specific roles are found, check for CUSTOMER role
+                                if (roles.Contains("CUSTOMER", StringComparer.OrdinalIgnoreCase))
+                                {
+                                    claims.Add(new Claim(ClaimTypes.Role, "CUSTOMER"));
+                                }
+                                // If no specific roles or CUSTOMER role found, add all roles
+                                else
+                                {
+                                    claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role.ToUpper())));
+                                }
+                            }
+                        }
+
                         var authenKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtConfiguration.Key));
                         var token = new JwtSecurityToken(
                             issuer: _jwtConfiguration.Issuer,
@@ -71,7 +106,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                             expires: utility.GetCurrentDateInTimeZone().AddDays(1),
                             claims: claims,
                             signingCredentials: new SigningCredentials(authenKey, SecurityAlgorithms.HmacSha512Signature)
-                            );
+                        );
                         return new JwtSecurityTokenHandler().WriteToken(token);
                     }
                 }
