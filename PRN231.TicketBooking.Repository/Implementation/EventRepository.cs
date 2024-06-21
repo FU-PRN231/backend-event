@@ -77,7 +77,11 @@ namespace PRN231.TicketBooking.Repository.Implementation
                 result = await _eventDAO.GetAllDataByExpression(
                     filter: null,
                     pageNumber: pageNumber,
-                    pageSize: pageSize
+                    pageSize: pageSize,
+                    includes: new Expression<Func<Event, object>>[] {
+                        e => e.Location,
+                        e => e.Organization,
+                    }
                 );
             }
             catch (Exception ex)
