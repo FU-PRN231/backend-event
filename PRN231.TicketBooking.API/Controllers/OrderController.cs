@@ -115,10 +115,16 @@ namespace PRN231.TicketBooking.API.Controllers
             return await _orderService.UpdateStatus(orderId, true);
         }
 
-        [HttpGet("send-ticket-email")]
+        [HttpGet("send-ticket-email/{orderId}")]
         public async Task<AppActionResult> SendTicketEmail(Guid orderId)
         {
             return await _orderService.SendTicketEmail(orderId);
+        }
+
+        [HttpGet("generate-ticket-qr/{orderId}")]
+        public async Task<AppActionResult> GenerateTicketQR(Guid orderId)
+        {
+            return await _orderService.GenerateTicketQR(orderId);
         }
     }
 }
