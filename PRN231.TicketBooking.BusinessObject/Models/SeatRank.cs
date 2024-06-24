@@ -12,7 +12,7 @@ namespace PRN231.TicketBooking.BusinessObject.Models
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public int RemainingCapacity { get; set; }
-        public double Price { get; set; }
+		public double Price { get; set; }
         public string Description { get; set; } = null!;
         public int Quantity { get; set; }
         public Guid EventId { get; set; }

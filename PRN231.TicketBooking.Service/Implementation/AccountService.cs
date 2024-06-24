@@ -740,6 +740,7 @@ namespace PRN231.TicketBooking.Service.Implementation
 				sponsor.IsDeleted = false;
 				sponsor.IsVerified = true;
 				sponsor.VerifyCode = null;
+                sponsor.SponsorId = sponsorDb.Id;
 				string pathName = SD.FirebasePathName.SPONSOR_PREFIX + sponsor.Id;
 				var url = await _firebaseService.UploadFileToFirebase(dto.Img, pathName);
                 if(url.IsSuccess) {

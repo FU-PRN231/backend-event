@@ -11,7 +11,6 @@ namespace PRN231.TicketBooking.BusinessObject.Models
         public OrderStatus Status { get; set; }
         public DateTime PurchaseDate { get; set; }
         public double Total { get; set; }
-        public PaymentStatus PaymentStatus { get; set; }
         public string? Content { get; set; }
         public string AccountId { get; set; } = null!;
         [ForeignKey(nameof(AccountId))]

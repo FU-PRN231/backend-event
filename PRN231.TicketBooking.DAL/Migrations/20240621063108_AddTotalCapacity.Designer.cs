@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PRN231.TicketBooking.DAO.Data;
 
@@ -11,9 +12,10 @@ using PRN231.TicketBooking.DAO.Data;
 namespace PRN231.TicketBooking.DAO.Migrations
 {
     [DbContext(typeof(BookingTicketDbContext))]
-    partial class BookingTicketDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240621063108_AddTotalCapacity")]
+    partial class AddTotalCapacity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -444,6 +446,9 @@ namespace PRN231.TicketBooking.DAO.Migrations
                     b.Property<string>("Content")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("PaymentStatus")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("PurchaseDate")
                         .HasColumnType("datetime2");
 
@@ -581,6 +586,9 @@ namespace PRN231.TicketBooking.DAO.Migrations
                     b.Property<DateTime>("StartTime")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("TotalCapacity")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("EventId");
@@ -677,17 +685,12 @@ namespace PRN231.TicketBooking.DAO.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid?>("OrderDetailId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid?>("PostId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
                     b.HasIndex("EventId");
-
-                    b.HasIndex("OrderDetailId");
 
                     b.HasIndex("PostId");
 
@@ -1039,17 +1042,11 @@ namespace PRN231.TicketBooking.DAO.Migrations
                         .WithMany()
                         .HasForeignKey("EventId");
 
-                    b.HasOne("PRN231.TicketBooking.BusinessObject.Models.OrderDetail", "OrderDetail")
-                        .WithMany()
-                        .HasForeignKey("OrderDetailId");
-
                     b.HasOne("PRN231.TicketBooking.BusinessObject.Models.Post", "Post")
                         .WithMany()
                         .HasForeignKey("PostId");
 
                     b.Navigation("Event");
-
-                    b.Navigation("OrderDetail");
 
                     b.Navigation("Post");
                 });

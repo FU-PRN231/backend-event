@@ -45,7 +45,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                 {
                     result = BuildAppActionResultError(result, $"Không tìm thấy đơn hàng với id {orderId}");
                 }
-                orderDb!.PaymentStatus = PaymentStatus.CANCELED;
+                orderDb!.Status = OrderStatus.FAILED;
                 await _unitOfWork.SaveChangeAsync();
                 result.Messages.Add("Bạn đã hủy đơn đặt hàng thành công");
             }
@@ -88,7 +88,6 @@ namespace PRN231.TicketBooking.Service.Implementation
                         Status = OrderStatus.PENDING,
                         Total = 0,
                         Content = orderRequestDto.Content,
-                        PaymentStatus = PaymentStatus.PENDING,
                     };
 
                     double total = 0;
@@ -148,6 +147,11 @@ namespace PRN231.TicketBooking.Service.Implementation
                 }
                 return result;
             }
+        }
+
+        public Task<AppActionResult> GenerateTicketQR(Guid orderId)
+        {
+            throw new NotImplementedException();
         }
 
         public async Task<AppActionResult> GetAllOrder(int pageNumber, int pageSize)
@@ -361,7 +365,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                 {
                     result = BuildAppActionResultError(result, $"Không tìm thấy đơn hàng với id {orderId}");
                 }
-                if (orderDb!.PaymentStatus == PaymentStatus.PENDING)
+                if (orderDb!.Status == OrderStatus.PENDING)
                 {
                     var payment = new PaymentInformationRequest
                     {
@@ -385,6 +389,34 @@ namespace PRN231.TicketBooking.Service.Implementation
             }
             return result;
 
+        }
+
+        public async Task<AppActionResult> SendTicketEmail(Guid orderId)
+        {
+            var result = new AppActionResult();
+            try
+            {
+                var orderDb = await _orderRepository.GetById(orderId);
+                if (orderDb == null)
+                {
+                    result = BuildAppActionResultError(result, $"Đơn hàng với id {orderId} không tồn tại");
+                    return result;
+                }
+                var orderDetailRepository = Resolve<IOrderDetailsRepository>();
+                var orderDetailDb = await orderDetailRepository.GetAllDataByExpression(p => p!.Id == orderId,0,0, null, false, o => o.Order.Account, o => o.SeatRank);
+                if(orderDetailDb.Items.Count == 0)
+                {
+                    result = BuildAppActionResultError(result, $"Đơn hàng đơn hàng {orderId} không tồn tại");
+                    return result;
+                }
+
+                Dictionary<string, List<string>> ticketInfo = new Dictionary<string, List<string>>();
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
         }
 
         public async Task<AppActionResult> UpdateStatus(Guid orderId, bool isSuccessful)

@@ -13,7 +13,7 @@ using System.Linq.Expressions;
 
 namespace PRN231.TicketBooking.Repository.Implementation
 {
-    public class EventRepository : GenericRepository<Event>, IEventRepository
+	public class EventRepository : GenericRepository<Event>, IEventRepository
     {
         private readonly IGenericDAO<Event> _eventDAO;
         private readonly IUnitOfWork _unitOfWork;
@@ -43,7 +43,7 @@ namespace PRN231.TicketBooking.Repository.Implementation
             return result;
         }
 
-        public async Task<Event> GetEventById(Guid id)
+		public async Task<Event> GetEventById(Guid id)
         {
             Event result = null;
             try
@@ -76,29 +76,6 @@ namespace PRN231.TicketBooking.Repository.Implementation
                 result = new PagedResult<Event>();
                 result = await _eventDAO.GetAllDataByExpression(
                     filter: null,
-                    pageNumber: pageNumber,
-                    pageSize: pageSize,
-                    includes: new Expression<Func<Event, object>>[] {
-                        e => e.Location,
-                        e => e.Organization,
-                    }
-                );
-            }
-            catch (Exception ex)
-            {
-                result = null;
-            }
-            return result;
-        }
-
-        public async Task<PagedResult<Event>> GetAvailableEvents(int pageNumber, int pageSize)
-        {
-            PagedResult<Event> result = null;
-            try
-            {
-                result = new PagedResult<Event>();
-                result = await _eventDAO.GetAllDataByExpression(
-                    filter: x=>x.StartEventDate>=DateTime.Now,
                     pageNumber: pageNumber,
                     pageSize: pageSize,
                     includes: new Expression<Func<Event, object>>[] {
@@ -154,6 +131,33 @@ namespace PRN231.TicketBooking.Repository.Implementation
                 result.Messages.Add(ex.Message);
             }
             return result;
+        }
+
+		public async Task<int[]> CountingEventsWithStatus(Guid? organizationId, DateTime today)
+		{
+			int[] data = new int[3];
+			try
+			{
+                var eventDb = await this.GetAllDataByExpression(null, 0, 0, null, false, null);
+                data[0] = eventDb.Items.Where(e => (organizationId == null || (organizationId != null && e.OrganizationId == organizationId)) && e.StartEventDate > today).Count();   
+                data[1] = eventDb.Items.Where(e => (organizationId == null || (organizationId != null && e.OrganizationId == organizationId)) && e.StartEventDate <= today && e.EndEventDate >= today).Count();
+				data[2] = eventDb.Items.Where(e => (organizationId == null || (organizationId != null && e.OrganizationId == organizationId)) && e.EndEventDate < today).Count();
+			}
+			catch (Exception ex)
+			{
+                data = new int[3];
+			}
+			return data;
+		}
+
+        public Task<PagedResult<Event>> GetEventsWithStatus(Guid? organizationId, DateTime today, int happened, int pageNumber, int pageSize)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<PagedResult<Event>> GetAvailableEvents(int pageNumber, int pageSize)
+        {
+            throw new NotImplementedException();
         }
     }
 }
