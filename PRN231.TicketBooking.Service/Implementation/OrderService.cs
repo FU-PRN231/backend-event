@@ -1,6 +1,9 @@
 ﻿using AutoMapper;
 using DocumentFormat.OpenXml.Drawing.Charts;
 using DocumentFormat.OpenXml.InkML;
+using DocumentFormat.OpenXml.Wordprocessing;
+using Humanizer;
+using IronBarCode;
 using MailKit.Search;
 using Microsoft.AspNetCore.Http;
 using PRN231.TicketBooking.BusinessObject.Enum;
@@ -8,6 +11,7 @@ using PRN231.TicketBooking.BusinessObject.Models;
 using PRN231.TicketBooking.Common.Dto;
 using PRN231.TicketBooking.Common.Dto.Request;
 using PRN231.TicketBooking.Common.Dto.Response;
+using PRN231.TicketBooking.Common.Util;
 using PRN231.TicketBooking.Repository.Contract;
 using PRN231.TicketBooking.Repository.Implementation;
 using PRN231.TicketBooking.Service.Contract;
@@ -15,6 +19,7 @@ using PRN231.TicketBooking.Service.Payment.PaymentRequest;
 using PRN231.TicketBooking.Service.Payment.PaymentService;
 using QRCoder;
 using StackExchange.Redis;
+using System.Linq;
 using System.Transactions;
 using Order = PRN231.TicketBooking.BusinessObject.Models.Order;
 
@@ -149,9 +154,106 @@ namespace PRN231.TicketBooking.Service.Implementation
             }
         }
 
-        public Task<AppActionResult> GenerateTicketQR(Guid orderId)
+        public async Task<AppActionResult> GenerateTicketQR(Guid orderId)
         {
-            throw new NotImplementedException();
+            var result = new AppActionResult();
+            try
+            {
+                var orderDetailsRepository = Resolve<IOrderDetailsRepository>();
+                var orderDetailDb = await orderDetailsRepository.GetAllDataByExpression(o => o.OrderId == orderId, 0, 0, null, false, o => o.SeatRank);
+                if(orderDetailDb.Items.Count == 0) {
+                    result = BuildAppActionResultError(result, $"Không tìm thấy chi tiết của đơn hàng với id {orderId}");
+                    return result;
+                }
+                var orderDetailImgs = orderDetailDb.Items.Select(o => o.Id).ToList();
+                var staticFileRepository = Resolve<IStaticFileRepository>();
+                var staticFileDb = await staticFileRepository.GetAllDataByExpression(s => s.OrderDetailId != null && orderDetailImgs.Contains((Guid)s.OrderDetailId), 0, 0, null, false, s => s.OrderDetail.SeatRank);
+                Dictionary<string, List<string>> data = new Dictionary<string, List<string>>();
+                if(staticFileDb.Items.Select(s => s.OrderDetailId).Distinct().ToList().Count == orderDetailImgs.Count)
+                {
+                    var groupedImgs = staticFileDb.Items.GroupBy(g => g.OrderDetail.SeatRank.Name).ToDictionary( g => g.Key, g => g.Select(i => i.Img).ToList());
+                    foreach(var kvp in groupedImgs)
+                    {
+                        data.Add(kvp.Key, kvp.Value);
+                    }
+                }
+                else
+                {
+                    int quantity = 0;
+                    
+                    foreach (var orderDetail in orderDetailDb.Items)
+                    {
+                        List<string> imgs = new List<string>();
+                        quantity = orderDetail.Quantity;
+                        while(quantity > 0)
+                        {
+                            string url = await GenerateQR($"{orderDetail.Id.ToString()}/{quantity}");
+                            if(url == null)
+                            {
+                                result = BuildAppActionResultError(result, $"Không thể tải hình ảnh vé, vui lòng thử lại");
+                                return result;
+                            }
+                            imgs.Add(url);
+                            await staticFileRepository.Insert(new StaticFile
+                            {
+                                Id = Guid.NewGuid(),
+                                Img = url,
+                                OrderDetailId = orderDetail.Id
+                            });
+                            quantity--;
+                        }
+                        data.Add(orderDetail.SeatRank.Name, imgs);
+                       
+                    }
+                }
+                await _unitOfWork.SaveChangeAsync();
+                result.Result = data;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
+        }
+
+        private async Task<string> GenerateQR(string Id)
+        {
+            string result = null;
+            try
+            {
+                string pathName = SD.FirebasePathName.QR_PREFIX + Id;
+                IFormFile qr = GenerateQRCodeImage(Id);
+                var url = await _firebaseService.UploadFileToFirebase(qr, pathName);
+                if (url.IsSuccess)
+                {
+                    result = (string?)url.Result;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                result = null;
+            }
+            return result;
+        }
+
+        private IFormFile GenerateQRCodeImage(string data)
+        {
+            GeneratedBarcode barcode = QRCodeWriter.CreateQrCode(data, 500, QRCodeWriter.QrErrorCorrectionLevel.Medium);
+
+            // Save barcode as PNG in memory
+            byte[] barcodeBytes = barcode.ToPngBinaryData();
+
+            // Create a MemoryStream from the barcode bytes
+            MemoryStream ms = new MemoryStream(barcodeBytes);
+
+            // Create an IFormFile from the MemoryStream
+            IFormFile formFile = new FormFile(ms, 0, ms.Length, "barcode.png", "image/png");
+
+            // Set the position of the MemoryStream back to the beginning for subsequent reads
+            ms.Position = 0;
+
+            return formFile;
         }
 
         public async Task<AppActionResult> GetAllOrder(int pageNumber, int pageSize)
@@ -403,7 +505,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                     return result;
                 }
                 var orderDetailRepository = Resolve<IOrderDetailsRepository>();
-                var orderDetailDb = await orderDetailRepository.GetAllDataByExpression(p => p!.Id == orderId,0,0, null, false, o => o.Order.Account, o => o.SeatRank);
+                var orderDetailDb = await orderDetailRepository.GetAllDataByExpression(p => p!.OrderId == orderId && p.Order.Status == OrderStatus.SUCCUSSFUL,0,0, null, false, o => o.Order.Account, o => o.SeatRank.Event.Location, o => o.SeatRank.Event.Organization);
                 if(orderDetailDb.Items.Count == 0)
                 {
                     result = BuildAppActionResultError(result, $"Đơn hàng đơn hàng {orderId} không tồn tại");
@@ -411,6 +513,19 @@ namespace PRN231.TicketBooking.Service.Implementation
                 }
 
                 Dictionary<string, List<string>> ticketInfo = new Dictionary<string, List<string>>();
+                var ticketData = await GenerateTicketQR(orderId);
+                if (!ticketData.IsSuccess)
+                {
+                    result = BuildAppActionResultError(result, $"Không thể tải hình ảnh vé. Vui lòng thử lại");
+                    return result;
+                }
+                ticketInfo = (Dictionary<string, List<string>>)ticketData.Result;
+
+                var emailService = Resolve<IEmailService>();
+                Account account = orderDetailDb.Items.FirstOrDefault().Order.Account;
+                Event eventDb = orderDetailDb.Items.FirstOrDefault().SeatRank.Event;
+                string body = TemplateMappingHelper.GenerateTicketEmailBody(account, ticketInfo, eventDb);
+                emailService!.SendEmail(account.Email, SD.SubjectMail.SEAT_TICKET, body);
             }
             catch (Exception ex)
             {

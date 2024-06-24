@@ -1,4 +1,7 @@
-﻿namespace PRN231.TicketBooking.Common.Util
+﻿using PRN231.TicketBooking.BusinessObject.Models;
+using System.Text;
+
+namespace PRN231.TicketBooking.Common.Util
 {
     public class TemplateMappingHelper
     {
@@ -616,7 +619,7 @@
             font-size: 30px;
           ""
         >
-          Cóc Travel
+          Cóc Event
         </p>
       </div>
       <div class=""mainBody"">
@@ -626,7 +629,7 @@
         <p class=""greeting""></p>
 
         <p class=""emailBody"">
-         Tài khoản hướng dẫn viên của bạn đã được tọ thành công <b><i>Cóc Travel </i></b>.
+         Tài khoản hướng dẫn viên của bạn đã được tọ thành công <b><i>Cóc Event </i></b>.
         </p>
         <p class=""emailBody"">
           Đây là thông tin tài khoản của bạn, hãy thay đỗi mật khẩu
@@ -642,14 +645,14 @@
           >
         </p>
         <p class=""support"">
-          Thank you for your interest in the services of <b><i>Cóc Travel</i></b
+          Thank you for your interest in the services of <b><i>Cóc Event</i></b
           >, for any inquiries, please contact
           <u><i>qk.backend@gmail.com</i></u> for support
         </p>
         <div class=""signature"">
           <p>Best regards,</p>
           <p>
-            <b><i>Cóc Travel Team</i></b>
+            <b><i>Cóc Event Team</i></b>
           </p>
         </div>
       </div>
@@ -825,5 +828,131 @@
 ";
             return body;
         }
+
+        public static string GenerateTicketEmailBody(Account account, Dictionary<string, List<string>> ticketInfo, Event eventInfo)
+        {
+            var emailTemplate = @"
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            padding: 20px 0;
+        }
+        .header h1 {
+            margin: 0;
+            color: #007BFF;
+        }
+        .account-info, .event-info {
+            margin: 20px 0;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+        .account-info p, .event-info p {
+            margin: 5px 0;
+        }
+        .ticket-section {
+            margin: 20px 0;
+        }
+        .ticket-section h2 {
+            margin: 0 0 10px 0;
+            color: #007BFF;
+        }
+        .ticket-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .ticket-list li {
+            background-color: #f1f1f1;
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .ticket-list img {
+            max-width: 100px;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <div class='container'>
+        <div class='header'>
+            <h1>THÔNG TIN VÉ</h1>
+        </div>
+        <div class='account-info'>
+            <h2>THÔNG TIN KHÁCH HÀNG</h2>
+            <p><strong>First Name:</strong> {{FirstName}}</p>
+            <p><strong>Last Name:</strong> {{LastName}}</p>
+            <p><strong>Phone Number:</strong> {{PhoneNumber}}</p>
+        </div>
+        <div class='event-info'>
+            <h2>THÔNG TIN SỰ KIỆN</h2>
+            <p><strong>Title:</strong> {{EventTitle}}</p>
+            <p><strong>Description:</strong> {{EventDescription}}</p>
+            <p><strong>Start Date:</strong> {{EventStartDate}}</p>
+            <p><strong>End Date:</strong> {{EventEndDate}}</p>
+            <p><strong>Start Time:</strong> {{EventStartTime}}</p>
+            <p><strong>End Time:</strong> {{EventEndTime}}</p>
+            <p><strong>Location:</strong> {{EventLocation}}</p>
+            <p><strong>Organization:</strong> {{EventOrganization}}</p>
+        </div>
+        <div class='ticket-section'>
+            <h2>Tickets</h2>
+            {{TicketSections}}
+        </div>
+    </div>
+</body>
+</html>";
+
+            var ticketSectionsBuilder = new StringBuilder();
+            foreach (var rank in ticketInfo.Keys)
+            {
+                ticketSectionsBuilder.AppendLine($"<div class='rank-section'><h3>{rank}</h3><ul class='ticket-list'>");
+                foreach (var ticket in ticketInfo[rank])
+                {
+                    ticketSectionsBuilder.AppendLine($"<li><img src='{ticket}' alt='QR Code'></li>");
+                }
+                ticketSectionsBuilder.AppendLine("</ul></div>");
+            }
+
+            var emailBody = emailTemplate
+                .Replace("{{FirstName}}", account.FirstName)
+                .Replace("{{LastName}}", account.LastName)
+                .Replace("{{PhoneNumber}}", account.PhoneNumber)
+                .Replace("{{EventTitle}}", eventInfo.Title)
+                .Replace("{{EventDescription}}", eventInfo.Description)
+                .Replace("{{EventStartDate}}", eventInfo.StartEventDate.ToString("yyyy-MM-dd"))
+                .Replace("{{EventEndDate}}", eventInfo.EndEventDate.ToString("yyyy-MM-dd"))
+                .Replace("{{EventStartTime}}", eventInfo.StartTime.ToString("HH:mm"))
+                .Replace("{{EventEndTime}}", eventInfo.EndTime.ToString("HH:mm"))
+                .Replace("{{EventLocation}}", eventInfo.Location != null ? eventInfo.Location.Name : "N/A")
+                .Replace("{{EventOrganization}}", eventInfo.Organization != null ? eventInfo.Organization.Name : "N/A")
+                .Replace("{{TicketSections}}", ticketSectionsBuilder.ToString());
+
+            return emailBody;
+        }
+
+
     }
 }
