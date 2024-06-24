@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using DocumentFormat.OpenXml.Wordprocessing;
 using Org.BouncyCastle.Asn1.Ocsp;
 using PRN231.TicketBooking.BusinessObject.Models;
 using PRN231.TicketBooking.Common.Dto;
@@ -384,14 +385,36 @@ namespace PRN231.TicketBooking.Service.Implementation
             }
         }
 
-		public Task<AppActionResult> GetEventByStatus(bool happened, int pageNumber, int pageSize)
+		public async Task<AppActionResult> GetEventByStatus(Guid? organizationId, int happened, int pageNumber, int pageSize)
 		{
-			throw new NotImplementedException();
+			AppActionResult result = new AppActionResult();
+            try
+            {
+                var eventRepository = Resolve<IEventRepository>();
+                var utility = Resolve<Utility>();
+				PagedResult<Event> eventDb = await eventRepository.GetEventsWithStatus(organizationId, utility.GetCurrentDateInTimeZone(), happened, pageNumber, pageSize);
+                result.Result = eventDb;
+            } catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
 		}
 
-		public Task<AppActionResult> CountingEventByStatus(Guid? organizationId, int timePeriod)
+		public async Task<AppActionResult> CountingEventByStatus(Guid? organizationId)
 		{
-			throw new NotImplementedException();
+            AppActionResult result = new();
+            try
+            {
+				var eventRepository = Resolve<IEventRepository>();
+				var utility = Resolve<Utility>();
+				int[] eventDb = await eventRepository.CountingEventsWithStatus(organizationId, utility.GetCurrentDateInTimeZone());
+				result.Result = eventDb;
+			} catch(Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
 		}
 	}
 }
