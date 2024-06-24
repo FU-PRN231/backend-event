@@ -149,5 +149,15 @@ namespace PRN231.TicketBooking.Repository.Implementation
 			}
 			return data;
 		}
-	}
+
+        public Task<PagedResult<Event>> GetEventsWithStatus(Guid? organizationId, DateTime today, int happened, int pageNumber, int pageSize)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<PagedResult<Event>> GetAvailableEvents(int pageNumber, int pageSize)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

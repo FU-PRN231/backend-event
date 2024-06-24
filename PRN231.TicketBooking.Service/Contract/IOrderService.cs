@@ -22,5 +22,7 @@ namespace PRN231.TicketBooking.Service.Contract
         Task<AppActionResult> GetAllOrderByEventId(Guid eventId, int pageNumber, int pageSize);
         Task<AppActionResult> CancelOrder(Guid orderId);
         Task<AppActionResult> PurchaseOrder(Guid orderId, HttpContext context);
+        Task<AppActionResult> GenerateTicketQR(Guid orderId);
+        Task<AppActionResult> SendTicketEmail(Guid orderId);
     }
 }

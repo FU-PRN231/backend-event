@@ -18,5 +18,9 @@ namespace PRN231.TicketBooking.BusinessObject.Models
 
         [ForeignKey(nameof(PostId))]
         public Post? Post { get; set; }
+        public Guid? OrderDetailId { get; set; }
+
+        [ForeignKey(nameof(OrderDetailId))]
+        public OrderDetail? OrderDetail { get; set; }
     }
 }
