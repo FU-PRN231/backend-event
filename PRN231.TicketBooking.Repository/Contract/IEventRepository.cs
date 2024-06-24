@@ -15,6 +15,7 @@ namespace PRN231.TicketBooking.Repository.Contract
         public Task<AppActionResult> AddEvent(Event eventEntity);
         public Task<AppActionResult> UpdateEvent(Event eventEntity);
         public Task<List<StaticFile>> GetStaticFilesByEventId(Guid eventId);
+        Task<PagedResult<Event>> GetAvailableEvents(int pageNumber, int pageSize);
         public Task<AppActionResult> GetEventReport(Guid? EventId,int timePeriod);
     }
 }

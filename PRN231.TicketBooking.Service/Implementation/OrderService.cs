@@ -401,7 +401,6 @@ namespace PRN231.TicketBooking.Service.Implementation
                 {
                     //if (!isSuccessful) orderDb.Status = OrderStatus.CANCELLED;
                     if (orderDb.Status == OrderStatus.PENDING) orderDb.Status = OrderStatus.SUCCUSSFUL;
-                    else orderDb.Status = OrderStatus.FAILED;
                     await _unitOfWork.SaveChangeAsync();
                 }
             }

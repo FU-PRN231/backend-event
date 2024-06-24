@@ -91,30 +91,7 @@ namespace PRN231.TicketBooking.Repository.Implementation
             return result;
         }
 
-		public async Task<PagedResult<Event>> GetEventsWithStatus(Guid? organizationId, DateTime today, int happened, int pageNumber, int pageSize)
-		{
-            PagedResult<Event> data = null;
-            try
-            {
-                
-                if(happened == 0)
-                {
-                    data = await this.GetAllDataByExpression(e => (organizationId == null || (organizationId != null && e.OrganizationId == organizationId)) && e.StartEventDate > today, pageNumber, pageSize, null, false, null);
-                } else if(happened == 1)
-                {
-					data = await this.GetAllDataByExpression(e => (organizationId == null || (organizationId != null && e.OrganizationId == organizationId)) && e.StartEventDate <= today && e.EndEventDate >= today, pageNumber, pageSize, null, false, null);
-				} else
-                {
-					data = await this.GetAllDataByExpression(e => (organizationId == null || (organizationId != null && e.OrganizationId == organizationId)) && e.EndEventDate < today, pageNumber, pageSize, null, false, null);
-				}
-            } catch (Exception ex)
-            {
-                return null;
-            }
-            return data;
-		}
-
-		public async Task<List<StaticFile>> GetStaticFilesByEventId(Guid eventId)
+        public async Task<List<StaticFile>> GetStaticFilesByEventId(Guid eventId)
         {
             try
             {
