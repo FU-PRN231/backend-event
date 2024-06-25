@@ -185,7 +185,7 @@ namespace PRN231.TicketBooking.Repository.Implementation
             {
                 result = new PagedResult<Event>();
                 result = await _eventDAO.GetAllDataByExpression(
-                    filter: x => x.StartEventDate <= today && today >= x.StartEventDate,
+                    filter: x => today.Date <= x.EndEventDate.Date,
                     pageNumber: pageNumber,
                     pageSize: pageSize,
                     includes: new Expression<Func<Event, object>>[] {
