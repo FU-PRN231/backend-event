@@ -52,7 +52,8 @@ namespace PRN231.TicketBooking.Service.Implementation
             try
             {
                 var eventRepository = Resolve<IEventRepository>();
-                var data = await eventRepository.GetAvailableEvents(pageNumber, pageSize);
+                var utility = Resolve<Utility>();
+                var data = await eventRepository.GetAvailableEvents(utility.GetCurrentDateInTimeZone(), pageNumber, pageSize);
                 result = new AppActionResult()
                 {
                     Result = data,

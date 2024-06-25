@@ -149,15 +149,56 @@ namespace PRN231.TicketBooking.Repository.Implementation
 			}
 			return data;
 		}
-
-        public Task<PagedResult<Event>> GetEventsWithStatus(Guid? organizationId, DateTime today, int happened, int pageNumber, int pageSize)
+        //0 past, 1 current, 2 future
+        public async Task<PagedResult<Event>> GetEventsWithStatus(Guid? organizationId, DateTime today, int happened, int pageNumber, int pageSize)
         {
-            throw new NotImplementedException();
+            PagedResult<Event> result = null;
+            try
+            {
+                result = new PagedResult<Event>();
+                result = await _eventDAO.GetAllDataByExpression(
+                    x => (organizationId == null || (organizationId != null && x.OrganizationId == organizationId)
+                    && (
+                    happened == 0 && today > x.EndEventDate 
+                    || happened == 1 && today >=  x.StartEventDate && today <= x.EndEventDate
+                    || happened == 2 && today < x.StartEventDate
+                    )),
+                    pageNumber: pageNumber,
+                    pageSize: pageSize,
+                    includes: new Expression<Func<Event, object>>[] {
+                        e => e.Location,
+                        e => e.Organization,
+                    }
+                );
+            }
+            catch (Exception ex)
+            {
+                result = null;
+            }
+            return result;
         }
 
-        public Task<PagedResult<Event>> GetAvailableEvents(int pageNumber, int pageSize)
+        public async Task<PagedResult<Event>> GetAvailableEvents(DateTime today, int pageNumber, int pageSize)
         {
-            throw new NotImplementedException();
+            PagedResult<Event> result = null;
+            try
+            {
+                result = new PagedResult<Event>();
+                result = await _eventDAO.GetAllDataByExpression(
+                    filter: x => x.StartEventDate <= today && today >= x.StartEventDate,
+                    pageNumber: pageNumber,
+                    pageSize: pageSize,
+                    includes: new Expression<Func<Event, object>>[] {
+                        e => e.Location,
+                        e => e.Organization,
+                    }
+                );
+            }
+            catch (Exception ex)
+            {
+                result = null;
+            }
+            return result;
         }
     }
 }
