@@ -100,7 +100,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                     foreach (var item in orderRequestDto.SeatRank)
                     {
                         var seatRankDb = await seatRepository!.GetByExpression(p => p.Id == item.Id, p => p.Event!.Organization!);
-                        if (seatRankDb == null) 
+                        if (seatRankDb == null)
                         {
                             result = BuildAppActionResultError(result, $"Loại ghế với Id {item.Id} không tồn tại hoặc sản phẩm không đủ số lượng");
                             return result;
@@ -161,7 +161,8 @@ namespace PRN231.TicketBooking.Service.Implementation
             {
                 var orderDetailsRepository = Resolve<IOrderDetailsRepository>();
                 var orderDetailDb = await orderDetailsRepository.GetAllDataByExpression(o => o.OrderId == orderId, 0, 0, null, false, o => o.SeatRank);
-                if(orderDetailDb.Items.Count == 0) {
+                if (orderDetailDb.Items.Count == 0)
+                {
                     result = BuildAppActionResultError(result, $"Không tìm thấy chi tiết của đơn hàng với id {orderId}");
                     return result;
                 }
@@ -169,10 +170,10 @@ namespace PRN231.TicketBooking.Service.Implementation
                 var staticFileRepository = Resolve<IStaticFileRepository>();
                 var staticFileDb = await staticFileRepository.GetAllDataByExpression(s => s.OrderDetailId != null && orderDetailImgs.Contains((Guid)s.OrderDetailId), 0, 0, null, false, s => s.OrderDetail.SeatRank);
                 Dictionary<string, List<string>> data = new Dictionary<string, List<string>>();
-                if(staticFileDb.Items.Select(s => s.OrderDetailId).Distinct().ToList().Count == orderDetailImgs.Count)
+                if (staticFileDb.Items.Select(s => s.OrderDetailId).Distinct().ToList().Count == orderDetailImgs.Count)
                 {
-                    var groupedImgs = staticFileDb.Items.GroupBy(g => g.OrderDetail.SeatRank.Name).ToDictionary( g => g.Key, g => g.Select(i => i.Img).ToList());
-                    foreach(var kvp in groupedImgs)
+                    var groupedImgs = staticFileDb.Items.GroupBy(g => g.OrderDetail.SeatRank.Name).ToDictionary(g => g.Key, g => g.Select(i => i.Img).ToList());
+                    foreach (var kvp in groupedImgs)
                     {
                         data.Add(kvp.Key, kvp.Value);
                     }
@@ -180,15 +181,15 @@ namespace PRN231.TicketBooking.Service.Implementation
                 else
                 {
                     int quantity = 0;
-                    
+
                     foreach (var orderDetail in orderDetailDb.Items)
                     {
                         List<string> imgs = new List<string>();
                         quantity = orderDetail.Quantity;
-                        while(quantity > 0)
+                        while (quantity > 0)
                         {
                             string url = await GenerateQR($"{orderDetail.Id.ToString()}/{quantity}");
-                            if(url == null)
+                            if (url == null)
                             {
                                 result = BuildAppActionResultError(result, $"Không thể tải hình ảnh vé, vui lòng thử lại");
                                 return result;
@@ -203,7 +204,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                             quantity--;
                         }
                         data.Add(orderDetail.SeatRank.Name, imgs);
-                       
+
                     }
                 }
                 await _unitOfWork.SaveChangeAsync();
@@ -299,7 +300,7 @@ namespace PRN231.TicketBooking.Service.Implementation
             try
             {
                 var orderDetailsRepository = Resolve<IOrderDetailsRepository>();
-                var ordersDb = await _orderRepository.GetAllDataByExpression(p => p.AccountId == accountId, pageNumber, pageSize, null, false, p => p.Account!);
+                var ordersDb = await _orderRepository.GetAllDataByExpression(p => p.AccountId == accountId, pageNumber, pageSize, p => p.PurchaseDate, false, p => p.Account!);
                 if (ordersDb == null)
                 {
                     result = BuildAppActionResultError(result, $"Không tìm thấy đơn hàng nào");
@@ -505,8 +506,8 @@ namespace PRN231.TicketBooking.Service.Implementation
                     return result;
                 }
                 var orderDetailRepository = Resolve<IOrderDetailsRepository>();
-                var orderDetailDb = await orderDetailRepository.GetAllDataByExpression(p => p!.OrderId == orderId && p.Order.Status == OrderStatus.SUCCUSSFUL,0,0, null, false, o => o.Order.Account, o => o.SeatRank.Event.Location, o => o.SeatRank.Event.Organization);
-                if(orderDetailDb.Items.Count == 0)
+                var orderDetailDb = await orderDetailRepository.GetAllDataByExpression(p => p!.OrderId == orderId && p.Order.Status == OrderStatus.SUCCUSSFUL, 0, 0, null, false, o => o.Order.Account, o => o.SeatRank.Event.Location, o => o.SeatRank.Event.Organization);
+                if (orderDetailDb.Items.Count == 0)
                 {
                     result = BuildAppActionResultError(result, $"Đơn hàng đơn hàng {orderId} không tồn tại");
                     return result;
@@ -549,6 +550,15 @@ namespace PRN231.TicketBooking.Service.Implementation
                     //if (!isSuccessful) orderDb.Status = OrderStatus.CANCELLED;
                     if (orderDb.Status == OrderStatus.PENDING) orderDb.Status = OrderStatus.SUCCUSSFUL;
                     await _unitOfWork.SaveChangeAsync();
+
+                    var orderSend = await this.SendTicketEmail(orderDb.Id);
+                    if (!orderSend.IsSuccess)
+                    {
+                        foreach (var mess in orderSend.Messages)
+                        {
+                            result.Messages.Add(mess);
+                        }
+                    }
                 }
             }
             catch (Exception ex)
