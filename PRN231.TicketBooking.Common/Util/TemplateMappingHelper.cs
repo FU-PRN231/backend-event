@@ -1,4 +1,6 @@
-﻿using PRN231.TicketBooking.BusinessObject.Models;
+﻿using Microsoft.AspNetCore.Http;
+using PRN231.TicketBooking.BusinessObject.Models;
+using System;
 using System.Text;
 
 namespace PRN231.TicketBooking.Common.Util
@@ -881,17 +883,24 @@ namespace PRN231.TicketBooking.Common.Util
             list-style-type: none;
             padding: 0;
         }
-        .ticket-list li {
-            background-color: #f1f1f1;
+        .ticket-item {
             margin: 5px 0;
             padding: 10px;
             border-radius: 5px;
+            background-color: #f1f1f1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
-        .ticket-list img {
+        .ticket-item img {
             max-width: 100px;
             height: auto;
             display: block;
-            margin: 0 auto;
+            margin-bottom: 10px;
+        }
+        .ticket-item a {
+            text-decoration: none;
+            color: #007BFF;
         }
     </style>
 </head>
@@ -929,9 +938,14 @@ namespace PRN231.TicketBooking.Common.Util
             foreach (var rank in ticketInfo.Keys)
             {
                 ticketSectionsBuilder.AppendLine($"<div class='rank-section'><h3>{rank}</h3><ul class='ticket-list'>");
-                foreach (var ticket in ticketInfo[rank])
+                foreach (var ticketUrl in ticketInfo[rank])
                 {
-                    ticketSectionsBuilder.AppendLine($"<li><img src='{ticket}' alt='QR Code'></li>");
+                    var fileName = GetFileNameFromUrl(ticketUrl); // Function to extract file name from URL
+                    ticketSectionsBuilder.AppendLine($@"
+    <li class='ticket-item'>
+        <img src='{ticketUrl}' alt='{fileName}' />
+        <a href='{ticketUrl}' download='{ticketUrl}'>Download {fileName}</a>
+    </li>");
                 }
                 ticketSectionsBuilder.AppendLine("</ul></div>");
             }
@@ -942,8 +956,8 @@ namespace PRN231.TicketBooking.Common.Util
                 .Replace("{{PhoneNumber}}", account.PhoneNumber)
                 .Replace("{{EventTitle}}", eventInfo.Title)
                 .Replace("{{EventDescription}}", eventInfo.Description)
-                .Replace("{{EventStartDate}}", eventInfo.StartEventDate.ToString("yyyy-MM-dd"))
-                .Replace("{{EventEndDate}}", eventInfo.EndEventDate.ToString("yyyy-MM-dd"))
+                .Replace("{{EventStartDate}}", eventInfo.StartEventDate.ToString("yyyy-MM-dd HH:mm"))
+                .Replace("{{EventEndDate}}", eventInfo.EndEventDate.ToString("yyyy-MM-dd HH:mm"))
                 .Replace("{{EventStartTime}}", eventInfo.StartTime.ToString("HH:mm"))
                 .Replace("{{EventEndTime}}", eventInfo.EndTime.ToString("HH:mm"))
                 .Replace("{{EventLocation}}", eventInfo.Location != null ? eventInfo.Location.Name : "N/A")
@@ -952,6 +966,12 @@ namespace PRN231.TicketBooking.Common.Util
 
             return emailBody;
         }
+
+        private static string GetFileNameFromUrl(string url)
+        {
+            return Path.GetFileName(url);
+        }
+
 
 
     }
