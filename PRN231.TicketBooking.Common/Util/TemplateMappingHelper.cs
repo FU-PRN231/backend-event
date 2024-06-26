@@ -967,8 +967,6 @@ namespace PRN231.TicketBooking.Common.Util
             <p><strong>Description:</strong> {{EventDescription}}</p>
             <p><strong>Start Date:</strong> {{EventStartDate}}</p>
             <p><strong>End Date:</strong> {{EventEndDate}}</p>
-            <p><strong>Start Time:</strong> {{EventStartTime}}</p>
-            <p><strong>End Time:</strong> {{EventEndTime}}</p>
             <p><strong>Location:</strong> {{EventLocation}}</p>
             <p><strong>Organization:</strong> {{EventOrganization}}</p>
         </div>
@@ -1036,8 +1034,6 @@ namespace PRN231.TicketBooking.Common.Util
                 .Replace("{{EventDescription}}", eventInfo.Description)
                 .Replace("{{EventStartDate}}", eventInfo.StartEventDate.ToString("yyyy-MM-dd HH:mm"))
                 .Replace("{{EventEndDate}}", eventInfo.EndEventDate.ToString("yyyy-MM-dd HH:mm"))
-                .Replace("{{EventStartTime}}", eventInfo.StartTime.ToString("HH:mm"))
-                .Replace("{{EventEndTime}}", eventInfo.EndTime.ToString("HH:mm"))
                 .Replace("{{EventLocation}}", eventInfo.Location != null ? eventInfo.Location.Name : "N/A")
                 .Replace("{{EventOrganization}}", eventInfo.Organization != null ? eventInfo.Organization.Name : "N/A")
                 .Replace("{{TicketSections}}", ticketSectionsBuilder.ToString());
