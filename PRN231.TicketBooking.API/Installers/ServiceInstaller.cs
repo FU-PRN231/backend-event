@@ -62,6 +62,7 @@ namespace PRN231.TicketBooking.API.Installers
             services.AddScoped<IPostService, PostService>();
             services.AddScoped<ISponsorEventHistoryService, SponsorHistoryService>();
             services.AddScoped<IReportService, ReportService>();
+            services.AddScoped<IQRCodeService, QRCodeService>();
         }
     }
 }
