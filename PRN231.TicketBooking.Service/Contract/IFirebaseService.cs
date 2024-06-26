@@ -10,5 +10,6 @@ namespace PRN231.TicketBooking.Service.Contract
         public Task<string> GetUrlImageFromFirebase(string pathFileName);
 
         public Task<AppActionResult> DeleteFileFromFirebase(string pathFileName);
+        //public Task<List<IFormFile>> GetFilesAsFormFilesAsync(List<string> fileUrls);
     }
 }

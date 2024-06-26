@@ -11,7 +11,7 @@ namespace PRN231.TicketBooking.API.Installers
         {
             services.AddDbContext<BookingTicketDbContext>(option =>
             {
-                option.UseSqlServer(configuration["ConnectionStrings:DBDocker"]);
+                option.UseSqlServer(configuration["ConnectionStrings:Host"]);
             });
 
             services.AddIdentity<Account, IdentityRole>().AddEntityFrameworkStores<BookingTicketDbContext>().AddDefaultTokenProviders();

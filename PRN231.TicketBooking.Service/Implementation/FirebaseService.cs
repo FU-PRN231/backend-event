@@ -1,6 +1,9 @@
 ﻿using DinkToPdf.Contracts;
 using Firebase.Auth;
 using Firebase.Storage;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
+using Google.Cloud.Storage.V1;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json.Linq;
@@ -25,6 +28,7 @@ namespace PRN231.TicketBooking.Service.Implementation
             _result = new();
             _firebaseConfiguration = Resolve<FirebaseConfiguration>();
             _configuration = configuration;
+           
         }
 
         public async Task<AppActionResult> DeleteFileFromFirebase(string pathFileName)
@@ -121,5 +125,26 @@ namespace PRN231.TicketBooking.Service.Implementation
             }
             return _result;
         }
+        //public async Task<List<IFormFile>> GetFilesAsFormFilesAsync(List<string> fileUrls)
+        //{
+        //    var storageClient = StorageClient.Create();
+        //    var formFiles = new List<IFormFile>();
+
+        //    foreach (var fileUrl in fileUrls)
+        //    {
+        //        using (var memoryStream = new MemoryStream())
+        //        {
+        //            await storageClient.DownloadObjectAsync(_firebaseConfiguration.Bucket, fileUrl, memoryStream);
+        //            memoryStream.Position = 0;
+        //            formFiles.Add(new FormFile(memoryStream, 0, memoryStream.Length, null, Path.GetFileName(fileUrl))
+        //            {
+        //                Headers = new HeaderDictionary(),
+        //                ContentType = "application/octet-stream"
+        //            });
+        //        }
+        //    }
+
+        //    return formFiles;
+        //}
     }
 }

@@ -192,24 +192,21 @@ namespace PRN231.TicketBooking.Service.Implementation
                         quantity = orderDetail.Quantity;
                         while (quantity > 0)
                         {
-                            string url = await GenerateQR($"{orderDetail.Id.ToString()}/{quantity}");
-                            if (url == null)
+                            UploadImgResponseDto upload = await GenerateQR($"{orderDetail.Id.ToString()}/{quantity}");
+                            if (upload == null)
                             {
                                 result = BuildAppActionResultError(result, $"Không thể tải hình ảnh vé, vui lòng thử lại");
                                 return result;
-                            } else if(url.Equals("Failed upload"))
-                            {
-                                result = BuildAppActionResultError(result, $"Firebase failed");
-                                return result;
-                            }
-                            imgs.Add(url);
+                            } 
+                            
                             await staticFileRepository.Insert(new StaticFile
                             {
                                 Id = Guid.NewGuid(),
-                                Img = url,
+                                Img = upload.url,
                                 OrderDetailId = orderDetail.Id
                             });
                             quantity--;
+                            imgs.Add(upload.url);
                         }
                         data.Add(orderDetail.SeatRank.Name, imgs);
 
@@ -225,9 +222,9 @@ namespace PRN231.TicketBooking.Service.Implementation
             return result;
         }
 
-        private async Task<string> GenerateQR(string Id)
+        private async Task<UploadImgResponseDto> GenerateQR(string Id)
         {
-            string result = null;
+            UploadImgResponseDto result = null;
             try
             {
                 string pathName = SD.FirebasePathName.QR_PREFIX + Id;
@@ -235,11 +232,12 @@ namespace PRN231.TicketBooking.Service.Implementation
                 var url = await _firebaseService.UploadFileToFirebase(qr, pathName);
                 if (url.IsSuccess)
                 {
-                 return (string)url.Result!;
+                    result.file = qr;
+                    result.url = (string)url.Result;
                 }
                 else
                 {
-                    return "Failed upload";
+                    return null;
                 }
 
             }
