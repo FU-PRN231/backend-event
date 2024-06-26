@@ -883,24 +883,17 @@ namespace PRN231.TicketBooking.Common.Util
             list-style-type: none;
             padding: 0;
         }
-        .ticket-item {
+        .ticket-list li {
+            background-color: #f1f1f1;
             margin: 5px 0;
             padding: 10px;
             border-radius: 5px;
-            background-color: #f1f1f1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
         }
-        .ticket-item img {
+        .ticket-list img {
             max-width: 100px;
             height: auto;
             display: block;
-            margin-bottom: 10px;
-        }
-        .ticket-item a {
-            text-decoration: none;
-            color: #007BFF;
+            margin: 0 auto;
         }
     </style>
 </head>
@@ -937,16 +930,16 @@ namespace PRN231.TicketBooking.Common.Util
             var ticketSectionsBuilder = new StringBuilder();
             foreach (var rank in ticketInfo.Keys)
             {
-
                 ticketSectionsBuilder.AppendLine($"<div class='rank-section'><h3>{rank}</h3><ul class='ticket-list'>");
-                foreach (var ticket in ticketInfo[rank])
+                foreach (var ticketUrl in ticketInfo[rank])
                 {
-                    ticketSectionsBuilder.AppendLine($"<li><img src='{ticket}' alt='QR Code'></li>");
+                    var fileName = GetFileNameFromUrl(ticketUrl); // Function to extract file name from URL
+                    ticketSectionsBuilder.AppendLine($"<li><img src='{ticketUrl}' alt='{fileName}' /><a href='{ticketUrl}' download='{ticketUrl}'>Download {fileName}</a></li>");
                 }
                 ticketSectionsBuilder.AppendLine("</ul></div>");
-
-                
             }
+
+
 
             var emailBody = emailTemplate
                 .Replace("{{FirstName}}", account.FirstName)
@@ -956,8 +949,6 @@ namespace PRN231.TicketBooking.Common.Util
                 .Replace("{{EventDescription}}", eventInfo.Description)
                 .Replace("{{EventStartDate}}", eventInfo.StartEventDate.ToString("yyyy-MM-dd HH:mm"))
                 .Replace("{{EventEndDate}}", eventInfo.EndEventDate.ToString("yyyy-MM-dd HH:mm"))
-                .Replace("{{EventStartTime}}", eventInfo.StartTime.ToString("HH:mm"))
-                .Replace("{{EventEndTime}}", eventInfo.EndTime.ToString("HH:mm"))
                 .Replace("{{EventLocation}}", eventInfo.Location != null ? eventInfo.Location.Name : "N/A")
                 .Replace("{{EventOrganization}}", eventInfo.Organization != null ? eventInfo.Organization.Name : "N/A")
                 .Replace("{{TicketSections}}", ticketSectionsBuilder.ToString());
