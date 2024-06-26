@@ -1,10 +1,10 @@
-﻿using IronBarCode;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using PRN231.TicketBooking.Common.Dto;
 using PRN231.TicketBooking.Common.Dto.Response;
 using PRN231.TicketBooking.Common.Util;
 using PRN231.TicketBooking.Repository.Contract;
 using PRN231.TicketBooking.Service.Contract;
+using QRCoder;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,17 +16,14 @@ namespace PRN231.TicketBooking.Service.Implementation
 {
     public class QRCodeService : GenericBackendService ,IQRCodeService
     {
-        private readonly IAccountRepository _accountRepository;
         private readonly IFirebaseService _firebaseService;
         private readonly IUnitOfWork _unitOfWork;   
 
         public QRCodeService(IServiceProvider serviceProvider,
-            IAccountRepository accountRepository,
             IFirebaseService firebaseService,
             IUnitOfWork unitOfWork
             ) : base(serviceProvider)
-        {
-            _accountRepository = accountRepository; 
+        { 
             _firebaseService = firebaseService;   
             _unitOfWork = unitOfWork;       
         }
@@ -60,25 +57,18 @@ namespace PRN231.TicketBooking.Service.Implementation
             AppActionResult result = new AppActionResult();
             try
             {
-                var accountDb = await _accountRepository.GetById(Id);
-                if (accountDb == null)
-                {
-                    result = BuildAppActionResultError(result, "Không tìm thấy thông tin tài khoản");
-                    return result;
-                }
-                string qrAccountString = $"{accountDb.FirstName} {accountDb.LastName},{accountDb.PhoneNumber},{accountDb.Email}";
+                UploadImgResponseDto dto = new UploadImgResponseDto();
+                string qrAccountString = $"{Id}";
                 //string encryptAccountResponseString = EncryptData(qrAccountString, SD.QR_CODE_KEY);
-                string pathName = SD.FirebasePathName.QR_PREFIX + accountDb.Id;
-                IFormFile qr = GenerateQRCodeImage(qrAccountString);
+                string pathName = SD.FirebasePathName.QR_PREFIX + Id;
+                IFormFile qr = CreateQRCode(qrAccountString);
                 var url = await _firebaseService.UploadFileToFirebase(qr, pathName);
                 if (url.IsSuccess)
                 {
-                    accountDb.qr = url.Result!.ToString();
-                    result.Messages.Add(accountDb.qr);
-                    //await _accountRepository.Update(accountDb);
-                    await _unitOfWork.SaveChangeAsync();
+                    dto.file = qr;
+                    dto.url = (string)url.Result;
                 }
-
+                result.Result = dto;
             }
             catch (Exception ex)
             {
@@ -87,26 +77,48 @@ namespace PRN231.TicketBooking.Service.Implementation
             return result;
         }
 
-        public IFormFile GenerateQRCodeImage(string data)
+        /* public IFormFile GenerateQRCodeImage(string data)
+         {
+             GeneratedBarcode barcode = QRCodeWriter.CreateQrCode(data, 500, QRCodeWriter.QrErrorCorrectionLevel.Medium);
+
+             // Save barcode as PNG in memory
+             byte[] barcodeBytes = barcode.ToPngBinaryData();
+
+             // Create a MemoryStream from the barcode bytes
+             MemoryStream ms = new MemoryStream(barcodeBytes);
+
+             // Create an IFormFile from the MemoryStream
+             IFormFile formFile = new FormFile(ms, 0, ms.Length, "barcode.png", "image/png");
+
+             // Set the position of the MemoryStream back to the beginning for subsequent reads
+             ms.Position = 0;
+
+             return formFile;
+         }*/
+
+        public IFormFile CreateQRCode(string qrCodeText)
         {
-            GeneratedBarcode barcode = QRCodeWriter.CreateQrCode(data, 500, QRCodeWriter.QrErrorCorrectionLevel.Medium);
+            byte[] qrCodeBytes;
+            QRCodeGenerator qRCodeGenerator = new QRCodeGenerator();
+            QRCodeData data = qRCodeGenerator.CreateQrCode(qrCodeText, QRCodeGenerator.ECCLevel.Q);
+            BitmapByteQRCode bitmap = new BitmapByteQRCode(data);
+            qrCodeBytes = bitmap.GetGraphic(20);
 
-            // Save barcode as PNG in memory
-            byte[] barcodeBytes = barcode.ToPngBinaryData();
-
-            // Create a MemoryStream from the barcode bytes
-            MemoryStream ms = new MemoryStream(barcodeBytes);
+            MemoryStream ms = new MemoryStream(qrCodeBytes);
 
             // Create an IFormFile from the MemoryStream
-            IFormFile formFile = new FormFile(ms, 0, ms.Length, "barcode.png", "image/png");
+            IFormFile formFile = new FormFile(ms, 0, ms.Length, "qrCode", "qrCode.png")
+            {
+                Headers = new HeaderDictionary(),
+                ContentType = "image/png"
+            };
 
-            // Set the position of the MemoryStream back to the beginning for subsequent reads
+            // Reset the position of the MemoryStream to 0 for subsequent reads
             ms.Position = 0;
 
             return formFile;
         }
 
-     
 
         private string EncryptData(string data, string key)
         {

@@ -82,20 +82,20 @@ namespace PRN231.TicketBooking.DAO.Data
             });
             base.OnModelCreating(builder);
         }
+        //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        //{
+        //    IConfiguration config = new ConfigurationBuilder()
+        //                       .SetBasePath(Directory.GetCurrentDirectory())
+        //                       .AddJsonFile("appsettings.json", true, true)
+        //                       .Build();
+        //    string cs = config["ConnectionStrings:DB"];
+        //    if (!optionsBuilder.IsConfigured)
+        //    {
+        //        optionsBuilder.UseSqlServer(cs);
+        //    }
+        //    //optionsBuilder.UseSqlServer(
+        //    //   "server=.;database=TicketBooking;uid=sa;pwd=12345;TrustServerCertificate=True;MultipleActiveResultSets=True;");
+        //}
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            IConfiguration config = new ConfigurationBuilder()
-                               .SetBasePath(Directory.GetCurrentDirectory())
-                               .AddJsonFile("appsettings.json", true, true)
-                               .Build();
-            string cs = config["ConnectionStrings:DB"];
-            if (!optionsBuilder.IsConfigured)
-            {
-                optionsBuilder.UseSqlServer(cs);
-            }
-            //optionsBuilder.UseSqlServer(
-            //   "server=.;database=TicketBooking;uid=sa;pwd=12345;TrustServerCertificate=True;MultipleActiveResultSets=True;");
-        }
     }
 }
