@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using PRN231.TicketBooking.BusinessObject.Enum;
 using PRN231.TicketBooking.Common.Dto;
+using PRN231.TicketBooking.Common.Dto.Request;
 using PRN231.TicketBooking.Service.Contract;
 
 namespace PRN231.TicketBooking.API.Controllers
@@ -39,6 +40,12 @@ namespace PRN231.TicketBooking.API.Controllers
         public async Task<AppActionResult> GetSponsorHistoryOfEvent(Guid eventId, int pageNumber = 1 , int pageSize = 10)
         {
             return await _sponsorEventHistory.GetSponsorHistoryOfEvent(eventId, pageNumber, pageSize);
+
+        }
+        [HttpPost("add-sponsor-history")]
+        public async Task<AppActionResult> AddSponsorHistory(AddSponsorMoneyHistoryRequestDto dto)
+        {
+            return await _sponsorEventHistory.AddSponsorHistory(dto);
 
         }
     }

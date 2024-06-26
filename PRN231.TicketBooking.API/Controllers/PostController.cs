@@ -16,6 +16,12 @@ namespace PRN231.TicketBooking.API.Controllers
             _postService = postService;
         }
 
+        [HttpGet("get-all-post/{pageNumber}/{pageSize}")]
+        public async Task<AppActionResult> GetAllPost(int pageNumber = 1, int pageSize = 10)
+        {
+            return await _postService.GetAllPost(pageNumber, pageSize);
+        }
+
         [HttpGet("get-all-post-of-event/{eventId}")]
         public async Task<AppActionResult> GetAllPostOfEvent(Guid eventId, int pageNumber = 1, int pageSize = 10)
         {

@@ -8,6 +8,7 @@ namespace PRN231.TicketBooking.Repository.Contract
     public interface IEventRepository : IRepository<Event>
     {
         public Task<PagedResult<Event>> GetEvents(int pageNumber, int pageSize);
+        public Task<PagedResult<Event>> GetEventsByOrganizationId(Guid organizationId, int pageNumber, int pageSize);
         public Task<PagedResult<Event>> GetEventsWithStatus(Guid? organizationId, DateTime today, int happened, int pageNumber, int pageSize);
         public Task<int[]> CountingEventsWithStatus(Guid? organizationId, DateTime today);
 		public Task<Event> GetEventById(Guid id);

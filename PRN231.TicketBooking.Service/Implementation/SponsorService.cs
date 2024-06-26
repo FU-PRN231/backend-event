@@ -45,6 +45,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                     return result;
                 }
                 var sponsorRepository = Resolve<ISponsorRepository>();
+                var utility = Resolve<Utility>();
                 foreach (var item in dto.SponsorItems)
                 {
                     var sponsorDb = await sponsorRepository.GetByExpression(p => p.Id == item.SponsorId);
@@ -68,7 +69,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                     {
                         Id = Guid.NewGuid(),
                         Amount = eventSponsor.MoneySponsorAmount ?? 0,
-                        Date = DateTime.Now,
+                        Date = utility.GetCurrentDateTimeInTimeZone(),
                         EventSponsorId = eventSponsor.Id,
                     };
                     await sponsorHistoryRepository.Insert(sponsorHistory);
