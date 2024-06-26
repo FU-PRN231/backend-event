@@ -214,6 +214,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                     //public Dictionary<Event, Dictionary<DateTime, double>> eventDetailSponsors { get; set; } = new Dictionary<Event, Dictionary<DateTime, double>>();
                     return result;
                 }
+                data.Sponsor = sponsorDb;
                 var sponsorEventRepository = Resolve<IEventSponsorRepository>();
                 var sponsorEventDb = new PagedResult<EventSponsor>();
                 var sponsorMoneyHistoryRepository = Resolve<ISponsorMoneyHistoryRepository>();
@@ -223,21 +224,21 @@ namespace PRN231.TicketBooking.Service.Implementation
                 if (timePeriod > 3)
                 {
                     sponsorEventDb = await sponsorEventRepository.GetAllDataByExpression(s => s.SponsorId == sponsorId && s.Event.StartTime.Year == today.Year, 0, 0, null, false, null);
-                    sponsorMoneyHistoryDb = await sponsorMoneyHistoryRepository.GetAllDataByExpression(s => s.EventSponsor.SponsorId == sponsorId && s.EventSponsor.Event.StartTime.Year >= today.Year, 0, 0, null, false, null);
+                    sponsorMoneyHistoryDb = await sponsorMoneyHistoryRepository.GetAllDataByExpression(s => s.EventSponsor.SponsorId == sponsorId && s.EventSponsor.Event.StartTime.Year >= today.Year, 0, 0, null, false, s => s.EventSponsor.Event);
                 } else if(timePeriod == 0)
                 {
                     sponsorEventDb = await sponsorEventRepository.GetAllDataByExpression(s => s.SponsorId == sponsorId && s.Event.StartTime.AddDays(7) >= today, 0, 0, null, false, null);
-                    sponsorMoneyHistoryDb = await sponsorMoneyHistoryRepository.GetAllDataByExpression(s => s.EventSponsor.SponsorId == sponsorId && s.EventSponsor.Event.StartTime.AddDays(7) >= today, 0, 0, null, false, null);
+                    sponsorMoneyHistoryDb = await sponsorMoneyHistoryRepository.GetAllDataByExpression(s => s.EventSponsor.SponsorId == sponsorId && s.EventSponsor.Event.StartTime.AddDays(7) >= today, 0, 0, null, false, s => s.EventSponsor.Event);
                 }
                 else if (timePeriod == 1)
                 {
                     sponsorEventDb = await sponsorEventRepository.GetAllDataByExpression(s => s.SponsorId == sponsorId && s.Event.StartTime.Month >= today.Month, 0, 0, null, false, null);
-                    sponsorMoneyHistoryDb = await sponsorMoneyHistoryRepository.GetAllDataByExpression(s => s.EventSponsor.SponsorId == sponsorId && s.EventSponsor.Event.StartTime.Month >= today.Month, 0, 0, null, false, null);
+                    sponsorMoneyHistoryDb = await sponsorMoneyHistoryRepository.GetAllDataByExpression(s => s.EventSponsor.SponsorId == sponsorId && s.EventSponsor.Event.StartTime.Month >= today.Month, 0, 0, null, false, s => s.EventSponsor.Event);
                 }
                 else if (timePeriod == 2)
                 {
                     sponsorEventDb = await sponsorEventRepository.GetAllDataByExpression(s => s.SponsorId == sponsorId && s.Event.StartTime.Month + 6 >= today.Month, 0, 0, null, false, null);
-                    sponsorMoneyHistoryDb = await sponsorMoneyHistoryRepository.GetAllDataByExpression(s => s.EventSponsor.SponsorId == sponsorId && s.EventSponsor.Event.StartTime.Month + 6 >= today.Month, 0, 0, null, false, null);
+                    sponsorMoneyHistoryDb = await sponsorMoneyHistoryRepository.GetAllDataByExpression(s => s.EventSponsor.SponsorId == sponsorId && s.EventSponsor.Event.StartTime.Month + 6 >= today.Month, 0, 0, null, false, s => s.EventSponsor.Event);
                 }
                 else
                 {
