@@ -534,8 +534,8 @@ namespace PRN231.TicketBooking.Service.Implementation
                     return result;
                 }
                 var orderDetailRepository = Resolve<IOrderDetailsRepository>();
-                var orderDetailDb = await orderDetailRepository.GetAllDataByExpression(p => p!.OrderId == orderId && p.Order.Status == OrderStatus.SUCCUSSFUL, 0, 0, null, false, o => o.Order.Account, o => o.SeatRank.Event.Location, o => o.SeatRank.Event.Organization);
-                if (orderDetailDb.Items.Count == 0)
+                var orderDetailDb = await orderDetailRepository.GetAllDataByExpression(p => p!.OrderId == orderId && p.Order!.Status == OrderStatus.SUCCUSSFUL, 0, 0, null, false, o => o.Order.Account, o => o.SeatRank.Event.Location, o => o.SeatRank.Event.Organization);
+                if (orderDetailDb.Items!.Count == 0)
                 {
                     result = BuildAppActionResultError(result, $"Chi tiết của đơn hàng thành công với id {orderId} không tồn tại");
                     return result;
@@ -549,13 +549,22 @@ namespace PRN231.TicketBooking.Service.Implementation
                     result.IsSuccess = false;
                     return result;
                 }
-                ticketInfo = (Dictionary<string, List<string>>)ticketData.Result;
+                ticketInfo = (Dictionary<string, List<string>>)ticketData.Result!;
 
                 var emailService = Resolve<IEmailService>();
-                Account account = orderDetailDb.Items.FirstOrDefault().Order.Account;
-                Event eventDb = orderDetailDb.Items.FirstOrDefault().SeatRank.Event;
+                Account account = orderDetailDb!.Items!.FirstOrDefault()!.Order!.Account!;
+                Event eventDb = orderDetailDb!.Items!.FirstOrDefault()!.SeatRank!.Event!;
                 string body = TemplateMappingHelper.GenerateTicketEmailBody(account, ticketInfo, eventDb);
-                emailService!.SendEmail(account.Email, SD.SubjectMail.SEAT_TICKET, body);
+                List<IFormFile> files = new List<IFormFile>();
+                foreach (var kvp in ticketInfo)
+                {
+                    foreach (var img in kvp.Value)
+                    {
+                        var file = new FormFile(new MemoryStream(System.IO.File.ReadAllBytes(img)), 0, System.IO.File.ReadAllBytes(img).Length, "ticket.png", "image/png");
+                        files.Add(file);
+                    }
+                }
+                emailService!.SendEmailWithFiles(account.Email, SD.SubjectMail.SEAT_TICKET, body, files);
             }
             catch (Exception ex)
             {
