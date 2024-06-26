@@ -937,17 +937,15 @@ namespace PRN231.TicketBooking.Common.Util
             var ticketSectionsBuilder = new StringBuilder();
             foreach (var rank in ticketInfo.Keys)
             {
+
                 ticketSectionsBuilder.AppendLine($"<div class='rank-section'><h3>{rank}</h3><ul class='ticket-list'>");
-                foreach (var ticketUrl in ticketInfo[rank])
+                foreach (var ticket in ticketInfo[rank])
                 {
-                    var fileName = GetFileNameFromUrl(ticketUrl); // Function to extract file name from URL
-                    ticketSectionsBuilder.AppendLine($@"
-    <li class='ticket-item'>
-        <img src='{ticketUrl}' alt='{fileName}' />
-        <a href='{ticketUrl}' download='{ticketUrl}'>Download {fileName}</a>
-    </li>");
+                    ticketSectionsBuilder.AppendLine($"<li><img src='{ticket}' alt='QR Code'></li>");
                 }
                 ticketSectionsBuilder.AppendLine("</ul></div>");
+
+                
             }
 
             var emailBody = emailTemplate
