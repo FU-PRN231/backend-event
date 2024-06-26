@@ -3,7 +3,6 @@ using DocumentFormat.OpenXml.Drawing.Charts;
 using DocumentFormat.OpenXml.InkML;
 using DocumentFormat.OpenXml.Wordprocessing;
 using Humanizer;
-using IronBarCode;
 using MailKit.Search;
 using Microsoft.AspNetCore.Http;
 using PRN231.TicketBooking.BusinessObject.Enum;
@@ -164,6 +163,7 @@ namespace PRN231.TicketBooking.Service.Implementation
             try
             {
                 var orderDetailsRepository = Resolve<IOrderDetailsRepository>();
+                var oRCodeService = Resolve<IQRCodeService>();
                 var orderDetailDb = await orderDetailsRepository.GetAllDataByExpression(o => o.OrderId == orderId, 0, 0, null, false, o => o.SeatRank);
                 if (orderDetailDb.Items.Count == 0)
                 {
@@ -192,21 +192,22 @@ namespace PRN231.TicketBooking.Service.Implementation
                         quantity = orderDetail.Quantity;
                         while (quantity > 0)
                         {
-                            UploadImgResponseDto upload = await GenerateQR($"{orderDetail.Id.ToString()}/{quantity}");
+                            AppActionResult upload = new AppActionResult();
+                            upload= await oRCodeService.GenerateQR($"{orderDetail.Id.ToString()}/{quantity}");
                             if (upload == null)
                             {
                                 result = BuildAppActionResultError(result, $"Không thể tải hình ảnh vé, vui lòng thử lại");
                                 return result;
-                            } 
-                            
+                            }
+                            UploadImgResponseDto QrCodeDto = (UploadImgResponseDto)upload.Result;
                             await staticFileRepository.Insert(new StaticFile
                             {
                                 Id = Guid.NewGuid(),
-                                Img = upload.url,
+                                Img = QrCodeDto.url,
                                 OrderDetailId = orderDetail.Id
                             });
                             quantity--;
-                            imgs.Add(upload.url);
+                            imgs.Add(QrCodeDto.url);
                         }
                         data.Add(orderDetail.SeatRank.Name, imgs);
 
@@ -222,13 +223,14 @@ namespace PRN231.TicketBooking.Service.Implementation
             return result;
         }
 
-        private async Task<UploadImgResponseDto> GenerateQR(string Id)
+       /* private async Task<UploadImgResponseDto> GenerateQR(string Id)
         {
             UploadImgResponseDto result = null;
             try
             {
                 string pathName = SD.FirebasePathName.QR_PREFIX + Id;
-                IFormFile qr = GenerateQRCodeImage(Id);
+                //IFormFile qr = GenerateQRCodeImage(Id);
+                IFormFile qr = CreateQRCode(Id);
                 var url = await _firebaseService.UploadFileToFirebase(qr, pathName);
                 if (url.IsSuccess)
                 {
@@ -246,9 +248,9 @@ namespace PRN231.TicketBooking.Service.Implementation
                 result = null;
             }
             return result;
-        }
+        }*/
 
-        private IFormFile GenerateQRCodeImage(string data)
+      /*  private IFormFile GenerateQRCodeImage(string data)
         {
             var barcodeWriter = new BarcodeWriterPixelData
             {
@@ -283,7 +285,8 @@ namespace PRN231.TicketBooking.Service.Implementation
 
                 return formFile;
             }
-        }
+        }*/
+       
 
         public async Task<AppActionResult> GetAllOrder(int pageNumber, int pageSize)
         {
@@ -534,8 +537,8 @@ namespace PRN231.TicketBooking.Service.Implementation
                     return result;
                 }
                 var orderDetailRepository = Resolve<IOrderDetailsRepository>();
-                var orderDetailDb = await orderDetailRepository.GetAllDataByExpression(p => p!.OrderId == orderId && p.Order.Status == OrderStatus.SUCCUSSFUL, 0, 0, null, false, o => o.Order.Account, o => o.SeatRank.Event.Location, o => o.SeatRank.Event.Organization);
-                if (orderDetailDb.Items.Count == 0)
+                var orderDetailDb = await orderDetailRepository.GetAllDataByExpression(p => p!.OrderId == orderId && p.Order!.Status == OrderStatus.SUCCUSSFUL, 0, 0, null, false, o => o.Order.Account, o => o.SeatRank.Event.Location, o => o.SeatRank.Event.Organization);
+                if (orderDetailDb.Items!.Count == 0)
                 {
                     result = BuildAppActionResultError(result, $"Chi tiết của đơn hàng thành công với id {orderId} không tồn tại");
                     return result;
@@ -549,13 +552,22 @@ namespace PRN231.TicketBooking.Service.Implementation
                     result.IsSuccess = false;
                     return result;
                 }
-                ticketInfo = (Dictionary<string, List<string>>)ticketData.Result;
+                ticketInfo = (Dictionary<string, List<string>>)ticketData.Result!;
 
                 var emailService = Resolve<IEmailService>();
-                Account account = orderDetailDb.Items.FirstOrDefault().Order.Account;
-                Event eventDb = orderDetailDb.Items.FirstOrDefault().SeatRank.Event;
+                Account account = orderDetailDb!.Items!.FirstOrDefault()!.Order!.Account!;
+                Event eventDb = orderDetailDb!.Items!.FirstOrDefault()!.SeatRank!.Event!;
                 string body = TemplateMappingHelper.GenerateTicketEmailBody(account, ticketInfo, eventDb);
-                emailService!.SendEmail(account.Email, SD.SubjectMail.SEAT_TICKET, body);
+                List<IFormFile> files = new List<IFormFile>();
+                //foreach (var kvp in ticketInfo)
+                //{
+                //    foreach (var img in kvp.Value)
+                //    {
+                //        var file = new FormFile(new MemoryStream(System.IO.File.ReadAllBytes(img)), 0, System.IO.File.ReadAllBytes(img).Length, "ticket.png", "image/png");
+                //        files.Add(file);
+                //    }
+                //}
+                //emailService!.SendEmailWithFiles(account.Email, SD.SubjectMail.SEAT_TICKET, body, files);
             }
             catch (Exception ex)
             {

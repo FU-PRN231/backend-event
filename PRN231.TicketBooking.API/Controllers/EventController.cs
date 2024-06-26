@@ -27,6 +27,12 @@ namespace PRN231.TicketBooking.API.Controllers
             return await _eventService.GetAvailableEvent(pageNumber, pageSize);
         }
 
+        [HttpGet("get-all-event-by-organization-id/{organizationId}/{pageNumber}/{pageSize}")]
+        public async Task<AppActionResult> GetAllEventByOrganizationId(Guid organizationId, int pageNumber = 1, int pageSize = 10)
+        {
+            return await _eventService.GetAllEventByOrganizationId(organizationId, pageNumber, pageSize);
+        }
+
         [HttpGet("get-event-by-id/{id}")]
         public async Task<AppActionResult> GetById(Guid id)
         {

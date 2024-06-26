@@ -1,4 +1,5 @@
-﻿using PRN231.TicketBooking.BusinessObject.Models.BaseModel;
+﻿using PRN231.TicketBooking.BusinessObject.Enum;
+using PRN231.TicketBooking.BusinessObject.Models.BaseModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -24,5 +25,6 @@ namespace PRN231.TicketBooking.BusinessObject.Models
 
         [ForeignKey(nameof(OrganizationId))]
         public Organization? Organization { get; set; }
+        public EventCensorStatus? Status { get; set; }
     }
 }

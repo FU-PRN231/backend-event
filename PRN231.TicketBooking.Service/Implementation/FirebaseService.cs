@@ -86,11 +86,13 @@ namespace PRN231.TicketBooking.Service.Implementation
         {
             var _result = new AppActionResult();
             bool isValid = true;
+
             if (file == null || file.Length == 0)
             {
                 isValid = false;
                 _result.Messages.Add("The file is empty");
             }
+
             if (isValid)
             {
                 using (var memoryStream = new MemoryStream())
@@ -99,22 +101,26 @@ namespace PRN231.TicketBooking.Service.Implementation
                     var stream = new MemoryStream(memoryStream.ToArray());
                     var auth = new FirebaseAuthProvider(new FirebaseConfig(_firebaseConfiguration.ApiKey));
                     var account = await auth.SignInWithEmailAndPasswordAsync(_firebaseConfiguration.AuthEmail, _firebaseConfiguration.AuthPassword);
-                    string destinationPath = $"{pathFileName}";
+                    string destinationPath = $"{pathFileName}.png"; // Add .png extension
 
+                    // Since Firebase.Storage doesn't support metadata directly, use a workaround
+                    // You could encode metadata in the file path or handle it separately
                     var task = new FirebaseStorage(
-                    _firebaseConfiguration.Bucket,
-                    new FirebaseStorageOptions
-                    {
-                        AuthTokenAsyncFactory = () => Task.FromResult(account.FirebaseToken),
-                        ThrowOnCancel = true
-                    })
-                    .Child(destinationPath)
-                    .PutAsync(stream);
+                        _firebaseConfiguration.Bucket,
+                        new FirebaseStorageOptions
+                        {
+                            AuthTokenAsyncFactory = () => Task.FromResult(account.FirebaseToken),
+                            ThrowOnCancel = true
+                        })
+                        .Child(destinationPath)
+                        .PutAsync(stream);
+
                     var downloadUrl = await task;
 
                     if (task != null)
                     {
                         _result.Result = downloadUrl;
+                        _result.IsSuccess = true;
                     }
                     else
                     {
@@ -123,8 +129,12 @@ namespace PRN231.TicketBooking.Service.Implementation
                     }
                 }
             }
+
             return _result;
         }
+
+
+
         //public async Task<List<IFormFile>> GetFilesAsFormFilesAsync(List<string> fileUrls)
         //{
         //    var storageClient = StorageClient.Create();
@@ -146,5 +156,10 @@ namespace PRN231.TicketBooking.Service.Implementation
 
         //    return formFiles;
         //}
+    }
+
+    public class CustomMetadata
+    {
+        public string ContentType { get; set; }
     }
 }

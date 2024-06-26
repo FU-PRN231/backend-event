@@ -27,5 +27,11 @@ namespace PRN231.TicketBooking.API.Controllers
         {
             return await _service.GetEventDetailReport(eventId);
         }
+
+        [HttpGet("get-sponsor-report/{sponsorId}/{timePeriod}")]
+        public async Task<AppActionResult> GetSponsorReport(Guid sponsorId, int timePeriod = 1)
+        {
+            return await _service.GetSponsorReport(sponsorId, timePeriod);
+        }
     }
 }

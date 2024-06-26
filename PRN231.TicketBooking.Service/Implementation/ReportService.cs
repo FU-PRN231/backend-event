@@ -76,17 +76,17 @@ namespace PRN231.TicketBooking.Service.Implementation
                 }
                 else if (timePeriod == 0)
                 {
-                    List<Event> events = eventDb.Items.Where(e => e.StartEventDate.AddDays(7) >= utility.GetCurrentDateInTimeZone()).ToList();
+                    List<Event> events = eventDb.Items.Where(e => e.StartTime.AddDays(7) >= utility.GetCurrentDateInTimeZone()).ToList();
                     data = await GetRevenueReport(events);
                 }
                 else if (timePeriod == 1)
                 {
-                    List<Event> events = eventDb.Items.Where(e => e.StartEventDate.Month >= DateTime.UtcNow.Month).ToList();
+                    List<Event> events = eventDb.Items.Where(e => e.StartTime.Month >= DateTime.UtcNow.Month).ToList();
                     data = await GetRevenueReport(events);
                 }
                 else if (timePeriod == 0)
                 {
-                    List<Event> events = eventDb.Items.Where(e => e.StartEventDate.Month + 6 >= DateTime.UtcNow.Month).ToList();
+                    List<Event> events = eventDb.Items.Where(e => e.StartTime.Month + 6 >= DateTime.UtcNow.Month).ToList();
                     data = await GetRevenueReport(events);
                 }
                 else
@@ -197,5 +197,75 @@ namespace PRN231.TicketBooking.Service.Implementation
             }
             return result;
 		}
-	}
+
+        public async Task<AppActionResult> GetSponsorReport(Guid sponsorId, int timePeriod)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                SponsorReportResponseDto data = new SponsorReportResponseDto();
+                var sponsorRepository = Resolve<ISponsorRepository>();
+                var sponsorDb = await sponsorRepository.GetById(sponsorId);
+                if(sponsorDb == null)
+                {
+                    result = BuildAppActionResultError(result, $"Không tìm thấy nhà tài trợ với id {sponsorId}");
+                    //public Dictionary<string, int> SponsorTypes { get; set; } = new Dictionary<string, int>();
+                    //public Dictionary<string, double> SponsorAmounts { get; set; } = new Dictionary<string, double>();
+                    //public Dictionary<Event, Dictionary<DateTime, double>> eventDetailSponsors { get; set; } = new Dictionary<Event, Dictionary<DateTime, double>>();
+                    return result;
+                }
+                var sponsorEventRepository = Resolve<IEventSponsorRepository>();
+                var sponsorEventDb = new PagedResult<EventSponsor>();
+                var sponsorMoneyHistoryRepository = Resolve<ISponsorMoneyHistoryRepository>();
+                var sponsorMoneyHistoryDb = new PagedResult<SponsorMoneyHistory>();
+                var utility = Resolve<Utility>();
+                DateTime today = utility.GetCurrentDateInTimeZone();
+                if (timePeriod > 3)
+                {
+                    sponsorEventDb = await sponsorEventRepository.GetAllDataByExpression(s => s.SponsorId == sponsorId && s.Event.StartTime.Year == today.Year, 0, 0, null, false, null);
+                    sponsorMoneyHistoryDb = await sponsorMoneyHistoryRepository.GetAllDataByExpression(s => s.EventSponsor.SponsorId == sponsorId && s.EventSponsor.Event.StartTime.Year >= today.Year, 0, 0, null, false, null);
+                } else if(timePeriod == 0)
+                {
+                    sponsorEventDb = await sponsorEventRepository.GetAllDataByExpression(s => s.SponsorId == sponsorId && s.Event.StartTime.AddDays(7) >= today, 0, 0, null, false, null);
+                    sponsorMoneyHistoryDb = await sponsorMoneyHistoryRepository.GetAllDataByExpression(s => s.EventSponsor.SponsorId == sponsorId && s.EventSponsor.Event.StartTime.AddDays(7) >= today, 0, 0, null, false, null);
+                }
+                else if (timePeriod == 1)
+                {
+                    sponsorEventDb = await sponsorEventRepository.GetAllDataByExpression(s => s.SponsorId == sponsorId && s.Event.StartTime.Month >= today.Month, 0, 0, null, false, null);
+                    sponsorMoneyHistoryDb = await sponsorMoneyHistoryRepository.GetAllDataByExpression(s => s.EventSponsor.SponsorId == sponsorId && s.EventSponsor.Event.StartTime.Month >= today.Month, 0, 0, null, false, null);
+                }
+                else if (timePeriod == 2)
+                {
+                    sponsorEventDb = await sponsorEventRepository.GetAllDataByExpression(s => s.SponsorId == sponsorId && s.Event.StartTime.Month + 6 >= today.Month, 0, 0, null, false, null);
+                    sponsorMoneyHistoryDb = await sponsorMoneyHistoryRepository.GetAllDataByExpression(s => s.EventSponsor.SponsorId == sponsorId && s.EventSponsor.Event.StartTime.Month + 6 >= today.Month, 0, 0, null, false, null);
+                }
+                else
+                {
+                    sponsorEventDb = await sponsorEventRepository.GetAllDataByExpression(s => s.SponsorId == sponsorId && s.Event.StartTime.Year  >= today.Year, 0, 0, null, false, null);
+                    sponsorMoneyHistoryDb = await sponsorMoneyHistoryRepository.GetAllDataByExpression(s => s.EventSponsor.SponsorId == sponsorId && s.EventSponsor.Event.StartTime.Year >= today.Year, 0, 0, null, false, s => s.EventSponsor.Event);
+                }
+
+                if(sponsorEventDb.Items.Count > 0) {
+                    var groupedSponsorEvent = sponsorEventDb.Items.GroupBy(s => s.SponsorType.ToString()).ToDictionary(s => s.Key, s => s.Count());
+                    data.SponsorTypes = groupedSponsorEvent;
+                }
+
+                if (sponsorMoneyHistoryDb.Items.Count > 0)
+                {
+                    var groupedSponsorEvent = sponsorMoneyHistoryDb.Items.GroupBy(s => s.EventSponsor.SponsorType.ToString()).ToDictionary(s => s.Key, s => s.Sum(a => a.Amount));
+                    data.SponsorAmounts = groupedSponsorEvent;
+                    var groupedSponsorEventDetail = sponsorMoneyHistoryDb.Items.GroupBy(s => s.EventSponsor.Event.Title)
+                                                                               .ToDictionary(s => s.Key, s => s.GroupBy(s => s.Date.Date.ToString("dd-MM-yyyy")).
+                                                                                                                ToDictionary(s => s.Key, s => s.Sum(a => a.Amount)));
+                    data.EventDetailSponsors = groupedSponsorEventDetail;
+                }
+                result.Result = data;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
+        }
+    }
 }

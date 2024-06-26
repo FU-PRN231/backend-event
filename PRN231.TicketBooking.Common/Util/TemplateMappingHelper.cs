@@ -993,38 +993,6 @@ namespace PRN231.TicketBooking.Common.Util
 </html>
 ";
 
-            var ticketSectionsBuilder = new StringBuilder();
-            foreach (var rank in ticketInfo.Keys)
-            {
-                int i = 1;
-                ticketSectionsBuilder.AppendLine($"<div class='rank-section'><h3>{rank}</h3><ul class='ticket-list'>");
-                ticketSectionsBuilder.AppendLine("<div class='image-grid'>"); // Container for image grid
-
-                foreach (var ticketUrl in ticketInfo[rank])
-                {
-                    var fileName = GetFileNameFromUrl(ticketUrl); // Function to extract file name from URL
-                    var customDownloadName = $"QR vé cho hạng vé {rank} - {i}"; // Custom filename
-
-                    ticketSectionsBuilder.AppendLine($@"
-<li class='ticket-item'>
-    <div class='image-container'>
-        <img src='{ticketUrl}' alt='{fileName}' />
-        <a href='{ticketUrl}' data-download-filename='{customDownloadName}'>{customDownloadName}</a>
-    </div>
-</li>");
-
-                    // Check if four images have been added, then close and reopen the grid row
-                    if (i % 4 == 0)
-                    {
-                        ticketSectionsBuilder.AppendLine("</div><div class='image-grid'>");
-                    }
-
-                    i++;
-                }
-
-                ticketSectionsBuilder.AppendLine("</div>"); // Close image grid container
-                ticketSectionsBuilder.AppendLine("</ul></div>");
-            }
 
             var emailBody = emailTemplate
                 .Replace("{{FirstName}}", account.FirstName)
@@ -1035,8 +1003,7 @@ namespace PRN231.TicketBooking.Common.Util
                 .Replace("{{EventStartDate}}", eventInfo.StartEventDate.ToString("yyyy-MM-dd HH:mm"))
                 .Replace("{{EventEndDate}}", eventInfo.EndEventDate.ToString("yyyy-MM-dd HH:mm"))
                 .Replace("{{EventLocation}}", eventInfo.Location != null ? eventInfo.Location.Name : "N/A")
-                .Replace("{{EventOrganization}}", eventInfo.Organization != null ? eventInfo.Organization.Name : "N/A")
-                .Replace("{{TicketSections}}", ticketSectionsBuilder.ToString());
+                .Replace("{{EventOrganization}}", eventInfo.Organization != null ? eventInfo.Organization.Name : "N/A");
 
             return emailBody;
         }
