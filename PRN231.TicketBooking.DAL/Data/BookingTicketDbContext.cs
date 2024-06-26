@@ -82,7 +82,6 @@ namespace PRN231.TicketBooking.DAO.Data
             });
             base.OnModelCreating(builder);
         }
-
         //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         //{
         //    IConfiguration config = new ConfigurationBuilder()
@@ -97,5 +96,6 @@ namespace PRN231.TicketBooking.DAO.Data
         //    //optionsBuilder.UseSqlServer(
         //    //   "server=.;database=TicketBooking;uid=sa;pwd=12345;TrustServerCertificate=True;MultipleActiveResultSets=True;");
         //}
+
     }
 }

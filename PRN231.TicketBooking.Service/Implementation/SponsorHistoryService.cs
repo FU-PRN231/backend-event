@@ -1,6 +1,10 @@
-﻿using DocumentFormat.OpenXml.Office2010.Excel;
+﻿using AutoMapper;
+using DocumentFormat.OpenXml.Office2010.Excel;
 using PRN231.TicketBooking.BusinessObject.Enum;
+using PRN231.TicketBooking.BusinessObject.Models;
 using PRN231.TicketBooking.Common.Dto;
+using PRN231.TicketBooking.Common.Dto.Request;
+using PRN231.TicketBooking.Common.Util;
 using PRN231.TicketBooking.Repository.Contract;
 using PRN231.TicketBooking.Service.Contract;
 using System;
@@ -14,15 +18,40 @@ namespace PRN231.TicketBooking.Service.Implementation
     public class SponsorHistoryService : GenericBackendService, ISponsorEventHistoryService
     {
         private readonly ISponsorMoneyHistoryRepository _repository;    
+        private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
         public SponsorHistoryService(
             IServiceProvider serviceProvider,
+            IMapper mapper,
             IUnitOfWork unitOfWork,
             ISponsorMoneyHistoryRepository repository   
             ) : base(serviceProvider)
         {
             _repository = repository;   
-            _unitOfWork = unitOfWork;   
+            _unitOfWork = unitOfWork; 
+            _mapper = mapper;
+        }
+
+        public async Task<AppActionResult> AddSponsorHistory(AddSponsorMoneyHistoryRequestDto dto)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                if(dto.TransferredDate == null) {
+                    var utility = Resolve<Utility>(); 
+                    dto.TransferredDate = utility.GetCurrentDateInTimeZone();
+                }
+
+                var sponsorMoneyHistory = _mapper.Map<SponsorMoneyHistory>(dto);
+                sponsorMoneyHistory.Id = Guid.NewGuid();
+                await _repository.Insert(sponsorMoneyHistory);
+                await _unitOfWork.SaveChangeAsync();
+
+            } catch(Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
         }
 
         public async Task<AppActionResult> GetSponsorHistoryById(Guid id)

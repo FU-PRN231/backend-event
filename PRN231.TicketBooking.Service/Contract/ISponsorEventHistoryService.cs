@@ -1,5 +1,6 @@
 ﻿using PRN231.TicketBooking.BusinessObject.Enum;
 using PRN231.TicketBooking.Common.Dto;
+using PRN231.TicketBooking.Common.Dto.Request;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,5 +15,6 @@ namespace PRN231.TicketBooking.Service.Contract
         Task<AppActionResult> GetSponsorHistoryById(Guid id);
         Task<AppActionResult> GetSponsorHistoryByType(SponsorType sponsorType, int pageNumber, int pageSize);
         Task<AppActionResult> GetSponsorHistoryBySponsorId(Guid sponsorId, int pageNumber, int pageSize);
+        Task<AppActionResult> AddSponsorHistory(AddSponsorMoneyHistoryRequestDto dto);
     }
 }
