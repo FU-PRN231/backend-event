@@ -573,7 +573,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                         files.Add(img);
                     }
                 }
-                emailService!.SendEmailWithFiles(account.Email, SD.SubjectMail.SEAT_TICKET, body, files);
+                emailService!.SendEmailWithFiles(account.Email, SD.SubjectMail.SEAT_TICKET, body, ticketInfo);
             }
             catch (Exception ex)
             {
