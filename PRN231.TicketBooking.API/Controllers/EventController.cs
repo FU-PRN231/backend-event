@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using PRN231.TicketBooking.BusinessObject.Enum;
 using PRN231.TicketBooking.Common.Dto;
 using PRN231.TicketBooking.Common.Dto.Request;
 using PRN231.TicketBooking.Service.Contract;
@@ -49,6 +50,12 @@ namespace PRN231.TicketBooking.API.Controllers
         public async Task<AppActionResult> UpdateEvent(Guid id, [FromForm] UpdateEventRequest updateEventRequest)
         {
             return await _eventService.UpdateEvent(id, updateEventRequest);
+        }
+
+        [HttpPost("update-event-status")]
+        public async Task<AppActionResult> UpdateEventStatus(Guid eventId, EventCensorStatus status)
+        {
+            return await _eventService.UpdateEventStatus(eventId, status);
         }
     }
 }

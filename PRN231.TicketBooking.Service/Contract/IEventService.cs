@@ -1,4 +1,5 @@
-﻿using PRN231.TicketBooking.Common.Dto;
+﻿using PRN231.TicketBooking.BusinessObject.Enum;
+using PRN231.TicketBooking.Common.Dto;
 using PRN231.TicketBooking.Common.Dto.Request;
 
 namespace PRN231.TicketBooking.Service.Contract
@@ -13,5 +14,7 @@ namespace PRN231.TicketBooking.Service.Contract
         public Task<AppActionResult> UpdateEvent(Guid id, UpdateEventRequest request);
         public Task<AppActionResult> GetEventByStatus(Guid? organizationId, int happened, int pageNumber, int pageSize);
         public Task<AppActionResult> CountingEventByStatus(Guid? organizationId);
-	}
+        public Task<AppActionResult> UpdateEventStatus(Guid eventId, EventCensorStatus status);
+
+    }
 }

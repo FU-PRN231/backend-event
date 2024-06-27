@@ -6,6 +6,7 @@ namespace PRN231.TicketBooking.Service.Contract
     {
         public void SendEmail(string recipient, string subject, string body);
         public void SendEmailWithFiles(string recipient, string subject, string body, List<IFormFile> files);
+        public void SendEmailWithFiles(string recipient, string subject, string body, Dictionary<string, List<IFormFile>> files);
 
     }
 }

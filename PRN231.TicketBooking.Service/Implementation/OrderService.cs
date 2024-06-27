@@ -162,58 +162,62 @@ namespace PRN231.TicketBooking.Service.Implementation
             var result = new AppActionResult();
             try
             {
+                var attendeeRepository = Resolve<IAttendeeRepostory>();
                 var orderDetailsRepository = Resolve<IOrderDetailsRepository>();
                 var oRCodeService = Resolve<IQRCodeService>();
-                var orderDetailDb = await orderDetailsRepository.GetAllDataByExpression(o => o.OrderId == orderId, 0, 0, null, false, o => o.SeatRank);
-                if (orderDetailDb.Items.Count == 0)
-                {
-                    result = BuildAppActionResultError(result, $"Không tìm thấy chi tiết của đơn hàng với id {orderId}");
-                    return result;
-                }
-                var orderDetailImgs = orderDetailDb.Items.Select(o => o.Id).ToList();
-                var staticFileRepository = Resolve<IStaticFileRepository>();
-                List<IFormFile> files = new List<IFormFile>();
-
-                var staticFileDb = await staticFileRepository.GetAllDataByExpression(s => s.OrderDetailId != null && orderDetailImgs.Contains((Guid)s.OrderDetailId), 0, 0, null, false, s => s.OrderDetail.SeatRank);
+                var attendeeDb = await attendeeRepository.GetAllDataByExpression(o => o.OrderDetail.OrderId == orderId, 0, 0, null, false, o => o.OrderDetail.SeatRank);
                 Dictionary<string, List<IFormFile>> data = new Dictionary<string, List<IFormFile>>();
-                if (staticFileDb.Items.Select(s => s.OrderDetailId).Distinct().ToList().Count == orderDetailImgs.Count)
+                if (attendeeDb.Items.Count > 0)
                 {
-                    var groupedImgs = staticFileDb.Items.GroupBy(g => g.OrderDetail!.SeatRank!.Name).ToDictionary(g => g.Key, g => g.Select(i => i.Img).ToList());
-                    foreach (var kvp in groupedImgs)
+                    var attendeeImgs = attendeeDb.Items.Where(a => !string.IsNullOrEmpty(a.QR)).Select(o => o.QR).ToList();
+                    if (attendeeDb.Items.Count == attendeeImgs.Count)
                     {
-                        data.Add(kvp.Key,null);
-                    }
-                }
-                else
-                {
-                    int quantity = 0;
-
-                    foreach (var orderDetail in orderDetailDb.Items)
-                    {
-                        List<string> imgs = new List<string>();
-                        quantity = orderDetail.Quantity;
-                        while (quantity > 0)
+                        var groupedImgs = attendeeDb.Items.GroupBy(g => g.OrderDetail!.SeatRank!.Name).ToDictionary(g => g.Key, g => g.Select(i => i.QR).ToList());
+                        foreach (var kvp in groupedImgs)
                         {
-                            AppActionResult upload = new AppActionResult();
-                            upload= await oRCodeService.GenerateQR($"{orderDetail.Id.ToString()}/{quantity}");
-                            if (upload == null)
+                            data.Add(kvp.Key,null);
+                        }
+                    }                    
+                } else
+                {
+                    var insertAttendee = await AddAttendee(orderId);
+                    if (insertAttendee == null)
+                    {
+                        result = BuildAppActionResultError(result, $"Tạo bảng điểm danh cho order với id {orderId} thất bại, vui lòng thử lại");
+                    }
+
+                    Dictionary<Guid, string> details = new Dictionary<Guid, string>();
+                    string seatRankName = null;
+                    foreach (var attendee in insertAttendee!)
+                    {
+                        AppActionResult upload = new AppActionResult();
+                        upload = await oRCodeService.GenerateQR(attendee.Id.ToString());
+                        if (upload == null)
+                        {
+                            result = BuildAppActionResultError(result, $"Không thể tải hình ảnh vé, vui lòng thử lại");
+                            return result;
+                        }
+                        UploadImgResponseDto QrCodeDto = (UploadImgResponseDto)upload.Result;
+                        attendee.QR = QrCodeDto.url;
+                        await attendeeRepository.Insert(attendee);
+                        if(!details.ContainsKey(attendee.OrderDetailId)) 
+                        {
+                            var detail = await orderDetailsRepository.GetByExpression(o => o.Id == attendee.OrderDetailId, o => o.SeatRank);
+                            if(detail == null)
                             {
-                                result = BuildAppActionResultError(result, $"Không thể tải hình ảnh vé, vui lòng thử lại");
+                                result = BuildAppActionResultError(result, $"Không tìm thấy ghế ngồi của chi tiết đơn hàng {attendee.OrderDetailId}");
                                 return result;
                             }
-                            UploadImgResponseDto QrCodeDto = (UploadImgResponseDto)upload.Result;
-                            files.Add(QrCodeDto.file);
-                            await staticFileRepository.Insert(new StaticFile
-                            {
-                                Id = Guid.NewGuid(),
-                                Img = QrCodeDto.url,
-                                OrderDetailId = orderDetail.Id
-                            });
-                            quantity--;
-                            imgs.Add(QrCodeDto.url);
+                            details.Add(attendee.OrderDetailId, detail.SeatRank.Name);
                         }
-                        data.Add(orderDetail.SeatRank!.Name, files);
-
+                        seatRankName = details[attendee.OrderDetailId];
+                        if (data.ContainsKey(seatRankName))
+                        {
+                            data[seatRankName].Add(QrCodeDto.file);
+                        } else
+                        {                         
+                            data.Add(seatRankName, new List<IFormFile> { QrCodeDto.file });
+                        }
                     }
                 }
                 await _unitOfWork.SaveChangeAsync();
@@ -593,7 +597,6 @@ namespace PRN231.TicketBooking.Service.Implementation
                     //if (!isSuccessful) orderDb.Status = OrderStatus.CANCELLED;
                     if (orderDb.Status == OrderStatus.PENDING) orderDb.Status = OrderStatus.SUCCUSSFUL;
                     await _unitOfWork.SaveChangeAsync();
-
                     var orderSend = await this.SendTicketEmail(orderDb.Id);
                     if (!orderSend.IsSuccess)
                     {
@@ -609,6 +612,40 @@ namespace PRN231.TicketBooking.Service.Implementation
                 result = BuildAppActionResultError(result, ex.Message);
             }
             return result;
+        }
+
+        private async Task<List<Attendee>> AddAttendee(Guid orderId)
+        {
+            List<Attendee> data = new List<Attendee>();
+            try
+            {
+                var orderDetailRepository = Resolve<IOrderDetailsRepository>();
+                var attendeeRepository = Resolve<IAttendeeRepostory>();
+                var orderDetailDb = await orderDetailRepository.GetAllDataByExpression(o => o.OrderId == orderId, 0, 0, null, false, o => o.SeatRank);
+                if (orderDetailDb.Items.Count > 0)
+                {
+                    int i = 0;
+                    foreach (var detail in orderDetailDb.Items)
+                    {
+                        i = detail.Quantity;
+                        while (i > 0)
+                        {
+                            data.Add(new Attendee
+                            {
+                                Id = Guid.NewGuid(),
+                                CheckedIn = false,
+                                OrderDetailId = detail.Id,
+                                QR = string.Empty
+                            });
+                            i--;
+                        }
+                    }
+                }
+            } catch(Exception ex)
+            {
+                data = null;
+            }
+            return data;
         }
     }
 }

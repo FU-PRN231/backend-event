@@ -90,4 +90,54 @@ public class EmailService : GenericBackendService, IEmailService
         }
     }
 
+    public void SendEmailWithFiles(string recipient, string subject, string body, Dictionary<string, List<IFormFile>> files)
+    {
+        try
+        {
+            var message = new MimeMessage();
+            message.From.Add(new MailboxAddress("Cóc Event Company", _emailConfiguration.User));
+            message.To.Add(new MailboxAddress("Khách hàng", recipient));
+            message.Subject = subject;
+            message.Importance = MessageImportance.High;
+
+            var bodyBuilder = new BodyBuilder();
+            var emailBody = new System.Text.StringBuilder(body);
+
+            // Attach files
+            foreach (var rank in files)
+            {
+                string rankName = rank.Key;
+                emailBody.AppendLine($"<h3>{rankName}</h3><ul>");
+                foreach (var file in rank.Value)
+                {
+                    var attachment = new MimePart(file.ContentType)
+                    {
+                        Content = new MimeContent(file.OpenReadStream()),
+                        ContentDisposition = new ContentDisposition(ContentDisposition.Attachment),
+                        ContentTransferEncoding = ContentEncoding.Base64,
+                        FileName = $"{rankName}_{file.FileName}"
+                    };
+                    bodyBuilder.Attachments.Add(attachment);
+                }
+                emailBody.AppendLine("</ul>");
+            }
+
+            bodyBuilder.HtmlBody = emailBody.ToString();
+            message.Body = bodyBuilder.ToMessageBody();
+
+            using (var client = new SmtpClient())
+            {
+                client.Connect("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+                client.Authenticate(_emailConfiguration.User, _emailConfiguration.ApplicationPassword);
+                client.Send(message);
+                client.Disconnect(true);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message, this);
+        }
+    }
+
+
 }
