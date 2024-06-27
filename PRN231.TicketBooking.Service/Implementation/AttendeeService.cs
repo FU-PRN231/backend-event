@@ -67,7 +67,7 @@ namespace PRN231.TicketBooking.Service.Implementation
             try
             {
                 var attendeeRepository = Resolve<IAttendeeRepostory>();
-                var attendeeEntity = await attendeeRepository.GetByExpression(a => a.Id == Guid.Parse(qrString), a => a.OrderDetail.Order, a => a.OrderDetail.SeatRank);
+                var attendeeEntity = await attendeeRepository.GetByExpression(a => a.Id == Guid.Parse(qrString), a => a.OrderDetail.Order.Account, a => a.OrderDetail.SeatRank.Event);
                 if (attendeeEntity == null)
                 {
                     result.IsSuccess = false;
@@ -86,7 +86,13 @@ namespace PRN231.TicketBooking.Service.Implementation
                 var item = await attendeeRepository.CheckInAttendee(attendeeEntity);
 
                 await _unitOfWork.SaveChangeAsync();
-                result.Result = _mapper.Map<UpdateAttendeeReponse>(item);
+                result.Result = new UpdateAttendeeReponse
+                {
+                    CheckedIn = true,
+                    OrderDate = attendeeEntity.OrderDetail.Order.PurchaseDate,
+                    Account = attendeeEntity.OrderDetail.Order.Account,
+                    SeatRank = attendeeEntity.OrderDetail.SeatRank
+                };
             }
             catch (Exception ex)
             {

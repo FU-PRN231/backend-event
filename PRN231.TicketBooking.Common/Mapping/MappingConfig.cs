@@ -94,10 +94,7 @@ namespace PRN231.TicketBooking.Common.Mapping
                    .ForMember(desc => desc.Amount, act => act.MapFrom(src => src.Amount))
                    .ForMember(desc => desc.IsFromSponsor, act => act.MapFrom(src => src.IsFromSponsor));
 
-                config.CreateMap<Attendee, UpdateAttendeeReponse>()
-                   .ForMember(desc => desc.EventId, act => act.MapFrom(src => src.OrderDetail.SeatRank.EventId))
-                   .ForMember(desc => desc.CheckedIn, act => act.MapFrom(src => src.CheckedIn))
-                   .ForMember(desc => desc.OrderId, act => act.MapFrom(src => src.OrderDetail.OrderId));
+
 
 
 

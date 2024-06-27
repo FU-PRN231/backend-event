@@ -799,10 +799,9 @@ namespace PRN231.TicketBooking.Service.Implementation
                     result = BuildAppActionResultError(result, "Không tìm thấy thông tin tài khoản");
                     return result;
                 }
-                string qrAccountString = $"{accountDb.FirstName} {accountDb.LastName},{accountDb.PhoneNumber},{accountDb.Email}";
                 //string encryptAccountResponseString = EncryptData(qrAccountString, SD.QR_CODE_KEY);
                 string pathName = SD.FirebasePathName.QR_PREFIX + accountDb.Id;
-                IFormFile qr = CreateQRCode(qrAccountString);
+                IFormFile qr = CreateQRCode(accountDb.Id);
                 var url = await _firebaseService.UploadFileToFirebase(qr, pathName);
                 if (url.IsSuccess)
                 {
@@ -895,12 +894,12 @@ namespace PRN231.TicketBooking.Service.Implementation
                 //if(decryptData != null)
                 //{
                 //}
-                string[] data = hashedAccountData.Split(',');
+                var account = await _accountRepository.GetById(hashedAccountData);
                 result.Result = new QRAccountResponse
                 {
-                    FullName = data[0],
-                    PhoneNumber = data[1],
-                    Email = data[2]
+                    FullName = account.LastName + " " + account.FirstName,
+                    PhoneNumber = account.PhoneNumber,
+                    Email = account.Email,
                 };
             }
             catch (Exception ex)
