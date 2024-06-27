@@ -172,14 +172,16 @@ namespace PRN231.TicketBooking.Service.Implementation
                 }
                 var orderDetailImgs = orderDetailDb.Items.Select(o => o.Id).ToList();
                 var staticFileRepository = Resolve<IStaticFileRepository>();
+                List<IFormFile> files = new List<IFormFile>();
+
                 var staticFileDb = await staticFileRepository.GetAllDataByExpression(s => s.OrderDetailId != null && orderDetailImgs.Contains((Guid)s.OrderDetailId), 0, 0, null, false, s => s.OrderDetail.SeatRank);
-                Dictionary<string, List<string>> data = new Dictionary<string, List<string>>();
+                Dictionary<string, List<IFormFile>> data = new Dictionary<string, List<IFormFile>>();
                 if (staticFileDb.Items.Select(s => s.OrderDetailId).Distinct().ToList().Count == orderDetailImgs.Count)
                 {
-                    var groupedImgs = staticFileDb.Items.GroupBy(g => g.OrderDetail.SeatRank.Name).ToDictionary(g => g.Key, g => g.Select(i => i.Img).ToList());
+                    var groupedImgs = staticFileDb.Items.GroupBy(g => g.OrderDetail!.SeatRank!.Name).ToDictionary(g => g.Key, g => g.Select(i => i.Img).ToList());
                     foreach (var kvp in groupedImgs)
                     {
-                        data.Add(kvp.Key, kvp.Value);
+                        data.Add(kvp.Key,null);
                     }
                 }
                 else
@@ -200,6 +202,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                                 return result;
                             }
                             UploadImgResponseDto QrCodeDto = (UploadImgResponseDto)upload.Result;
+                            files.Add(QrCodeDto.file);
                             await staticFileRepository.Insert(new StaticFile
                             {
                                 Id = Guid.NewGuid(),
@@ -209,7 +212,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                             quantity--;
                             imgs.Add(QrCodeDto.url);
                         }
-                        data.Add(orderDetail.SeatRank.Name, imgs);
+                        data.Add(orderDetail.SeatRank!.Name, files);
 
                     }
                 }
@@ -222,71 +225,71 @@ namespace PRN231.TicketBooking.Service.Implementation
             }
             return result;
         }
+      
+        /* private async Task<UploadImgResponseDto> GenerateQR(string Id)
+         {
+             UploadImgResponseDto result = null;
+             try
+             {
+                 string pathName = SD.FirebasePathName.QR_PREFIX + Id;
+                 //IFormFile qr = GenerateQRCodeImage(Id);
+                 IFormFile qr = CreateQRCode(Id);
+                 var url = await _firebaseService.UploadFileToFirebase(qr, pathName);
+                 if (url.IsSuccess)
+                 {
+                     result.file = qr;
+                     result.url = (string)url.Result;
+                 }
+                 else
+                 {
+                     return null;
+                 }
 
-       /* private async Task<UploadImgResponseDto> GenerateQR(string Id)
-        {
-            UploadImgResponseDto result = null;
-            try
-            {
-                string pathName = SD.FirebasePathName.QR_PREFIX + Id;
-                //IFormFile qr = GenerateQRCodeImage(Id);
-                IFormFile qr = CreateQRCode(Id);
-                var url = await _firebaseService.UploadFileToFirebase(qr, pathName);
-                if (url.IsSuccess)
-                {
-                    result.file = qr;
-                    result.url = (string)url.Result;
-                }
-                else
-                {
-                    return null;
-                }
+             }
+             catch (Exception ex)
+             {
+                 result = null;
+             }
+             return result;
+         }*/
 
-            }
-            catch (Exception ex)
-            {
-                result = null;
-            }
-            return result;
-        }*/
+        /*  private IFormFile GenerateQRCodeImage(string data)
+          {
+              var barcodeWriter = new BarcodeWriterPixelData
+              {
+                  Format = BarcodeFormat.QR_CODE,
+                  Options = new EncodingOptions
+                  {
+                      Height = 500,
+                      Width = 500,
+                      Margin = 1
+                  }
+              };
 
-      /*  private IFormFile GenerateQRCodeImage(string data)
-        {
-            var barcodeWriter = new BarcodeWriterPixelData
-            {
-                Format = BarcodeFormat.QR_CODE,
-                Options = new EncodingOptions
-                {
-                    Height = 500,
-                    Width = 500,
-                    Margin = 1
-                }
-            };
+              var pixelData = barcodeWriter.Write(data);
 
-            var pixelData = barcodeWriter.Write(data);
+              using (var bitmap = new System.Drawing.Bitmap(pixelData.Width, pixelData.Height, System.Drawing.Imaging.PixelFormat.Format32bppRgb))
+              {
+                  var bitmapData = bitmap.LockBits(new System.Drawing.Rectangle(0, 0, bitmap.Width, bitmap.Height), System.Drawing.Imaging.ImageLockMode.WriteOnly, bitmap.PixelFormat);
+                  try
+                  {
+                      System.Runtime.InteropServices.Marshal.Copy(pixelData.Pixels, 0, bitmapData.Scan0, pixelData.Pixels.Length);
+                  }
+                  finally
+                  {
+                      bitmap.UnlockBits(bitmapData);
+                  }
 
-            using (var bitmap = new System.Drawing.Bitmap(pixelData.Width, pixelData.Height, System.Drawing.Imaging.PixelFormat.Format32bppRgb))
-            {
-                var bitmapData = bitmap.LockBits(new System.Drawing.Rectangle(0, 0, bitmap.Width, bitmap.Height), System.Drawing.Imaging.ImageLockMode.WriteOnly, bitmap.PixelFormat);
-                try
-                {
-                    System.Runtime.InteropServices.Marshal.Copy(pixelData.Pixels, 0, bitmapData.Scan0, pixelData.Pixels.Length);
-                }
-                finally
-                {
-                    bitmap.UnlockBits(bitmapData);
-                }
+                  var memoryStream = new MemoryStream();
+                  bitmap.Save(memoryStream, System.Drawing.Imaging.ImageFormat.Png);
+                  memoryStream.Position = 0;
 
-                var memoryStream = new MemoryStream();
-                bitmap.Save(memoryStream, System.Drawing.Imaging.ImageFormat.Png);
-                memoryStream.Position = 0;
+                  IFormFile formFile = new FormFile(memoryStream, 0, memoryStream.Length, "barcode.png", "image/png");
 
-                IFormFile formFile = new FormFile(memoryStream, 0, memoryStream.Length, "barcode.png", "image/png");
+                  return formFile;
+              }
+          }*/
 
-                return formFile;
-            }
-        }*/
-       
 
         public async Task<AppActionResult> GetAllOrder(int pageNumber, int pageSize)
         {
@@ -544,7 +547,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                     return result;
                 }
 
-                Dictionary<string, List<string>> ticketInfo = new Dictionary<string, List<string>>();
+                Dictionary<string, List<IFormFile>> ticketInfo = new Dictionary<string, List<IFormFile>>();
                 var ticketData = await GenerateTicketQR(orderId);
                 if (!ticketData.IsSuccess)
                 {
@@ -552,22 +555,21 @@ namespace PRN231.TicketBooking.Service.Implementation
                     result.IsSuccess = false;
                     return result;
                 }
-                ticketInfo = (Dictionary<string, List<string>>)ticketData.Result!;
+                ticketInfo = (Dictionary<string, List<IFormFile>>)ticketData.Result!;
 
                 var emailService = Resolve<IEmailService>();
                 Account account = orderDetailDb!.Items!.FirstOrDefault()!.Order!.Account!;
                 Event eventDb = orderDetailDb!.Items!.FirstOrDefault()!.SeatRank!.Event!;
                 string body = TemplateMappingHelper.GenerateTicketEmailBody(account, ticketInfo, eventDb);
                 List<IFormFile> files = new List<IFormFile>();
-                //foreach (var kvp in ticketInfo)
-                //{
-                //    foreach (var img in kvp.Value)
-                //    {
-                //        var file = new FormFile(new MemoryStream(System.IO.File.ReadAllBytes(img)), 0, System.IO.File.ReadAllBytes(img).Length, "ticket.png", "image/png");
-                //        files.Add(file);
-                //    }
-                //}
-                //emailService!.SendEmailWithFiles(account.Email, SD.SubjectMail.SEAT_TICKET, body, files);
+                foreach (var kvp in ticketInfo)
+                {
+                    foreach (var img in kvp.Value)
+                    {
+                        files.Add(img);
+                    }
+                }
+                emailService!.SendEmailWithFiles(account.Email, SD.SubjectMail.SEAT_TICKET, body, files);
             }
             catch (Exception ex)
             {
