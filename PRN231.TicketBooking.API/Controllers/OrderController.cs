@@ -127,10 +127,5 @@ namespace PRN231.TicketBooking.API.Controllers
             return await _orderService.GenerateTicketQR(orderId);
         }
 
-        [HttpPost("test-file")]
-        public async Task<List<IFormFile>> ConvertUrlsToIFormFilesAsync([FromBody]List<string> urls)
-        {
-            return await _orderService.ConvertUrlsToIFormFilesAsync(urls);
-        }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using PRN231.TicketBooking.BusinessObject.Enum;
+using PRN231.TicketBooking.BusinessObject.Models;
 using PRN231.TicketBooking.Common.Dto;
 using PRN231.TicketBooking.Common.Dto.Request;
 using System;
@@ -24,6 +25,5 @@ namespace PRN231.TicketBooking.Service.Contract
         Task<AppActionResult> PurchaseOrder(Guid orderId, HttpContext context);
         Task<AppActionResult> GenerateTicketQR(Guid orderId);
         Task<AppActionResult> SendTicketEmail(Guid orderId);
-        Task<List<IFormFile>> ConvertUrlsToIFormFilesAsync(List<string> imageUrls);
     }
 }

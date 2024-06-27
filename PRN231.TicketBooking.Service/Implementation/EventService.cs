@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using PRN231.TicketBooking.BusinessObject.Enum;
 using PRN231.TicketBooking.BusinessObject.Models;
 using PRN231.TicketBooking.Common.Dto;
 using PRN231.TicketBooking.Common.Dto.Request;
@@ -472,6 +473,34 @@ namespace PRN231.TicketBooking.Service.Implementation
                 return BuildAppActionResultSuccess(result, "Get list event successfully!");
             }
             catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
+        }
+
+        public async Task<AppActionResult> UpdateEventStatus(Guid eventId, EventCensorStatus status)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                var eventRepository = Resolve<IEventRepository>();
+                var eventDb = await eventRepository.GetById(eventId);
+                if(eventDb == null)
+                {
+                    result = BuildAppActionResultError(result, $"Không tìm thấy sư kiện với id {eventId}");
+                    return result;
+                }
+                if(eventDb.Status != EventCensorStatus.PENDING)
+                {
+                    result = BuildAppActionResultError(result, $"Sự kiện {eventDb.Title} đã được duyệt, không thể chuyển trạng thái");
+                    return result;
+                }
+
+                eventDb.Status = status;
+                await eventRepository.Update(eventDb);
+                await _unitOfWork.SaveChangeAsync();
+            } catch(Exception ex)
             {
                 result = BuildAppActionResultError(result, ex.Message);
             }
