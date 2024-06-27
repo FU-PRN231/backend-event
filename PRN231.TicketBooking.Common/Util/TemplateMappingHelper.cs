@@ -831,7 +831,7 @@ namespace PRN231.TicketBooking.Common.Util
             return body;
         }
 
-        public static string GenerateTicketEmailBody(Account account, Dictionary<string, List<string>> ticketInfo, Event eventInfo)
+        public static string GenerateTicketEmailBody(Account account, Event eventInfo)
         {
             var emailTemplate = @"
 <!DOCTYPE html>
