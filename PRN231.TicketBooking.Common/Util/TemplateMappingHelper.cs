@@ -831,7 +831,7 @@ namespace PRN231.TicketBooking.Common.Util
             return body;
         }
 
-        public static string GenerateTicketEmailBody(Account account, Event eventInfo)
+        public static string GenerateTicketEmailBody(Account account, Dictionary<string, List<IFormFile>> ticketInfo, Event eventInfo)
         {
             var emailTemplate = @"
 <!DOCTYPE html>
@@ -972,7 +972,7 @@ namespace PRN231.TicketBooking.Common.Util
         </div>
         <div class='ticket-section'>
             <h2>Tickets</h2>
-            {{TicketSections}}
+           <p>Below are the tickets you have purchased for the event</p>
         </div>
     </div>
 
