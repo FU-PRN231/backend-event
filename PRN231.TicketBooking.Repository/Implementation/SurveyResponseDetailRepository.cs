@@ -16,7 +16,7 @@ namespace PRN231.TicketBooking.Repository.Implementation
         {
         }
 
-        public async Task<bool> AddAnswerToSurvey(List<AnswerDetail> answerDetails, string accountId)
+        public async Task<bool> AddAnswerToSurvey(List<AnswerDetail> answerDetails, string? accountId)
         {
             bool result = false;
             try

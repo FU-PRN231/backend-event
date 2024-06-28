@@ -15,5 +15,6 @@ namespace PRN231.TicketBooking.Service.Contract
         public Task<AppActionResult> CreateAnswerForSurvey(CreateAnswerRequest dto);
         public Task<AppActionResult> GellAllSurvey();
         public Task<AppActionResult> GellSurveyOfOrganization(Guid id);
+        public Task<AppActionResult> GetSurveyResponseBySurveyId(Guid id);
     }
 }

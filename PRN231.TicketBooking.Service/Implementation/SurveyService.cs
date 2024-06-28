@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using DocumentFormat.OpenXml.Office2013.Excel;
 using PRN231.TicketBooking.BusinessObject.Models;
 using PRN231.TicketBooking.Common.Dto;
 using PRN231.TicketBooking.Common.Dto.Request;
@@ -13,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace PRN231.TicketBooking.Service.Implementation
 {
-    public class SurveyService: GenericBackendService, ISurveyService
+    public class SurveyService : GenericBackendService, ISurveyService
     {
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
@@ -35,11 +36,14 @@ namespace PRN231.TicketBooking.Service.Implementation
             {
                 var accountRepository = Resolve<IAccountRepository>();
                 var surveyResponseDetailRepository = Resolve<ISurveyResponseDetailRepository>();
-                var accountDb = await accountRepository.GetById(dto.AccountId);
-                if (accountDb == null)
+                if(dto.AccountId != null)
                 {
-                    result = BuildAppActionResultError(result, $"Không tìm thấy người dùng với id {dto.AccountId}");
-                    return result;
+                    var accountDb = await accountRepository.GetById(dto.AccountId);
+                    if (accountDb == null)
+                    {
+                        result = BuildAppActionResultError(result, $"Không tìm thấy người dùng với id {dto.AccountId}");
+                        return result;
+                    }
                 }
                 var surveyDb = await _surveyRepository.GetById(dto.SurveyId);
                 if(surveyDb == null)
@@ -101,7 +105,7 @@ namespace PRN231.TicketBooking.Service.Implementation
             AppActionResult result = new();
             try
             {
-                var surveyDb = await _surveyRepository.GetAllDataByExpression(null, 0, 0, null, false, null);
+                var surveyDb = await _surveyRepository.GetAllDataByExpression(null, 0, 0, null, false, s => s.CreateByAccount);
                 List<SurveyQuestionResponse> data = new List<SurveyQuestionResponse>();
                 if(surveyDb.Items != null && surveyDb.Items.Count > 0) 
                 {
@@ -136,7 +140,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                     return result;
                 }
 
-                var surveyDb = await _surveyRepository.GetAllDataByExpression(s => s.Event!.OrganizationId == id, 0, 0, null, false, null);
+                var surveyDb = await _surveyRepository.GetAllDataByExpression(s => s.Event!.OrganizationId == id, 0, 0, null, false, s => s.CreateByAccount);
                 List<SurveyQuestionResponse> data = new List<SurveyQuestionResponse>();
                 if (surveyDb.Items != null && surveyDb.Items.Count > 0)
                 {
@@ -165,7 +169,7 @@ namespace PRN231.TicketBooking.Service.Implementation
             try
             {
                 SurveyQuestionResponse data = new SurveyQuestionResponse();
-                var surveyDb = await _surveyRepository.GetById(surveyId);
+                var surveyDb = await _surveyRepository.GetByExpression(s => s.Id == surveyId, s => s.CreateByAccount);
                 if(surveyDb == null ) 
                 {
                     result = BuildAppActionResultError(result, $"Không tìm thấy form khảo sát với id {surveyId}");
@@ -174,6 +178,38 @@ namespace PRN231.TicketBooking.Service.Implementation
                 data.Survey = surveyDb;
                 var surveyQuestionDetail = await _surveyQuestionDetailRepository.GetAllDataByExpression(s => s.SurveyId == surveyId, 0, 0, null, false, null);
                 data.surveyQuestionDetails = surveyQuestionDetail.Items!;
+                result.Result = data;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
+        }
+
+        public async Task<AppActionResult> GetSurveyResponseBySurveyId(Guid id)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                SurveyAnswerResponse data = new SurveyAnswerResponse();
+                var surveyDb = await _surveyRepository.GetByExpression(s => s.Id == id, s => s.CreateByAccount);
+                if (surveyDb == null)
+                {
+                    result = BuildAppActionResultError(result, $"Không tìm thấy form khảo sát với id {id}");
+                    return result;
+                }
+                data.Survey = surveyDb;
+                var surveyQuestionDetail = await _surveyQuestionDetailRepository.GetAllDataByExpression(s => s.SurveyId == id, 0, 0, null, false, null);
+                var surveyAnswerDetailRepository = Resolve<ISurveyResponseDetailRepository>(); 
+                foreach (var question in surveyQuestionDetail.Items!)
+                {
+                    SurveyAnswerDetailDto answers = new SurveyAnswerDetailDto();
+                    answers.SurveyQuestionDetail = question;
+                    var surveyAnswerDetail = await surveyAnswerDetailRepository.GetAllDataByExpression(s => s.SurveyQuestionId == question.Id, 0, 0, null, false, null);
+                    answers.SurveyResponseDetails.AddRange(surveyAnswerDetail.Items!);
+                    data.SurveyAnswerDetailDtos.Add(answers);
+                }
                 result.Result = data;
             }
             catch (Exception ex)
