@@ -8,7 +8,7 @@ namespace PRN231.TicketBooking.Common.Dto.Request
 {
     public class CreateAnswerRequest
     {
-        public string AccountId { get; set; }
+        public string? AccountId { get; set; }
         public Guid SurveyId { get; set; }
         public List<AnswerDetail> AnswerDetails { get; set; } = new List<AnswerDetail>();
     }
