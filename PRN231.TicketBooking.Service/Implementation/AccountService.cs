@@ -18,6 +18,8 @@ using System.Text;
 using System.Drawing;
 using Firebase.Auth;
 using System.Data.Entity.Core.Metadata.Edm;
+using Humanizer;
+using ZXing;
 
 
 namespace PRN231.TicketBooking.Service.Implementation
@@ -331,8 +333,8 @@ namespace PRN231.TicketBooking.Service.Implementation
 
             try
             {
-                var user = await _accountRepository.GetAccountByEmail(dto.Email, false, true);
-                if (user == null)
+                var user = await _userManager.FindByEmailAsync(dto.Email);
+                if (user == null || (user != null && user.IsDeleted))
                     result = BuildAppActionResultError(result, "Tài khoản không tồn tại hoặc chưa được xác thực!");
                 else if (user.VerifyCode != dto.RecoveryCode)
                     result = BuildAppActionResultError(result, "Mã xác thực sai!");
@@ -362,11 +364,11 @@ namespace PRN231.TicketBooking.Service.Implementation
             var result = new AppActionResult();
             try
             {
-                var user = await _accountRepository.GetAccountByEmail(email, false, false);
-                if (user == null)
-                    result = BuildAppActionResultError(result, "Tài khoản không tồn tại ");
-                else if (user.VerifyCode != verifyCode)
-                    result = BuildAppActionResultError(result, "Mã xác thực sai");
+                var user = await _userManager.FindByEmailAsync(dto.Email);
+                if (user == null || (user != null && user.IsDeleted))
+                    result = BuildAppActionResultError(result, "Tài khoản không tồn tại hoặc chưa được xác thực!");
+                else if (user.VerifyCode != dto.RecoveryCode)
+                    result = BuildAppActionResultError(result, "Mã xác thực sai!");
 
                 if (!BuildAppActionResultIsError(result))
                 {
@@ -390,8 +392,9 @@ namespace PRN231.TicketBooking.Service.Implementation
 
             try
             {
-                var user = await _accountRepository.GetAccountByEmail(email, false, true);
-                if (user == null) result = BuildAppActionResultError(result, "Tài khoản không tồn tại hoặc chưa được xác thực");
+                var user = await _userManager.FindByEmailAsync(email);
+                if (user == null || (user != null && user.IsDeleted))
+                    result = BuildAppActionResultError(result, "Tài khoản không tồn tại hoặc chưa được xác thực!");
 
                 if (!BuildAppActionResultIsError(result))
                 {
@@ -416,8 +419,9 @@ namespace PRN231.TicketBooking.Service.Implementation
 
             try
             {
-                var user = await _accountRepository.GetAccountByEmail(email, false, false);
-                if (user == null) result = BuildAppActionResultError(result, "Tài khoản không tồn tại hoặc chưa xác thực");
+                var user = await _userManager.FindByEmailAsync(email);
+                if (user == null || (user != null && user.IsDeleted))
+                    result = BuildAppActionResultError(result, "Tài khoản không tồn tại hoặc chưa được xác thực!");
 
                 if (!BuildAppActionResultIsError(result))
                 {
@@ -440,8 +444,7 @@ namespace PRN231.TicketBooking.Service.Implementation
         {
             var code = string.Empty;
 
-            var user = await _accountRepository.GetAccountByEmail(email, false, isForForgettingPassword);
-
+            var user = await _userManager.FindByEmailAsync(email);
             if (user != null)
             {
                 code = Guid.NewGuid().ToString("N").Substring(0, 6);
