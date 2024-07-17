@@ -135,7 +135,7 @@ namespace PRN231.TicketBooking.Common.Util
             font-size: 30px;
           ""
         >
-          Love House
+          Cóc Event
         </p>
       </div>
       <div class=""mainBody"">
@@ -145,7 +145,7 @@ namespace PRN231.TicketBooking.Common.Util
         <p class=""greeting""></p>
 
         <p class=""emailBody"">
-          You are currently registering an account through <b><i>Love House </i></b>.
+          You are currently registering an account through <b><i>Cóc Event </i></b>.
         </p>
         <p class=""emailBody"">
           Below is your OTP information:
@@ -161,14 +161,14 @@ namespace PRN231.TicketBooking.Common.Util
           >
         </p>
         <p class=""support"">
-          Thank you for your interest in the services of <b><i>Love House</i></b
+          Thank you for your interest in the services of <b><i>Cóc Event</i></b
           >, for any inquiries, please contact
           <u><i>qk.backend@gmail.com</i></u> for support
         </p>
         <div class=""signature"">
           <p>Best regards,</p>
           <p>
-            <b><i>Love House Team</i></b>
+            <b><i>Cóc Event Team</i></b>
           </p>
         </div>
       </div>
@@ -297,7 +297,7 @@ namespace PRN231.TicketBooking.Common.Util
             font-size: 30px;
           ""
         >
-          Love House
+          Cóc Event
         </p>
       </div>
       <div class=""mainBody"">
@@ -307,7 +307,7 @@ namespace PRN231.TicketBooking.Common.Util
         <p class=""greeting""></p>
 
         <p class=""emailBody"">
-          You are in the process of completing contract procedures through <b><i>Love House </i></b>.
+          You are in the process of completing contract procedures through <b><i>Cóc Event </i></b>.
         </p>
         <p class=""emailBody"">
           Below is your OTP information:
@@ -323,14 +323,14 @@ namespace PRN231.TicketBooking.Common.Util
           >
         </p>
         <p class=""support"">
-          Thank you for your interest in the services of <b><i>Love House</i></b
+          Thank you for your interest in the services of <b><i>Cóc Event</i></b
           >, for any inquiries, please contact
           <u><i>qk.backend@gmail.com</i></u> for support
         </p>
         <div class=""signature"">
           <p>Best regards,</p>
           <p>
-            <b><i>Love House Team</i></b>
+            <b><i>Cóc Event Team</i></b>
           </p>
         </div>
       </div>
@@ -459,7 +459,7 @@ namespace PRN231.TicketBooking.Common.Util
             font-size: 30px;
           ""
         >
-          Love House
+          Cóc Event
         </p>
       </div>
       <div class=""mainBody"">
@@ -469,7 +469,7 @@ namespace PRN231.TicketBooking.Common.Util
         <p class=""greeting""></p>
 
         <p class=""emailBody"">
-         You have accidentally forgotten your password through <b><i>Love House </i></b>.
+         You have accidentally forgotten your password through <b><i>Cóc Event </i></b>.
         </p>
         <p class=""emailBody"">
           Below is your OTP information:
@@ -485,14 +485,14 @@ namespace PRN231.TicketBooking.Common.Util
           >
         </p>
         <p class=""support"">
-          Thank you for your interest in the services of <b><i>Love House</i></b
+          Thank you for your interest in the services of <b><i>Cóc Event</i></b
           >, for any inquiries, please contact
           <u><i>qk.backend@gmail.com</i></u> for support
         </p>
         <div class=""signature"">
           <p>Best regards,</p>
           <p>
-            <b><i>Love House Team</i></b>
+            <b><i>Cóc Event Team</i></b>
           </p>
         </div>
       </div>
@@ -788,7 +788,7 @@ namespace PRN231.TicketBooking.Common.Util
             font-size: 30px;
           ""
         >
-          Love House
+          Cóc Event
         </p>
       </div>
       <div class=""mainBody"">
@@ -798,7 +798,7 @@ namespace PRN231.TicketBooking.Common.Util
         <p class=""greeting""></p>
 
         <p class=""emailBody"">
-         Your quote request has been completed at <b><i>Love House </i></b>.
+         Your quote request has been completed at <b><i>Cóc Event </i></b>.
         </p>
         <p class=""emailBody"">
          Please enter the system to view the quote and moderate this quote
@@ -809,14 +809,14 @@ namespace PRN231.TicketBooking.Common.Util
             ></a
           >
         <p class=""support"">
-          Thank you for your interest in the services of <b><i>Love House</i></b
+          Thank you for your interest in the services of <b><i>Cóc Event</i></b
           >, for any inquiries, please contact
           <u><i>qk.backend@gmail.com</i></u> for support
         </p>
         <div class=""signature"">
           <p>Best regards,</p>
           <p>
-            <b><i>Love House Team</i></b>
+            <b><i>Cóc Event Team</i></b>
           </p>
         </div>
       </div>

@@ -364,10 +364,10 @@ namespace PRN231.TicketBooking.Service.Implementation
             var result = new AppActionResult();
             try
             {
-                var user = await _userManager.FindByEmailAsync(dto.Email);
+                var user = await _userManager.FindByEmailAsync(email);
                 if (user == null || (user != null && user.IsDeleted))
                     result = BuildAppActionResultError(result, "Tài khoản không tồn tại hoặc chưa được xác thực!");
-                else if (user.VerifyCode != dto.RecoveryCode)
+                else if (user.VerifyCode != verifyCode)
                     result = BuildAppActionResultError(result, "Mã xác thực sai!");
 
                 if (!BuildAppActionResultIsError(result))
