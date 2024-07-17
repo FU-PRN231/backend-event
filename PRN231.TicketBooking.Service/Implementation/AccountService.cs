@@ -275,13 +275,12 @@ namespace PRN231.TicketBooking.Service.Implementation
 
             try
             {
-                if (await _accountRepository.GetAccountByEmail(changePasswordDto.Email, false, null) == null)
+                var user = await _userManager.FindByEmailAsync(changePasswordDto.Email);
+                if (user == null || (user != null && user.IsDeleted))
                     result = BuildAppActionResultError(result,
                         $"Tài khoản có email {changePasswordDto.Email} không tồn tại!");
                 if (!BuildAppActionResultIsError(result))
                 {
-                    var user = await _accountRepository.GetByExpression(c =>
-                        c!.Email == changePasswordDto.Email && c.IsDeleted == false);
                     var changePassword = await _userManager.ChangePasswordAsync(user!, changePasswordDto.OldPassword,
                         changePasswordDto.NewPassword);
                     if (!changePassword.Succeeded)
