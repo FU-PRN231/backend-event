@@ -41,5 +41,6 @@ namespace PRN231.TicketBooking.Service.Contract
         public Task<AppActionResult> GenerateQR(string Id);
         public Task<AppActionResult> DecodeQR(string hashedAccountData);
         public Task<AppActionResult> AssignRole(string userId, string roleName);
-	}
+        public Task<AppActionResult> AssignUserIntoOrganization(string userId, Guid organizationId);
+    }
 }
