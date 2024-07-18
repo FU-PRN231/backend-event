@@ -24,6 +24,7 @@ namespace PRN231.TicketBooking.API.Controllers
         }
 
         [HttpGet("get-all-account")]
+        [Authorize("ADMIN")]
         public async Task<AppActionResult> GetAllAccount(int pageIndex = 1, int pageSize = 10)
         {
             return await _accountService.GetAllAccount(pageIndex, pageSize);
@@ -54,12 +55,14 @@ namespace PRN231.TicketBooking.API.Controllers
         }
 
         [HttpPost("get-account-by-userId/{id}")]
+        [Authorize("REGISTERED")]
         public async Task<AppActionResult> GetAccountByUserId(string id)
         {
             return await _accountService.GetAccountByUserId(id);
         }
 
         [HttpPut("change-password")]
+        [Authorize("REGISTERED")]
         public async Task<AppActionResult> ChangePassword(ChangePasswordDto dto)
         {
             return await _accountService.ChangePassword(dto);
@@ -72,6 +75,7 @@ namespace PRN231.TicketBooking.API.Controllers
         }
 
         [HttpPut("forgot-password")]
+        [Authorize("REGISTERED")]
         public async Task<AppActionResult> ForgotPassword(ForgotPasswordDto dto)
         {
             return await _accountService.ForgotPassword(dto);
@@ -114,13 +118,15 @@ namespace PRN231.TicketBooking.API.Controllers
         }
 
 		[HttpPost("assign-role")]
-		public async Task<AppActionResult> AssignRole(string userId, string roleName)
+        [Authorize("ADMIN")]
+        public async Task<AppActionResult> AssignRole(string userId, string roleName)
 		{
 			return await _accountService.AssignRole(userId, roleName);
 		}
 
 		[HttpPost("add-sponsor")]
-		public async Task<AppActionResult> AddSponsor([FromForm]CreateSponsorDto dto)
+        [Authorize("ADMIN")]
+        public async Task<AppActionResult> AddSponsor([FromForm]CreateSponsorDto dto)
 		{
 			return await _accountService.AddSponsor(dto);
 		}

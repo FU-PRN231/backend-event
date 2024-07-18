@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PRN231.TicketBooking.Common.Dto;
 using PRN231.TicketBooking.Service.Contract;
@@ -17,6 +18,7 @@ namespace PRN231.TicketBooking.API.Controllers
         }
 
         [HttpGet("get-location-by-eventid/{id}")]
+        [Authorize("REGISTERED")]
         public async Task<AppActionResult> GetLocationByEventId(Guid id)
         {
             return await _locationService.GetLocationByEventId(id);

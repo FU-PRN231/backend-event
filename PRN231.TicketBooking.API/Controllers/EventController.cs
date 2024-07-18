@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using PRN231.TicketBooking.Common.Dto;
 using PRN231.TicketBooking.Common.Dto.Request;
+using PRN231.TicketBooking.Common.Util;
 using PRN231.TicketBooking.Service.Contract;
 
 namespace PRN231.TicketBooking.API.Controllers
@@ -16,30 +18,35 @@ namespace PRN231.TicketBooking.API.Controllers
         }
 
         [HttpGet("get-all-event")]
+        [Authorize("ORGANIZATION")]
         public async Task<AppActionResult> GetAllEvent([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             return await _eventService.GetAllEvent(pageNumber, pageSize);
         }
 
         [HttpGet("get-available-event")]
+        [Authorize("REGISTERED")]
         public async Task<AppActionResult> GetAvailableEvent([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             return await _eventService.GetAvailableEvent(pageNumber, pageSize);
         }
 
         [HttpGet("get-event-by-id/{id}")]
+        [Authorize("REGISTERED")]
         public async Task<AppActionResult> GetById(Guid id)
         {
             return await _eventService.GetEventById(id);
         }
 
         [HttpPost("add-event")]
+        [Authorize(Roles = "ORGANIZER")]
         public async Task<AppActionResult> AddEvent([FromForm] CreateEventRequest createEventRequest)
         {
             return await _eventService.AddEvent(createEventRequest);
         }
 
         [HttpPut("update-event/{id}")]
+        [Authorize(Roles = "ORGANIZER")]
         public async Task<AppActionResult> UpdateEvent(Guid id, [FromForm] UpdateEventRequest updateEventRequest)
         {
             return await _eventService.UpdateEvent(id, updateEventRequest);

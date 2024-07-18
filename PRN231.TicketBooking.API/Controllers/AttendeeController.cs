@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PRN231.TicketBooking.Common.Dto;
 using PRN231.TicketBooking.Common.Dto.Request;
@@ -17,12 +18,14 @@ namespace PRN231.TicketBooking.API.Controllers
             _attendeeService = attendeeService;
         }
         [HttpPut]
+        [Authorize("REGISTERED")]
         public async Task<AppActionResult> CheckIn(CheckInEventRequest checkInEventRequest)
         {
             return await _attendeeService.CheckInAttendee(checkInEventRequest);
         }
 
         [HttpGet("get-all-attendee-by-eventId/{eventId}")]
+        [Authorize("ORGANIZATION")]
         public async Task<AppActionResult> GetAllAttendeeByEventId(Guid eventId)
         {
             return await _attendeeService.GetAllAttendeeByEventId(eventId);
