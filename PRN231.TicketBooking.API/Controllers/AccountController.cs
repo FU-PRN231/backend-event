@@ -132,5 +132,12 @@ namespace PRN231.TicketBooking.API.Controllers
 		{
 			return await _accountService.AddSponsor(dto);
 		}
-	}
+
+        [HttpPost("assign-user-into-organization")]
+        public async Task<AppActionResult> AssignUserIntoOrganization(string userId, Guid organizationId)
+        {
+            return await _accountService.AssignUserIntoOrganization(userId, organizationId);    
+        }
+
+    }
 }

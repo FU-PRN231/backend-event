@@ -85,6 +85,7 @@ namespace PRN231.TicketBooking.Common.Util
 
         public class FirebasePathName
         {
+            public static string ORGANIZATION_PREFIX = "org/";
             public static string NEWS_PREFIX = "news/";
             public static string BLOG_PREFIX = "blog/";
             public static string SAMPLE_HOUSE_PREFIX = "sample-house/";

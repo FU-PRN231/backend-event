@@ -977,5 +977,33 @@ namespace PRN231.TicketBooking.Service.Implementation
 			}
 			return result;
 		}
-	}
+
+        public async Task<AppActionResult> AssignUserIntoOrganization(string userId, Guid organizationId)
+        {
+            var result = new AppActionResult();
+            var organizationRepository = Resolve<IOrganizationRepository>();
+            try
+            {
+                var accountDb = await _accountRepository.GetById(userId);
+                if (accountDb == null)
+                {
+                    result = BuildAppActionResultError(result, $"Không tìm thấy tài khoản với id {userId}");
+                    return result;
+                }
+                var organiztionDb = await organizationRepository.GetById(organizationId);
+                if (organiztionDb == null)
+                {
+                    result = BuildAppActionResultError(result, $"Không tìm thấy tài khoản với id {userId}");
+                    return result;
+                }
+                accountDb.OrganizationId = organiztionDb.Id;
+                await _unitOfWork.SaveChangeAsync();
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
+        }
+    }
 }
