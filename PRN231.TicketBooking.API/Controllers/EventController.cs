@@ -20,7 +20,7 @@ namespace PRN231.TicketBooking.API.Controllers
         }
 
         [HttpGet("get-all-event")]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Permission.ORGANIZATION)]
+        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Permission.ORGANIZATION)]
         public async Task<AppActionResult> GetAllEvent([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             return await _eventService.GetAllEvent(pageNumber, pageSize);
