@@ -177,6 +177,7 @@ namespace PRN231.TicketBooking.Service.Implementation
             AppActionResult result = new AppActionResult();
             try
             {
+                var utility = Resolve<Utility>();
                 var eventRepository = Resolve<IEventRepository>();
                 var eventSponsorRepository = Resolve<IEventSponsorRepository>();
                 var sponsorRepository = Resolve<ISponsorRepository>();
@@ -198,8 +199,10 @@ namespace PRN231.TicketBooking.Service.Implementation
                 var eventEntity = _mapper.Map<Event>(dto);
                 eventEntity.Id = Guid.NewGuid();
                 eventEntity.CreateBy = dto.UserId;
-                eventEntity.CreateDate = DateTime.Now;
-                
+                eventEntity.CreateDate = utility.GetCurrentDateTimeInTimeZone();
+                eventEntity.UpdateDate = utility.GetCurrentDateTimeInTimeZone();
+                eventEntity.Status = EventCensorStatus.PENDING;
+
                 //Create SeatRank
                 if (dto.CreateSeatRankDtoRequests != null && dto.CreateSeatRankDtoRequests.Count > 0)
                 {
@@ -327,6 +330,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                 var locationRepository = Resolve<ILocationRepository>();
                 var organizationRepository = Resolve<IOrganizationRepository>();
                 var eventEntity = await eventRepository.GetEventById(id);
+                var utility = Resolve<Utility>();
                 if (eventEntity == null)
                 {
                     BuildAppActionResultSuccess(result, $"Event not found with id {id}");
@@ -342,7 +346,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                     return BuildAppActionResultSuccess(result, $"Not found organization with id: {request.OrganizationId}");
                 }
                 _mapper.Map(request, eventEntity);
-                eventEntity.UpdateDate = DateTime.Now;
+                eventEntity.UpdateDate = utility.GetCurrentDateTimeInTimeZone();
                 eventEntity.UpdateBy = request.UserId;
                 var resultUpdateEvent = await eventRepository.UpdateEvent(eventEntity);
                 if (resultUpdateEvent == null || !resultUpdateEvent.IsSuccess)
@@ -481,6 +485,27 @@ namespace PRN231.TicketBooking.Service.Implementation
             return result;
         }
 
+        public async Task<AppActionResult> GetAllEventBySponsorId(Guid sponsorId, int pageNumber, int pageSize)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                var eventRepository = Resolve<IEventSponsorRepository>();
+                var data = await eventRepository.GetEventsBySponsorId(sponsorId, pageNumber, pageSize);
+                result = new AppActionResult()
+                {
+                    Result = data,
+                    IsSuccess = true
+                };
+                return BuildAppActionResultSuccess(result, "Get list sponsor event successfully!");
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
+        }
+
         public async Task<AppActionResult> UpdateEventStatus(Guid eventId, EventCensorStatus status)
         {
             AppActionResult result = new AppActionResult();
@@ -508,6 +533,7 @@ namespace PRN231.TicketBooking.Service.Implementation
             }
             return result;
         }
+
 
         public async Task<AppActionResult> GetAllEventByStatus(EventCensorStatus status, int pageNumber, int pageSize)
         {
