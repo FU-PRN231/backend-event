@@ -10,5 +10,6 @@ namespace PRN231.TicketBooking.Repository.Contract
     public interface IEventSponsorRepository : IRepository<EventSponsor>
     {
         public Task<EventSponsor> AddEventSponsorFromEvent(EventSponsor eventSponsor);
+        public Task<List<Event>> GetEventsBySponsorId(Guid sponsorId, int pageNumber, int pageSize);
     }
 }
