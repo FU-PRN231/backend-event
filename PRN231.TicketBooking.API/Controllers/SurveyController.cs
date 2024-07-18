@@ -49,7 +49,7 @@ namespace PRN231.TicketBooking.API.Controllers
         }
 
         [HttpGet("get-survey-by-organization-id/{organizationId}")]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Permission.ORGANIZATION)]
+        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Permission.ORGANIZATION)]
         public async Task<AppActionResult> GellSurveyOfOrganization(Guid organizationId)
         {
             return await _service.GellSurveyOfOrganization(organizationId);
