@@ -185,7 +185,8 @@ namespace PRN231.TicketBooking.Repository.Implementation
             {
                 result = new PagedResult<Event>();
                 result = await _eventDAO.GetAllDataByExpression(
-                    filter: x => today.Date <= x.EndEventDate.Date,
+                    filter: x => today.Date <= x.EndEventDate.Date 
+                    && x.Status == BusinessObject.Enum.EventCensorStatus.APPROVED,
                     pageNumber: pageNumber,
                     pageSize: pageSize,
                     includes: new Expression<Func<Event, object>>[] {
@@ -208,7 +209,8 @@ namespace PRN231.TicketBooking.Repository.Implementation
             {
                 result = new PagedResult<Event>();
                 result = await _eventDAO.GetAllDataByExpression(
-                    filter: e => e.OrganizationId == organizationId,
+                    filter: e => e.OrganizationId == organizationId
+                    && e.Status == BusinessObject.Enum.EventCensorStatus.APPROVED,
                     pageNumber: pageNumber,
                     pageSize: pageSize,
                     includes: new Expression<Func<Event, object>>[] {

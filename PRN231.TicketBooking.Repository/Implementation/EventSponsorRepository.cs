@@ -38,7 +38,8 @@ namespace PRN231.TicketBooking.Repository.Implementation
             {
                 result = new List<Event>();
                 var eventSponsorDB = await _dao.GetAllDataByExpression(
-                    filter: e => e.SponsorId == sponsorId,
+                    filter: e => e.SponsorId == sponsorId
+                    && e.Event.Status == BusinessObject.Enum.EventCensorStatus.APPROVED,
                     pageNumber: pageNumber,
                     pageSize: pageSize,
                     orderBy: null,
