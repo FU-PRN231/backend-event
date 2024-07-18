@@ -48,7 +48,7 @@ namespace PRN231.TicketBooking.Service.Implementation
             var result = new AppActionResult();
             try
             {
-                var orderDb = await _orderRepository.GetByExpression(p => p.Id == orderId);
+                var orderDb = await _orderRepository.GetById(orderId);
                 if (orderDb == null)
                 {
                     result = BuildAppActionResultError(result, $"Không tìm thấy đơn hàng với id {orderId}");
@@ -76,7 +76,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                     var accountRepository = Resolve<IAccountRepository>();
                     var seatRepository = Resolve<ISeatRankRepository>();
                     var orderDetailsRepository = Resolve<IOrderDetailsRepository>();
-                    var accountDb = await accountRepository.GetByExpression(p => p!.Id == orderRequestDto.AccountId);
+                    var accountDb = await accountRepository.GetById(orderRequestDto.AccountId);
                     if (accountDb == null)
                     {
                         result = BuildAppActionResultError(result, $"Tài khoản với {orderRequestDto.AccountId} không tồn tại");
@@ -102,7 +102,7 @@ namespace PRN231.TicketBooking.Service.Implementation
 
                     foreach (var item in orderRequestDto.SeatRank)
                     {
-                        var seatRankDb = await seatRepository!.GetByExpression(p => p.Id == item.Id, p => p.Event!.Organization!);
+                        var seatRankDb = await seatRepository!.GetById(item.Id);
                         if (seatRankDb == null)
                         {
                             result = BuildAppActionResultError(result, $"Loại ghế với Id {item.Id} không tồn tại hoặc sản phẩm không đủ số lượng");
@@ -165,7 +165,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                 var attendeeRepository = Resolve<IAttendeeRepostory>();
                 var orderDetailsRepository = Resolve<IOrderDetailsRepository>();
                 var oRCodeService = Resolve<IQRCodeService>();
-                var attendeeDb = await attendeeRepository.GetAllDataByExpression(o => o.OrderDetail.OrderId == orderId, 0, 0, null, false, o => o.OrderDetail.SeatRank);
+                var attendeeDb = await attendeeRepository.GetAllAttendee(o => o.OrderDetail.OrderId == orderId, 0, 0, null, false, o => o.OrderDetail.SeatRank);
                 Dictionary<string, List<IFormFile>> data = new Dictionary<string, List<IFormFile>>();
                 if (attendeeDb.Items.Count > 0)
                 {
@@ -202,7 +202,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                         await attendeeRepository.Insert(attendee);
                         if(!details.ContainsKey(attendee.OrderDetailId)) 
                         {
-                            var detail = await orderDetailsRepository.GetByExpression(o => o.Id == attendee.OrderDetailId, o => o.SeatRank);
+                            var detail = await orderDetailsRepository.GetById(attendee.OrderDetailId);
                             if(detail == null)
                             {
                                 result = BuildAppActionResultError(result, $"Không tìm thấy ghế ngồi của chi tiết đơn hàng {attendee.OrderDetailId}");
@@ -312,7 +312,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                     foreach (var item in ordersDb.Items)
                     {
                         var orderResponse = new OrderResponses();
-                        var orderDetailsDb = await orderDetailsRepository.GetAllDataByExpression(p => p.OrderId == item.Id, 0, 0, null, false, p => p.SeatRank!.Event!);
+                        var orderDetailsDb = await orderDetailsRepository.GetAllOrderDetail(p => p.OrderId == item.Id, 0, 0, null, false, p => p.SeatRank!.Event!);
                         orderResponse.Order = item;
                         orderResponse.OrderDetails = orderDetailsDb.Items!;
                         orderResponseList.Add(orderResponse);
@@ -338,7 +338,7 @@ namespace PRN231.TicketBooking.Service.Implementation
             try
             {
                 var orderDetailsRepository = Resolve<IOrderDetailsRepository>();
-                var ordersDb = await _orderRepository.GetAllDataByExpression(p => p.AccountId == accountId, pageNumber, pageSize, p => p.PurchaseDate, false, p => p.Account!);
+                var ordersDb = await _orderRepository.GetAllOrder(p => p.AccountId == accountId, pageNumber, pageSize, p => p.PurchaseDate, false, p => p.Account!);
                 if (ordersDb == null)
                 {
                     result = BuildAppActionResultError(result, $"Không tìm thấy đơn hàng nào");
@@ -348,7 +348,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                     foreach (var item in ordersDb.Items)
                     {
                         var orderResponse = new OrderResponses();
-                        var orderDetailsDb = await orderDetailsRepository.GetAllDataByExpression(p => p.OrderId == item.Id, 0, 0, null, false, p => p.SeatRank!.Event!);
+                        var orderDetailsDb = await orderDetailsRepository.GetAllOrderDetail(p => p.OrderId == item.Id, 0, 0, null, false, p => p.SeatRank!.Event!);
                         orderResponse.Order = item;
                         orderResponse.OrderDetails = orderDetailsDb.Items!;
                         orderResponseList.Add(orderResponse);
@@ -374,7 +374,7 @@ namespace PRN231.TicketBooking.Service.Implementation
             try
             {
                 var orderDetailsRepository = Resolve<IOrderDetailsRepository>();
-                var orderDetailsDb = await orderDetailsRepository.GetAllDataByExpression(p => p.SeatRank!.EventId == eventId, pageNumber, pageSize, null, false, p => p.Order!);
+                var orderDetailsDb = await orderDetailsRepository.GetAllOrderDetail(p => p.SeatRank!.EventId == eventId, pageNumber, pageSize, null, false, p => p.Order!);
                 if (orderDetailsDb == null)
                 {
                     result = BuildAppActionResultError(result, $"Chi tiết đơn hàng này không tìm thấy với sự kiện với {eventId}");
@@ -382,7 +382,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                 var order = orderDetailsDb!.Items!.Select(p => p.Order);
                 foreach (var item in order)
                 {
-                    var orderDetails = await orderDetailsRepository.GetAllDataByExpression(p => p.SeatRank!.EventId == eventId, pageNumber, pageSize, null, false, p => p.Order!, p => p.SeatRank!.Event!);
+                    var orderDetails = await orderDetailsRepository.GetAllOrderDetail(p => p.SeatRank!.EventId == eventId, pageNumber, pageSize, null, false, p => p.Order!, p => p.SeatRank!.Event!);
                     orderResponseList.Add(new OrderResponses
                     {
                         Order = item!,
@@ -409,7 +409,7 @@ namespace PRN231.TicketBooking.Service.Implementation
             try
             {
                 var orderDetailsRepository = Resolve<IOrderDetailsRepository>();
-                var ordersDb = await _orderRepository.GetAllDataByExpression(p => p.Status == orderStatus, pageNumber, pageSize, null, false, p => p.Account!);
+                var ordersDb = await _orderRepository.GetAllOrder(p => p.Status == orderStatus, pageNumber, pageSize, null, false, p => p.Account!);
                 if (ordersDb == null)
                 {
                     result = BuildAppActionResultError(result, "Không tìm thấy đơn hàng nào");
@@ -444,14 +444,14 @@ namespace PRN231.TicketBooking.Service.Implementation
             try
             {
                 var orderDetailsRepository = Resolve<IOrderDetailsRepository>();
-                var orderDb = await _orderRepository!.GetAllDataByExpression(p => p.Id == orderId, 0, 0, null, false, p => p.Account!);
+                var orderDb = await _orderRepository!.GetAllOrder(p => p.Id == orderId, 0, 0, null, false, p => p.Account!);
                 if (orderDb == null)
                 {
                     result = BuildAppActionResultError(result, $"Đơn hàng với {orderDb} không tồn tại");
                 }
                 if (!BuildAppActionResultIsError(result))
                 {
-                    var orderDetailsDb = await orderDetailsRepository.GetAllDataByExpression(p => p!.OrderId == orderId, pageNumber, pageSize, null, false, p => p.SeatRank!.Event!);
+                    var orderDetailsDb = await orderDetailsRepository.GetAllOrderDetail(p => p!.OrderId == orderId, pageNumber, pageSize, null, false, p => p.SeatRank!.Event!);
                     OrderResponses orderResponses = new OrderResponses();
                     orderResponses.OrderDetails = orderDetailsDb!.Items!;
                     orderResponses.Order = orderDb.Items!.FirstOrDefault()!;
@@ -472,12 +472,12 @@ namespace PRN231.TicketBooking.Service.Implementation
             {
                 var eventRepository = Resolve<IEventRepository>();
                 var orderDetailsRepository = Resolve<IOrderDetailsRepository>();
-                var eventDb = eventRepository.GetByExpression(p => p!.Id == eventId);
+                var eventDb = eventRepository.GetById(eventId);
                 if (eventDb == null)
                 {
                     result = BuildAppActionResultError(result, $"Sự kiện với {eventId} không tồn tại");
                 }
-                var orderDetailsDb = await orderDetailsRepository.GetAllDataByExpression(p => p.SeatRank!.EventId == eventId, pageNumber, pageSize, null, false, p => p.Order!);
+                var orderDetailsDb = await orderDetailsRepository.GetAllOrderDetail(p => p.SeatRank!.EventId == eventId, pageNumber, pageSize, null, false, p => p.Order!);
                 if (orderDetailsDb == null)
                 {
                     result = BuildAppActionResultError(result, $"Chi tiết đơn hàng này không tìm thấy với sự kiện với {eventId}");
@@ -485,7 +485,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                 if (orderDetailsDb!.Items != null && orderDetailsDb.Items.Count > 0)
                 {
                     var orderIds = orderDetailsDb.Items.DistinctBy(o => o.OrderId).Select(o => o.OrderId);
-                    result.Result = await _orderRepository.GetAllDataByExpression(p => p.Status == orderStatus && orderIds.Contains(p.Id), pageNumber, pageSize, null, false, p => p.Account!);
+                    result.Result = await _orderRepository.GetAllOrder(p => p.Status == orderStatus && orderIds.Contains(p.Id), pageNumber, pageSize, null, false, p => p.Account!);
                 }
             }
             catch (Exception ex)
@@ -501,7 +501,7 @@ namespace PRN231.TicketBooking.Service.Implementation
             try
             {
                 var paymentGatewayService = Resolve<IPaymentGatewayService>();
-                var orderDb = await _orderRepository.GetByExpression(p => p!.Id == orderId, p => p.Account!);
+                var orderDb = await _orderRepository.GetById(orderId);
                 if (orderDb == null)
                 {
                     result = BuildAppActionResultError(result, $"Không tìm thấy đơn hàng với id {orderId}");
@@ -544,7 +544,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                     return result;
                 }
                 var orderDetailRepository = Resolve<IOrderDetailsRepository>();
-                var orderDetailDb = await orderDetailRepository.GetAllDataByExpression(p => p!.OrderId == orderId && p.Order!.Status == OrderStatus.SUCCUSSFUL, 0, 0, null, false, o => o.Order.Account, o => o.SeatRank.Event.Location, o => o.SeatRank.Event.Organization);
+                var orderDetailDb = await orderDetailRepository.GetAllOrderDetail(p => p!.OrderId == orderId && p.Order!.Status == OrderStatus.SUCCUSSFUL, 0, 0, null, false, o => o.Order.Account, o => o.SeatRank.Event.Location, o => o.SeatRank.Event.Organization);
                 if (orderDetailDb.Items!.Count == 0)
                 {
                     result = BuildAppActionResultError(result, $"Chi tiết của đơn hàng thành công với id {orderId} không tồn tại");
@@ -587,7 +587,7 @@ namespace PRN231.TicketBooking.Service.Implementation
             var result = new AppActionResult();
             try
             {
-                var orderDb = await _orderRepository.GetByExpression(p => p!.Id == orderId);
+                var orderDb = await _orderRepository.GetById(orderId);
                 if (orderDb == null)
                 {
                     result = BuildAppActionResultError(result, "Đơn hàng này không tồn tại");
@@ -624,7 +624,7 @@ namespace PRN231.TicketBooking.Service.Implementation
             {
                 var orderDetailRepository = Resolve<IOrderDetailsRepository>();
                 var attendeeRepository = Resolve<IAttendeeRepostory>();
-                var orderDetailDb = await orderDetailRepository.GetAllDataByExpression(o => o.OrderId == orderId, 0, 0, null, false, o => o.SeatRank);
+                var orderDetailDb = await orderDetailRepository.GetAllOrderDetail(o => o.OrderId == orderId, 0, 0, null, false, o => o.SeatRank);
                 if (orderDetailDb.Items.Count > 0)
                 {
                     int i = 0;
