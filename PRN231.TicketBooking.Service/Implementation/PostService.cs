@@ -32,7 +32,7 @@ namespace PRN231.TicketBooking.Service.Implementation
             try
             {
                 var eventRepository = Resolve<IEventRepository>();
-                var eventDb = await eventRepository.GetByExpression(p => p.Id == createPostDto.EventId);
+                var eventDb = await eventRepository.GetEventById(createPostDto.EventId);
                 if (eventDb == null)
                 {
                     result = BuildAppActionResultError(result, $"Không tồn tại sự kiện với Id {createPostDto.EventId}");
@@ -61,7 +61,7 @@ namespace PRN231.TicketBooking.Service.Implementation
             var result = new AppActionResult();
             try
             {
-                var postDb = await _postRepository.GetByExpression(p => p.Id == postId);
+                var postDb = await _postRepository.GetById(postId);
                 if (postDb == null)
                 {
                     result = BuildAppActionResultError(result, $"Bài post này khong tìm thấy với id {postId}");
@@ -83,7 +83,7 @@ namespace PRN231.TicketBooking.Service.Implementation
             var result = new AppActionResult();
             try
             {
-                result.Result = await _postRepository.GetAllDataByExpression(null, pageNumeber, pageSize, null, false, p => p.Event!);
+                result.Result = await _postRepository.GetAllPost(null, pageNumeber, pageSize, null, false, p => p.Event!);
             }
             catch (Exception ex)
             {
@@ -104,7 +104,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                     result = BuildAppActionResultError(result, $"Không tồn tại sự kiện với Id {eventId}");
                     return result;
                 }
-                var postDb = await _postRepository.GetAllDataByExpression(p => p.EventId == eventId, pageNumber, pageSize, null, false, p => p.Event!);
+                var postDb = await _postRepository.GetAllPost(p => p.EventId == eventId, pageNumber, pageSize, null, false, p => p.Event!);
                 result.Result = postDb;
             }
             catch (Exception ex)
@@ -119,7 +119,7 @@ namespace PRN231.TicketBooking.Service.Implementation
             var result = new AppActionResult();
             try
             {
-                result.Result = await _postRepository.GetByExpression(p => p.Id == postId, p => p.Event!);
+                result.Result = await _postRepository.GetById(postId);
             }
             catch (Exception ex)
             {
@@ -133,7 +133,7 @@ namespace PRN231.TicketBooking.Service.Implementation
             var result = new AppActionResult();
             try
             {
-                var postDb = await _postRepository.GetByExpression(p => p.Id == updatePostDto.Id);
+                var postDb = await _postRepository.GetById(updatePostDto.Id);
                 if (postDb == null)
                 {
                     result = BuildAppActionResultError(result, $"Bài post này khong tìm thấy với id {updatePostDto.Id}");

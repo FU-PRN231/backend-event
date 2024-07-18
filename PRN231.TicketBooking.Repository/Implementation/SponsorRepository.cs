@@ -1,7 +1,9 @@
 ﻿using PRN231.TicketBooking.BusinessObject.Models;
 using PRN231.TicketBooking.Common.Dto.Request;
+using PRN231.TicketBooking.Common.Dto.Response;
 using PRN231.TicketBooking.DAO.dao;
 using PRN231.TicketBooking.Repository.Contract;
+using System.Linq.Expressions;
 
 namespace PRN231.TicketBooking.Repository.Implementation
 {
@@ -76,6 +78,21 @@ namespace PRN231.TicketBooking.Repository.Implementation
 		public async Task<Sponsor> GetSponsorByName(string name)
         {
             return await _dao.GetByExpression(s => s.Name == name);
+        }
+
+        public async Task<PagedResult<Sponsor>> GetAllSponsor(Expression<Func<Sponsor, bool>>? filter, int pageNumber, int pageSize, Expression<Func<Sponsor, object>>? orderBy = null, bool isAscending = true, params Expression<Func<Sponsor, object>>[]? includes)
+        {
+            PagedResult<Sponsor> result = null;
+            try
+            {
+                result = new PagedResult<Sponsor>();
+                result = await _dao.GetAllDataByExpression(filter, pageNumber, pageSize, orderBy, isAscending, includes);
+            }
+            catch (Exception ex)
+            {
+                result = null;
+            }
+            return result;
         }
     }
 }

@@ -74,5 +74,20 @@ namespace PRN231.TicketBooking.Repository.Implementation
                 throw new Exception(ex.Message);
             }
         }
+
+        public async Task<PagedResult<SeatRank>> GetAllSeatRank(Expression<Func<SeatRank, bool>>? filter, int pageNumber, int pageSize, Expression<Func<SeatRank, object>>? orderBy = null, bool isAscending = true, params Expression<Func<SeatRank, object>>[]? includes)
+        {
+            PagedResult<SeatRank> result = null;
+            try
+            {
+                result = new PagedResult<SeatRank>();
+                result = await _dao.GetAllDataByExpression(filter, pageNumber, pageSize, orderBy, isAscending, includes);
+            }
+            catch (Exception ex)
+            {
+                result = null;
+            }
+            return result;
+        }
     }
 }

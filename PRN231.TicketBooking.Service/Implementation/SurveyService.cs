@@ -105,13 +105,13 @@ namespace PRN231.TicketBooking.Service.Implementation
             AppActionResult result = new();
             try
             {
-                var surveyDb = await _surveyRepository.GetAllDataByExpression(null, 0, 0, null, false, s => s.CreateByAccount);
+                var surveyDb = await _surveyRepository.GetAllServey(null, 0, 0, null, false, s => s.CreateByAccount);
                 List<SurveyQuestionResponse> data = new List<SurveyQuestionResponse>();
                 if(surveyDb.Items != null && surveyDb.Items.Count > 0) 
                 {
                     foreach( var item in surveyDb.Items)
                     {
-                        var surveyQuestion = await _surveyQuestionDetailRepository.GetAllDataByExpression(s => s.SurveyId == item.Id, 0, 0, null, false, null);
+                        var surveyQuestion = await _surveyQuestionDetailRepository.GetAllSurveyDetail(s => s.SurveyId == item.Id, 0, 0, null, false, null);
                         data.Add(new SurveyQuestionResponse
                         {
                             Survey = item,
@@ -140,13 +140,13 @@ namespace PRN231.TicketBooking.Service.Implementation
                     return result;
                 }
 
-                var surveyDb = await _surveyRepository.GetAllDataByExpression(s => s.Event!.OrganizationId == id, 0, 0, null, false, s => s.CreateByAccount);
+                var surveyDb = await _surveyRepository.GetAllServey(s => s.Event!.OrganizationId == id, 0, 0, null, false, s => s.CreateByAccount);
                 List<SurveyQuestionResponse> data = new List<SurveyQuestionResponse>();
                 if (surveyDb.Items != null && surveyDb.Items.Count > 0)
                 {
                     foreach (var item in surveyDb.Items)
                     {
-                        var surveyQuestion = await _surveyQuestionDetailRepository.GetAllDataByExpression(s => s.SurveyId == item.Id, 0, 0, null, false, null);
+                        var surveyQuestion = await _surveyQuestionDetailRepository.GetAllSurveyDetail(s => s.SurveyId == item.Id, 0, 0, null, false, null);
                         data.Add(new SurveyQuestionResponse
                         {
                             Survey = item,
@@ -169,14 +169,14 @@ namespace PRN231.TicketBooking.Service.Implementation
             try
             {
                 SurveyQuestionResponse data = new SurveyQuestionResponse();
-                var surveyDb = await _surveyRepository.GetByExpression(s => s.Id == surveyId, s => s.CreateByAccount);
+                var surveyDb = await _surveyRepository.GetServeyById(surveyId, s => s.CreateByAccount);
                 if(surveyDb == null ) 
                 {
                     result = BuildAppActionResultError(result, $"Không tìm thấy form khảo sát với id {surveyId}");
                     return result;
                 }
                 data.Survey = surveyDb;
-                var surveyQuestionDetail = await _surveyQuestionDetailRepository.GetAllDataByExpression(s => s.SurveyId == surveyId, 0, 0, null, false, null);
+                var surveyQuestionDetail = await _surveyQuestionDetailRepository.GetAllSurveyDetail(s => s.SurveyId == surveyId, 0, 0, null, false, null);
                 data.surveyQuestionDetails = surveyQuestionDetail.Items!;
                 result.Result = data;
             }
@@ -193,20 +193,20 @@ namespace PRN231.TicketBooking.Service.Implementation
             try
             {
                 SurveyAnswerResponse data = new SurveyAnswerResponse();
-                var surveyDb = await _surveyRepository.GetByExpression(s => s.Id == id, s => s.CreateByAccount);
+                var surveyDb = await _surveyRepository.GetServeyById(id, s => s.CreateByAccount);
                 if (surveyDb == null)
                 {
                     result = BuildAppActionResultError(result, $"Không tìm thấy form khảo sát với id {id}");
                     return result;
                 }
                 data.Survey = surveyDb;
-                var surveyQuestionDetail = await _surveyQuestionDetailRepository.GetAllDataByExpression(s => s.SurveyId == id, 0, 0, null, false, null);
+                var surveyQuestionDetail = await _surveyQuestionDetailRepository.GetAllSurveyDetail(s => s.SurveyId == id, 0, 0, null, false, null);
                 var surveyAnswerDetailRepository = Resolve<ISurveyResponseDetailRepository>(); 
                 foreach (var question in surveyQuestionDetail.Items!)
                 {
                     SurveyAnswerDetailDto answers = new SurveyAnswerDetailDto();
                     answers.SurveyQuestionDetail = question;
-                    var surveyAnswerDetail = await surveyAnswerDetailRepository.GetAllDataByExpression(s => s.SurveyQuestionId == question.Id, 0, 0, null, false, null);
+                    var surveyAnswerDetail = await surveyAnswerDetailRepository.GetAllSurveyResponseDetail(s => s.SurveyQuestionId == question.Id, 0, 0, null, false, null);
                     answers.SurveyResponseDetails.AddRange(surveyAnswerDetail.Items!);
                     data.SurveyAnswerDetailDtos.Add(answers);
                 }

@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using PRN231.TicketBooking.Common.Dto.Response;
 using System.Linq.Expressions;
+using System.Drawing.Printing;
 
 namespace PRN231.TicketBooking.Repository.Implementation
 {
@@ -48,8 +49,22 @@ namespace PRN231.TicketBooking.Repository.Implementation
 
                 if (eventSponsorDB.Items!.Count > 0)
                 {
-                    result = eventSponsorDB.Items.DistinctBy(e => e.EventId).Select(e=>e.Event).ToList()!;
+                    result = eventSponsorDB.Items.DistinctBy(e => e.EventId).Select(e => e.Event).ToList()!;
                 }
+            }
+            catch (Exception ex)
+            {
+                result = null;
+            }
+            return result;
+        }
+        public async Task<PagedResult<EventSponsor>> GetAllEventSponsor(Expression<Func<EventSponsor, bool>>? filter, int pageNumber, int pageSize, Expression<Func<EventSponsor, object>>? orderBy = null, bool isAscending = true, params Expression<Func<EventSponsor, object>>[]? includes)
+        {
+            PagedResult<EventSponsor> result = null;
+            try
+            {
+                result = new PagedResult<EventSponsor>();
+                result = await _dao.GetAllDataByExpression(filter, pageNumber, pageSize, orderBy, isAscending, includes);
             }
             catch (Exception ex)
             {

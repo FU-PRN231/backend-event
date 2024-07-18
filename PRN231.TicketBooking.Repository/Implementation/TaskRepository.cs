@@ -6,6 +6,7 @@ using PRN231.TicketBooking.Repository.Contract;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -71,6 +72,21 @@ namespace PRN231.TicketBooking.Repository.Implementation
             {
                 result = new BusinessObject.Models.Task();
                 result = await _dao.GetByExpression(p => p!.Id == taskId, p => p.Event!);
+            }
+            catch (Exception ex)
+            {
+                result = null;
+            }
+            return result;
+        }
+
+        public async Task<PagedResult<BusinessObject.Models.Task>> GetAllTask(Expression<Func<BusinessObject.Models.Task, bool>>? filter, int pageNumber, int pageSize, Expression<Func<BusinessObject.Models.Task, object>>? orderBy = null, bool isAscending = true, params Expression<Func<BusinessObject.Models.Task, object>>[]? includes)
+        {
+            PagedResult<BusinessObject.Models.Task> result = null;
+            try
+            {
+                result = new PagedResult<BusinessObject.Models.Task>();
+                result = await _dao.GetAllDataByExpression(filter, pageNumber, pageSize, orderBy, isAscending, includes);
             }
             catch (Exception ex)
             {

@@ -56,10 +56,10 @@ namespace PRN231.TicketBooking.Service.Implementation
                 Common.Dto.Response.PagedResult<Event> eventDb = null;
                 if(organizationId != null)
                 {
-                    eventDb = await eventRepository.GetAllDataByExpression(e => e.OrganizationId == organizationId, 0, 0, null, false, null);
+                    eventDb = await eventRepository.GetAllEvent(e => e.OrganizationId == organizationId, 0, 0, null, false, null);
                 } else
                 {
-                    eventDb = await eventRepository.GetAllDataByExpression(null, 0, 0, null, false, null);
+                    eventDb = await eventRepository.GetAllEvent(null, 0, 0, null, false, null);
                 }
 
                 if(eventDb.Items.Count == 0)
@@ -112,20 +112,20 @@ namespace PRN231.TicketBooking.Service.Implementation
                 var eventIds = events.Select(e => e.Id).ToList();
 
                 var seatRankRepository = Resolve<ISeatRankRepository>();
-                var seatRankDb = await seatRankRepository.GetAllDataByExpression(o => eventIds.Contains(o.EventId), 0, 0, null, false, null);
+                var seatRankDb = await seatRankRepository.GetAllSeatRank(o => eventIds.Contains(o.EventId), 0, 0, null, false, null);
                 seatRankDb.Items.ForEach(s => data.NumOfSeat += s.Quantity);
                 seatRankDb.Items.ForEach(s => data.NumOfBookedSeat += s.Quantity - s.RemainingCapacity);
 
                 var orderDetailRepository = Resolve<IOrderDetailsRepository>();
-                var orderDetailDb = await orderDetailRepository.GetAllDataByExpression(o => eventIds.Contains(o.SeatRank.EventId), 0, 0, null, false, o => o.SeatRank);
+                var orderDetailDb = await orderDetailRepository.GetAllOrderDetail(o => eventIds.Contains(o.SeatRank.EventId), 0, 0, null, false, o => o.SeatRank);
                 orderDetailDb.Items.ForEach(o => data.TotalTicketRevenue += o.Quantity * o.SeatRank.Price);
 
                 var taskRepository = Resolve<ITaskRepository>();
-                var taskDb = await taskRepository.GetAllDataByExpression(o => eventIds.Contains(o.EventId), 0, 0, null, false, null);
+                var taskDb = await taskRepository.GetAllTask(o => eventIds.Contains(o.EventId), 0, 0, null, false, null);
                 taskDb.Items.ForEach(o => data.TotalCost += o.Cost);
 
                 var sponsorMoneyHistoryRepository = Resolve<ISponsorMoneyHistoryRepository>();
-                var sponsorMoneyHistoryDb = await sponsorMoneyHistoryRepository.GetAllDataByExpression(o => eventIds.Contains(o.EventSponsor.EventId), 0, 0, null, false, s => s.EventSponsor.Event);
+                var sponsorMoneyHistoryDb = await sponsorMoneyHistoryRepository.GetAllSponsorMoneyHistory(o => eventIds.Contains(o.EventSponsor.EventId), 0, 0, null, false, s => s.EventSponsor.Event);
                 sponsorMoneyHistoryDb.Items.DistinctBy(s => s.EventSponsorId).Select(s => s.EventSponsorId).ToList().ForEach(o => data.TotalSponsor++);
                 sponsorMoneyHistoryDb.Items.DistinctBy(s => s.Id).ToList().ForEach(o => data.TotalSponsorAmount += (o.IsFromSponsor) ? o.Amount : 0);
                 data.TotalRevenue += data.TotalTicketRevenue + data.TotalSponsorAmount - data.TotalCost;
@@ -144,20 +144,20 @@ namespace PRN231.TicketBooking.Service.Implementation
             {
 
                 var seatRankRepository = Resolve<ISeatRankRepository>();
-                var seatRankDb = await seatRankRepository.GetAllDataByExpression(o => eventDb.Id == o.EventId, 0, 0, null, false, null);
+                var seatRankDb = await seatRankRepository.GetAllSeatRank(o => eventDb.Id == o.EventId, 0, 0, null, false, null);
                 seatRankDb.Items.ForEach(s => result.NumOfSeat += s.Quantity);
                 seatRankDb.Items.ForEach(s => result.NumOfBookedSeat += s.Quantity - s.RemainingCapacity);
 
                 var orderDetailRepository = Resolve<IOrderDetailsRepository>();
-                var orderDetailDb = await orderDetailRepository.GetAllDataByExpression(o => eventDb.Id == o.SeatRank.EventId, 0, 0, null, false, o => o.SeatRank, o => o.Order);
+                var orderDetailDb = await orderDetailRepository.GetAllOrderDetail(o => eventDb.Id == o.SeatRank.EventId, 0, 0, null, false, o => o.SeatRank, o => o.Order);
                 orderDetailDb.Items.ForEach(o => result.TotalTicketRevenue += o.Quantity * o.SeatRank.Price);
 
                 var taskRepository = Resolve<ITaskRepository>();
-                var taskDb = await taskRepository.GetAllDataByExpression(o => eventDb.Id == o.EventId , 0, 0, null, false, null);
+                var taskDb = await taskRepository.GetAllTask(o => eventDb.Id == o.EventId , 0, 0, null, false, null);
                 taskDb.Items.ForEach(o => result.TotalCost += o.Cost);
 
                 var sponsorMoneyHistoryRepository = Resolve<ISponsorMoneyHistoryRepository>();
-                var sponsorMoneyHistoryDb = await sponsorMoneyHistoryRepository.GetAllDataByExpression(o => eventDb.Id == o.EventSponsor.EventId, 0, 0, null, false, s => s.EventSponsor.Event);
+                var sponsorMoneyHistoryDb = await sponsorMoneyHistoryRepository.GetAllSponsorMoneyHistory(o => eventDb.Id == o.EventSponsor.EventId, 0, 0, null, false, s => s.EventSponsor.Event);
                 sponsorMoneyHistoryDb.Items.DistinctBy(s => s.EventSponsorId).Select(s => s.EventSponsorId).ToList().ForEach(o => result.TotalSponsor++);
                 sponsorMoneyHistoryDb.Items.DistinctBy(s => s.Id).ToList().ForEach(o => result.TotalSponsorAmount += (o.IsFromSponsor) ? o.Amount : 0);
                 result.TotalRevenue += result.TotalTicketRevenue + result.TotalSponsorAmount - result.TotalCost;
@@ -223,26 +223,26 @@ namespace PRN231.TicketBooking.Service.Implementation
                 DateTime today = utility.GetCurrentDateInTimeZone();
                 if (timePeriod > 3)
                 {
-                    sponsorEventDb = await sponsorEventRepository.GetAllDataByExpression(s => s.SponsorId == sponsorId && s.Event.StartTime.Year == today.Year, 0, 0, null, false, null);
+                    sponsorEventDb = await sponsorEventRepository.GetAllEventSponsor(s => s.SponsorId == sponsorId && s.Event.StartTime.Year == today.Year, 0, 0, null, false, null);
                     sponsorMoneyHistoryDb = await sponsorMoneyHistoryRepository.GetAllDataByExpression(s => s.EventSponsor.SponsorId == sponsorId && s.EventSponsor.Event.StartTime.Year >= today.Year, 0, 0, null, false, s => s.EventSponsor.Event);
                 } else if(timePeriod == 0)
                 {
-                    sponsorEventDb = await sponsorEventRepository.GetAllDataByExpression(s => s.SponsorId == sponsorId && s.Event.StartTime.AddDays(7) >= today, 0, 0, null, false, null);
+                    sponsorEventDb = await sponsorEventRepository.GetAllEventSponsor(s => s.SponsorId == sponsorId && s.Event.StartTime.AddDays(7) >= today, 0, 0, null, false, null);
                     sponsorMoneyHistoryDb = await sponsorMoneyHistoryRepository.GetAllDataByExpression(s => s.EventSponsor.SponsorId == sponsorId && s.EventSponsor.Event.StartTime.AddDays(7) >= today, 0, 0, null, false, s => s.EventSponsor.Event);
                 }
                 else if (timePeriod == 1)
                 {
-                    sponsorEventDb = await sponsorEventRepository.GetAllDataByExpression(s => s.SponsorId == sponsorId && s.Event.StartTime.Month >= today.Month, 0, 0, null, false, null);
+                    sponsorEventDb = await sponsorEventRepository.GetAllEventSponsor(s => s.SponsorId == sponsorId && s.Event.StartTime.Month >= today.Month, 0, 0, null, false, null);
                     sponsorMoneyHistoryDb = await sponsorMoneyHistoryRepository.GetAllDataByExpression(s => s.EventSponsor.SponsorId == sponsorId && s.EventSponsor.Event.StartTime.Month >= today.Month, 0, 0, null, false, s => s.EventSponsor.Event);
                 }
                 else if (timePeriod == 2)
                 {
-                    sponsorEventDb = await sponsorEventRepository.GetAllDataByExpression(s => s.SponsorId == sponsorId && s.Event.StartTime.Month + 6 >= today.Month, 0, 0, null, false, null);
+                    sponsorEventDb = await sponsorEventRepository.GetAllEventSponsor(s => s.SponsorId == sponsorId && s.Event.StartTime.Month + 6 >= today.Month, 0, 0, null, false, null);
                     sponsorMoneyHistoryDb = await sponsorMoneyHistoryRepository.GetAllDataByExpression(s => s.EventSponsor.SponsorId == sponsorId && s.EventSponsor.Event.StartTime.Month + 6 >= today.Month, 0, 0, null, false, s => s.EventSponsor.Event);
                 }
                 else
                 {
-                    sponsorEventDb = await sponsorEventRepository.GetAllDataByExpression(s => s.SponsorId == sponsorId && s.Event.StartTime.Year  >= today.Year, 0, 0, null, false, null);
+                    sponsorEventDb = await sponsorEventRepository.GetAllEventSponsor(s => s.SponsorId == sponsorId && s.Event.StartTime.Year  >= today.Year, 0, 0, null, false, null);
                     sponsorMoneyHistoryDb = await sponsorMoneyHistoryRepository.GetAllDataByExpression(s => s.EventSponsor.SponsorId == sponsorId && s.EventSponsor.Event.StartTime.Year >= today.Year, 0, 0, null, false, s => s.EventSponsor.Event);
                 }
 

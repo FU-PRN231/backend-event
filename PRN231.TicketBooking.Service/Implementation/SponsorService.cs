@@ -83,8 +83,6 @@ namespace PRN231.TicketBooking.Service.Implementation
             return result;
         }
 
-       
-
         public async Task<AppActionResult> GetAllSponsor(int pageNumber, int pagesize)
         {
             AppActionResult result = new AppActionResult();
@@ -106,13 +104,13 @@ namespace PRN231.TicketBooking.Service.Implementation
             {
                 var eventSponsorRepository = Resolve<IEventSponsorRepository>();
                 var eventRepository = Resolve<IEventRepository>();
-                var eventDb = await eventRepository.GetByExpression(p => p.Id == eventId);
+                var eventDb = await eventRepository.GetEventById(eventId);
                 if (eventDb == null)
                 {
                     result = BuildAppActionResultError(result, $"Không tồn tại sự kiện với Id {eventId}");
                     return result;
                 }
-                result.Result = await eventSponsorRepository.GetAllDataByExpression(p => p.EventId == eventId, pageNumber, pageSize, null, false, p => p.Sponsor!);
+                result.Result = await eventSponsorRepository.GetAllEventSponsor(p => p.EventId == eventId, pageNumber, pageSize, null, false, p => p.Sponsor!);
             }
             catch (Exception ex)
             {
@@ -149,7 +147,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                     result = BuildAppActionResultError(result, $"Không tồn tại sự kiện với Id {eventId}");
                     return result;
                 }
-                var sponsorHistoryDb = await sponsorHistoryRepository.GetAllDataByExpression(p => p.EventSponsor!.EventId == eventId, pageNumber, pageNumber, null, false, p => p.EventSponsor!.Event!, p => p.EventSponsor!.Sponsor!);
+                var sponsorHistoryDb = await sponsorHistoryRepository.GetAllSponsorMoneyHistory(p => p.EventSponsor!.EventId == eventId, pageNumber, pageNumber, null, false, p => p.EventSponsor!.Event!, p => p.EventSponsor!.Sponsor!);
                 result.Result = sponsorHistoryDb;
             }
             catch (Exception ex)

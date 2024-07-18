@@ -223,5 +223,21 @@ namespace PRN231.TicketBooking.Repository.Implementation
             }
             return result;
         }
+
+
+        public async Task<PagedResult<Event>> GetAllEvent(Expression<Func<Event, bool>>? filter, int pageNumber, int pageSize, Expression<Func<Event, object>>? orderBy = null, bool isAscending = true, params Expression<Func<Event, object>>[]? includes)
+        {
+            PagedResult<Event> result = null;
+            try
+            {
+                result = new PagedResult<Event>();
+                result = await _dao.GetAllDataByExpression(filter, pageNumber, pageSize, orderBy, isAscending, includes);
+            }
+            catch (Exception ex)
+            {
+                result = null;
+            }
+            return result;
+        }
     }
 }

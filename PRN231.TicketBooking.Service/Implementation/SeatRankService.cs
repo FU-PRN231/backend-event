@@ -32,7 +32,7 @@ namespace PRN231.TicketBooking.Service.Implementation
             AppActionResult result = new AppActionResult();
             try
             {
-                var seatRankDb = _repository.GetByExpression(p => p!.Id == seatrankId);
+                var seatRankDb = _repository.GetSeatRankById(seatrankId);
                 if (seatRankDb == null)
                 {
                     result = BuildAppActionResultError(result, $"Ghế ngồi  với {seatrankId} không tồn tại");
@@ -75,13 +75,13 @@ namespace PRN231.TicketBooking.Service.Implementation
             try
             {
                 var eventRepository = Resolve<IEventRepository>();
-                var eventDb = await eventRepository.GetByExpression(p => p.Id == eventId);
+                var eventDb = await eventRepository.GetEventById(eventId);
                 if (eventDb == null)
                 {
                     result = BuildAppActionResultError(result, $"Sự kiện này với {eventId} không tồn tại");
                     return result;
                 }
-                result.Result = _repository.GetAllDataByExpression(p => p.EventId == eventId, pageNumber, pageSize, null, false, p => p.Event!);
+                result.Result = _repository.GetAllSeatRank(p => p.EventId == eventId, pageNumber, pageSize, null, false, p => p.Event!);
             }
             catch (Exception ex)
             {
@@ -95,7 +95,7 @@ namespace PRN231.TicketBooking.Service.Implementation
             AppActionResult result = new AppActionResult();
             try
             {
-                result.Result = await _repository.GetAllDataByExpression(p => p.Price <= filterSeatRankDto.Price || (p.StartTime >= filterSeatRankDto.StartTime &&
+                result.Result = await _repository.GetAllSeatRank(p => p.Price <= filterSeatRankDto.Price || (p.StartTime >= filterSeatRankDto.StartTime &&
             p.EndTime <= filterSeatRankDto.EndTime) || p.Description.Contains(filterSeatRankDto.Description!), pageNumber, pageSize, null, false, p => p.Event!);
             }
             catch (Exception ex)
@@ -111,7 +111,7 @@ namespace PRN231.TicketBooking.Service.Implementation
             try
             {
                 var eventRepository = Resolve<ISeatRankRepository>();
-                var data = await eventRepository.GetByExpression(p => p!.Id == id, p => p.Event!);
+                var data = await eventRepository.GetSeatRankById(id);
                 if (data == null)
                 {
                     result = new AppActionResult()
@@ -141,7 +141,7 @@ namespace PRN231.TicketBooking.Service.Implementation
             try
             {
                 var eventRepository = Resolve<IEventRepository>();
-                var eventDb = await eventRepository.GetByExpression(p => p.Id == updateSeatRankDto.EventId);
+                var eventDb = await eventRepository.GetEventById(updateSeatRankDto.EventId);
                 if (eventDb == null)
                 {
                     result = BuildAppActionResultError(result, $"Sự kiện này với {updateSeatRankDto.EventId} không tồn tại");

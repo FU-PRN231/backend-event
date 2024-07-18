@@ -17,5 +17,6 @@ namespace PRN231.TicketBooking.Repository.Contract
         public Task<PagedResult<SeatRank>> GetSeatRanks(int pageNumber, int pageSize);
         public Task<AppActionResult> AddSeatRankFromEvent(SeatRank seatRank);
         public Task<SeatRank> UpdateSeatRank(SeatRank seatRank);
+        public Task<PagedResult<SeatRank>> GetAllSeatRank(Expression<Func<SeatRank, bool>>? filter, int pageNumber, int pageSize, Expression<Func<SeatRank, object>>? orderBy = null, bool isAscending = true, params Expression<Func<SeatRank, object>>[]? includes);
     }
 }

@@ -79,7 +79,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                 {
                     result = BuildAppActionResultError(result, $"Nhà đầu tư với id {sponsorId} không tồn tại");
                 }
-                result.Result = await _repository.GetAllDataByExpression(p => p.EventSponsor!.SponsorId == sponsorId, pageNumber, pageSize, null, false, p => p.EventSponsor!.Sponsor!, p => p.EventSponsor!.Event!);
+                result.Result = await _repository.GetAllSponsorMoneyHistory(p => p.EventSponsor!.SponsorId == sponsorId, pageNumber, pageSize, null, false, p => p.EventSponsor!.Sponsor!, p => p.EventSponsor!.Event!);
             }
             catch (Exception ex)
             {
@@ -93,7 +93,7 @@ namespace PRN231.TicketBooking.Service.Implementation
             AppActionResult result = new AppActionResult();
             try
             {
-                result.Result = await _repository.GetAllDataByExpression(p => p.EventSponsor!.SponsorType == sponsorType, 0, 0, null, false, p => p.EventSponsor!.Sponsor!, p => p.EventSponsor!.Event!);
+                result.Result = await _repository.GetAllSponsorMoneyHistory(p => p.EventSponsor!.SponsorType == sponsorType, 0, 0, null, false, p => p.EventSponsor!.Sponsor!, p => p.EventSponsor!.Event!);
             }
             catch (Exception ex)
             {
@@ -108,12 +108,12 @@ namespace PRN231.TicketBooking.Service.Implementation
             try
             {
                 var eventRepository = Resolve<IEventRepository>();
-                var eventDb = eventRepository.GetByExpression(p => p!.Id == eventId);
+                var eventDb = eventRepository.GetEventById(eventId);
                 if (eventDb == null)
                 {
                     result = BuildAppActionResultError(result, $"Sự kiện với id {eventId} không tồn tại");
                 }
-                result.Result = await _repository.GetAllDataByExpression(p => p.EventSponsor!.EventId == eventId, pageNumber, pageSize, null, false, p => p.EventSponsor!.Sponsor!, p => p.EventSponsor!.Event!);
+                result.Result = await _repository.GetAllSponsorMoneyHistory(p => p.EventSponsor!.EventId == eventId, pageNumber, pageSize, null, false, p => p.EventSponsor!.Sponsor!, p => p.EventSponsor!.Event!);
             }
             catch (Exception ex)
             {
