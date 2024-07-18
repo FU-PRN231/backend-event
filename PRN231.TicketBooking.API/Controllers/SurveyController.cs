@@ -42,7 +42,7 @@ namespace PRN231.TicketBooking.API.Controllers
         }
 
         [HttpGet("get-all-survey")]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Permission.ORGANIZATION)]
+        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Permission.ORGANIZATION)]
         public async Task<AppActionResult> GellAllSurvey()
         {
             return await _service.GellAllSurvey();
