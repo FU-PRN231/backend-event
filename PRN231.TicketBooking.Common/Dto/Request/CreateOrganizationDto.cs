@@ -15,7 +15,6 @@ namespace PRN231.TicketBooking.Common.Dto.Request
         public string ContactEmail { get; set; } = null!;
         public string Website { get; set; } = null!;
         public string Address { get; set; } = null!;
-        public string Img { get; set; } = null!;
         public IFormFile? File { get; set; } 
         public DateTime CreateDate { get; set; }
     }

@@ -13,7 +13,7 @@ namespace PRN231.TicketBooking.Service.Contract
         public Task<AppActionResult> GetAllOrganization(int pageNumber, int pageSize);
         public Task<AppActionResult> CreateOrganization(CreateOrganizationDto organizationDto);
         public Task<AppActionResult> UpdateOrganization(UpdateOrganizationDTO organizationDTO);
-        public Task<AppActionResult> DeleteOrganization(int id);
+        public Task<AppActionResult> DeleteOrganization(Guid id);
 
     }
 }

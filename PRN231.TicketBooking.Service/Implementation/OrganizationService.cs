@@ -36,7 +36,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                 try
                 {
                     var isOrganizationExisted = _organizationRepository.GetByExpression(p => p.Name == organizationDto.Name);
-                    if (isOrganizationExisted != null)
+                    if (isOrganizationExisted == null)
                     {
                         result = BuildAppActionResultError(result, $"Tổ chức với tên {organizationDto.Name} đã tồn tại");
                     }
@@ -76,7 +76,7 @@ namespace PRN231.TicketBooking.Service.Implementation
             }
         }
 
-        public async Task<AppActionResult> DeleteOrganization(int id)
+        public async Task<AppActionResult> DeleteOrganization(Guid id)
         {
             AppActionResult result = new AppActionResult();
             try
