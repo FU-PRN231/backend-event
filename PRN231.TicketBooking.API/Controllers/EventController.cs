@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PRN231.TicketBooking.BusinessObject.Enum;
 using PRN231.TicketBooking.Common.Dto;
 using PRN231.TicketBooking.Common.Dto.Request;
 using PRN231.TicketBooking.Common.Util;
@@ -31,6 +32,12 @@ namespace PRN231.TicketBooking.API.Controllers
             return await _eventService.GetAvailableEvent(pageNumber, pageSize);
         }
 
+        [HttpGet("get-all-event-by-organization-id/{organizationId}/{pageNumber}/{pageSize}")]
+        public async Task<AppActionResult> GetAllEventByOrganizationId(Guid organizationId, int pageNumber = 1, int pageSize = 10)
+        {
+            return await _eventService.GetAllEventByOrganizationId(organizationId, pageNumber, pageSize);
+        }
+
         [HttpGet("get-event-by-id/{id}")]
         [Authorize("REGISTERED")]
         public async Task<AppActionResult> GetById(Guid id)
@@ -50,6 +57,12 @@ namespace PRN231.TicketBooking.API.Controllers
         public async Task<AppActionResult> UpdateEvent(Guid id, [FromForm] UpdateEventRequest updateEventRequest)
         {
             return await _eventService.UpdateEvent(id, updateEventRequest);
+        }
+
+        [HttpPost("update-event-status")]
+        public async Task<AppActionResult> UpdateEventStatus(Guid eventId, EventCensorStatus status)
+        {
+            return await _eventService.UpdateEventStatus(eventId, status);
         }
     }
 }

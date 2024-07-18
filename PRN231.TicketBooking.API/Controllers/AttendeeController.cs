@@ -21,7 +21,7 @@ namespace PRN231.TicketBooking.API.Controllers
         [Authorize("REGISTERED")]
         public async Task<AppActionResult> CheckIn(CheckInEventRequest checkInEventRequest)
         {
-            return await _attendeeService.CheckInAttendee(checkInEventRequest);
+            return await _attendeeService.CheckInAttendee(qrString);
         }
 
         [HttpGet("get-all-attendee-by-eventId/{eventId}")]

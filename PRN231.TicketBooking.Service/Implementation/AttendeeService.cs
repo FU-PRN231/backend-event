@@ -61,6 +61,46 @@ namespace PRN231.TicketBooking.Service.Implementation
             return result;
         }
 
+        public async Task<AppActionResult> CheckInAttendee(string qrString)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                var attendeeRepository = Resolve<IAttendeeRepostory>();
+                var attendeeEntity = await attendeeRepository.GetByExpression(a => a.Id == Guid.Parse(qrString), a => a.OrderDetail.Order.Account, a => a.OrderDetail.SeatRank.Event);
+                if (attendeeEntity == null)
+                {
+                    result.IsSuccess = false;
+                    result.Messages.Add($"Event Not Found with Id: {qrString}!");
+                    return result;
+                }
+                var orderRepo = Resolve<IOrderRepository>();
+                var accountId = await orderRepo.GetAccountId(attendeeEntity.OrderDetail.OrderId);
+                if (accountId == null || !accountId.Equals(attendeeEntity.OrderDetail.Order.AccountId))
+                {
+                    result.IsSuccess = false;
+                    result.Messages[0] = $"Account Not Found with Id: {accountId}!";
+                    return result;
+                }
+
+                var item = await attendeeRepository.CheckInAttendee(attendeeEntity);
+
+                await _unitOfWork.SaveChangeAsync();
+                result.Result = new UpdateAttendeeReponse
+                {
+                    CheckedIn = true,
+                    OrderDate = attendeeEntity.OrderDetail.Order.PurchaseDate,
+                    Account = attendeeEntity.OrderDetail.Order.Account,
+                    SeatRank = attendeeEntity.OrderDetail.SeatRank
+                };
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
+        }
+
         public async Task<AppActionResult> GetAllAttendeeByEventId(Guid eventId)
         {
             AppActionResult result = new AppActionResult();

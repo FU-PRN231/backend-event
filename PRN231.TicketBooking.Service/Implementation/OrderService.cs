@@ -3,7 +3,6 @@ using DocumentFormat.OpenXml.Drawing.Charts;
 using DocumentFormat.OpenXml.InkML;
 using DocumentFormat.OpenXml.Wordprocessing;
 using Humanizer;
-using IronBarCode;
 using MailKit.Search;
 using Microsoft.AspNetCore.Http;
 using PRN231.TicketBooking.BusinessObject.Enum;
@@ -20,7 +19,11 @@ using PRN231.TicketBooking.Service.Payment.PaymentService;
 using QRCoder;
 using StackExchange.Redis;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Transactions;
+using ZXing;
+using ZXing.Common;
+using ZXing.QrCode;
 using Order = PRN231.TicketBooking.BusinessObject.Models.Order;
 
 namespace PRN231.TicketBooking.Service.Implementation
@@ -159,52 +162,62 @@ namespace PRN231.TicketBooking.Service.Implementation
             var result = new AppActionResult();
             try
             {
+                var attendeeRepository = Resolve<IAttendeeRepostory>();
                 var orderDetailsRepository = Resolve<IOrderDetailsRepository>();
-                var orderDetailDb = await orderDetailsRepository.GetAllDataByExpression(o => o.OrderId == orderId, 0, 0, null, false, o => o.SeatRank);
-                if (orderDetailDb.Items.Count == 0)
+                var oRCodeService = Resolve<IQRCodeService>();
+                var attendeeDb = await attendeeRepository.GetAllDataByExpression(o => o.OrderDetail.OrderId == orderId, 0, 0, null, false, o => o.OrderDetail.SeatRank);
+                Dictionary<string, List<IFormFile>> data = new Dictionary<string, List<IFormFile>>();
+                if (attendeeDb.Items.Count > 0)
                 {
-                    result = BuildAppActionResultError(result, $"Không tìm thấy chi tiết của đơn hàng với id {orderId}");
-                    return result;
-                }
-                var orderDetailImgs = orderDetailDb.Items.Select(o => o.Id).ToList();
-                var staticFileRepository = Resolve<IStaticFileRepository>();
-                var staticFileDb = await staticFileRepository.GetAllDataByExpression(s => s.OrderDetailId != null && orderDetailImgs.Contains((Guid)s.OrderDetailId), 0, 0, null, false, s => s.OrderDetail.SeatRank);
-                Dictionary<string, List<string>> data = new Dictionary<string, List<string>>();
-                if (staticFileDb.Items.Select(s => s.OrderDetailId).Distinct().ToList().Count == orderDetailImgs.Count)
-                {
-                    var groupedImgs = staticFileDb.Items.GroupBy(g => g.OrderDetail.SeatRank.Name).ToDictionary(g => g.Key, g => g.Select(i => i.Img).ToList());
-                    foreach (var kvp in groupedImgs)
+                    var attendeeImgs = attendeeDb.Items.Where(a => !string.IsNullOrEmpty(a.QR)).Select(o => o.QR).ToList();
+                    if (attendeeDb.Items.Count == attendeeImgs.Count)
                     {
-                        data.Add(kvp.Key, kvp.Value);
-                    }
-                }
-                else
-                {
-                    int quantity = 0;
-
-                    foreach (var orderDetail in orderDetailDb.Items)
-                    {
-                        List<string> imgs = new List<string>();
-                        quantity = orderDetail.Quantity;
-                        while (quantity > 0)
+                        var groupedImgs = attendeeDb.Items.GroupBy(g => g.OrderDetail!.SeatRank!.Name).ToDictionary(g => g.Key, g => g.Select(i => i.QR).ToList());
+                        foreach (var kvp in groupedImgs)
                         {
-                            string url = await GenerateQR($"{orderDetail.Id.ToString()}/{quantity}");
-                            if (url == null)
+                            data.Add(kvp.Key,null);
+                        }
+                    }                    
+                } else
+                {
+                    var insertAttendee = await AddAttendee(orderId);
+                    if (insertAttendee == null)
+                    {
+                        result = BuildAppActionResultError(result, $"Tạo bảng điểm danh cho order với id {orderId} thất bại, vui lòng thử lại");
+                    }
+
+                    Dictionary<Guid, string> details = new Dictionary<Guid, string>();
+                    string seatRankName = null;
+                    foreach (var attendee in insertAttendee!)
+                    {
+                        AppActionResult upload = new AppActionResult();
+                        upload = await oRCodeService.GenerateQR(attendee.Id.ToString());
+                        if (upload == null)
+                        {
+                            result = BuildAppActionResultError(result, $"Không thể tải hình ảnh vé, vui lòng thử lại");
+                            return result;
+                        }
+                        UploadImgResponseDto QrCodeDto = (UploadImgResponseDto)upload.Result;
+                        attendee.QR = QrCodeDto.url;
+                        await attendeeRepository.Insert(attendee);
+                        if(!details.ContainsKey(attendee.OrderDetailId)) 
+                        {
+                            var detail = await orderDetailsRepository.GetByExpression(o => o.Id == attendee.OrderDetailId, o => o.SeatRank);
+                            if(detail == null)
                             {
-                                result = BuildAppActionResultError(result, $"Không thể tải hình ảnh vé, vui lòng thử lại");
+                                result = BuildAppActionResultError(result, $"Không tìm thấy ghế ngồi của chi tiết đơn hàng {attendee.OrderDetailId}");
                                 return result;
                             }
-                            imgs.Add(url);
-                            await staticFileRepository.Insert(new StaticFile
-                            {
-                                Id = Guid.NewGuid(),
-                                Img = url,
-                                OrderDetailId = orderDetail.Id
-                            });
-                            quantity--;
+                            details.Add(attendee.OrderDetailId, detail.SeatRank.Name);
                         }
-                        data.Add(orderDetail.SeatRank.Name, imgs);
-
+                        seatRankName = details[attendee.OrderDetailId];
+                        if (data.ContainsKey(seatRankName))
+                        {
+                            data[seatRankName].Add(QrCodeDto.file);
+                        } else
+                        {                         
+                            data.Add(seatRankName, new List<IFormFile> { QrCodeDto.file });
+                        }
                     }
                 }
                 await _unitOfWork.SaveChangeAsync();
@@ -216,46 +229,71 @@ namespace PRN231.TicketBooking.Service.Implementation
             }
             return result;
         }
+      
+        /* private async Task<UploadImgResponseDto> GenerateQR(string Id)
+         {
+             UploadImgResponseDto result = null;
+             try
+             {
+                 string pathName = SD.FirebasePathName.QR_PREFIX + Id;
+                 //IFormFile qr = GenerateQRCodeImage(Id);
+                 IFormFile qr = CreateQRCode(Id);
+                 var url = await _firebaseService.UploadFileToFirebase(qr, pathName);
+                 if (url.IsSuccess)
+                 {
+                     result.file = qr;
+                     result.url = (string)url.Result;
+                 }
+                 else
+                 {
+                     return null;
+                 }
 
-        private async Task<string> GenerateQR(string Id)
-        {
-            string result = null;
-            try
-            {
-                string pathName = SD.FirebasePathName.QR_PREFIX + Id;
-                IFormFile qr = GenerateQRCodeImage(Id);
-                var url = await _firebaseService.UploadFileToFirebase(qr, pathName);
-                if (url.IsSuccess)
-                {
-                    result = (string?)url.Result;
-                }
+             }
+             catch (Exception ex)
+             {
+                 result = null;
+             }
+             return result;
+         }*/
 
-            }
-            catch (Exception ex)
-            {
-                result = null;
-            }
-            return result;
-        }
+        /*  private IFormFile GenerateQRCodeImage(string data)
+          {
+              var barcodeWriter = new BarcodeWriterPixelData
+              {
+                  Format = BarcodeFormat.QR_CODE,
+                  Options = new EncodingOptions
+                  {
+                      Height = 500,
+                      Width = 500,
+                      Margin = 1
+                  }
+              };
 
-        private IFormFile GenerateQRCodeImage(string data)
-        {
-            GeneratedBarcode barcode = QRCodeWriter.CreateQrCode(data, 500, QRCodeWriter.QrErrorCorrectionLevel.Medium);
+              var pixelData = barcodeWriter.Write(data);
 
-            // Save barcode as PNG in memory
-            byte[] barcodeBytes = barcode.ToPngBinaryData();
+              using (var bitmap = new System.Drawing.Bitmap(pixelData.Width, pixelData.Height, System.Drawing.Imaging.PixelFormat.Format32bppRgb))
+              {
+                  var bitmapData = bitmap.LockBits(new System.Drawing.Rectangle(0, 0, bitmap.Width, bitmap.Height), System.Drawing.Imaging.ImageLockMode.WriteOnly, bitmap.PixelFormat);
+                  try
+                  {
+                      System.Runtime.InteropServices.Marshal.Copy(pixelData.Pixels, 0, bitmapData.Scan0, pixelData.Pixels.Length);
+                  }
+                  finally
+                  {
+                      bitmap.UnlockBits(bitmapData);
+                  }
 
-            // Create a MemoryStream from the barcode bytes
-            MemoryStream ms = new MemoryStream(barcodeBytes);
+                  var memoryStream = new MemoryStream();
+                  bitmap.Save(memoryStream, System.Drawing.Imaging.ImageFormat.Png);
+                  memoryStream.Position = 0;
 
-            // Create an IFormFile from the MemoryStream
-            IFormFile formFile = new FormFile(ms, 0, ms.Length, "barcode.png", "image/png");
+                  IFormFile formFile = new FormFile(memoryStream, 0, memoryStream.Length, "barcode.png", "image/png");
 
-            // Set the position of the MemoryStream back to the beginning for subsequent reads
-            ms.Position = 0;
+                  return formFile;
+              }
+          }*/
 
-            return formFile;
-        }
 
         public async Task<AppActionResult> GetAllOrder(int pageNumber, int pageSize)
         {
@@ -506,27 +544,36 @@ namespace PRN231.TicketBooking.Service.Implementation
                     return result;
                 }
                 var orderDetailRepository = Resolve<IOrderDetailsRepository>();
-                var orderDetailDb = await orderDetailRepository.GetAllDataByExpression(p => p!.OrderId == orderId && p.Order.Status == OrderStatus.SUCCUSSFUL, 0, 0, null, false, o => o.Order.Account, o => o.SeatRank.Event.Location, o => o.SeatRank.Event.Organization);
-                if (orderDetailDb.Items.Count == 0)
+                var orderDetailDb = await orderDetailRepository.GetAllDataByExpression(p => p!.OrderId == orderId && p.Order!.Status == OrderStatus.SUCCUSSFUL, 0, 0, null, false, o => o.Order.Account, o => o.SeatRank.Event.Location, o => o.SeatRank.Event.Organization);
+                if (orderDetailDb.Items!.Count == 0)
                 {
-                    result = BuildAppActionResultError(result, $"Đơn hàng đơn hàng {orderId} không tồn tại");
+                    result = BuildAppActionResultError(result, $"Chi tiết của đơn hàng thành công với id {orderId} không tồn tại");
                     return result;
                 }
 
-                Dictionary<string, List<string>> ticketInfo = new Dictionary<string, List<string>>();
+                Dictionary<string, List<IFormFile>> ticketInfo = new Dictionary<string, List<IFormFile>>();
                 var ticketData = await GenerateTicketQR(orderId);
                 if (!ticketData.IsSuccess)
                 {
-                    result = BuildAppActionResultError(result, $"Không thể tải hình ảnh vé. Vui lòng thử lại");
+                    result.Messages.AddRange(ticketData.Messages);
+                    result.IsSuccess = false;
                     return result;
                 }
-                ticketInfo = (Dictionary<string, List<string>>)ticketData.Result;
+                ticketInfo = (Dictionary<string, List<IFormFile>>)ticketData.Result!;
 
                 var emailService = Resolve<IEmailService>();
-                Account account = orderDetailDb.Items.FirstOrDefault().Order.Account;
-                Event eventDb = orderDetailDb.Items.FirstOrDefault().SeatRank.Event;
+                Account account = orderDetailDb!.Items!.FirstOrDefault()!.Order!.Account!;
+                Event eventDb = orderDetailDb!.Items!.FirstOrDefault()!.SeatRank!.Event!;
                 string body = TemplateMappingHelper.GenerateTicketEmailBody(account, ticketInfo, eventDb);
-                emailService!.SendEmail(account.Email, SD.SubjectMail.SEAT_TICKET, body);
+                List<IFormFile> files = new List<IFormFile>();
+                foreach (var kvp in ticketInfo)
+                {
+                    foreach (var img in kvp.Value)
+                    {
+                        files.Add(img);
+                    }
+                }
+                emailService!.SendEmailWithFiles(account.Email, SD.SubjectMail.SEAT_TICKET, body, files);
             }
             catch (Exception ex)
             {
@@ -550,7 +597,6 @@ namespace PRN231.TicketBooking.Service.Implementation
                     //if (!isSuccessful) orderDb.Status = OrderStatus.CANCELLED;
                     if (orderDb.Status == OrderStatus.PENDING) orderDb.Status = OrderStatus.SUCCUSSFUL;
                     await _unitOfWork.SaveChangeAsync();
-
                     var orderSend = await this.SendTicketEmail(orderDb.Id);
                     if (!orderSend.IsSuccess)
                     {
@@ -566,6 +612,40 @@ namespace PRN231.TicketBooking.Service.Implementation
                 result = BuildAppActionResultError(result, ex.Message);
             }
             return result;
+        }
+
+        private async Task<List<Attendee>> AddAttendee(Guid orderId)
+        {
+            List<Attendee> data = new List<Attendee>();
+            try
+            {
+                var orderDetailRepository = Resolve<IOrderDetailsRepository>();
+                var attendeeRepository = Resolve<IAttendeeRepostory>();
+                var orderDetailDb = await orderDetailRepository.GetAllDataByExpression(o => o.OrderId == orderId, 0, 0, null, false, o => o.SeatRank);
+                if (orderDetailDb.Items.Count > 0)
+                {
+                    int i = 0;
+                    foreach (var detail in orderDetailDb.Items)
+                    {
+                        i = detail.Quantity;
+                        while (i > 0)
+                        {
+                            data.Add(new Attendee
+                            {
+                                Id = Guid.NewGuid(),
+                                CheckedIn = false,
+                                OrderDetailId = detail.Id,
+                                QR = string.Empty
+                            });
+                            i--;
+                        }
+                    }
+                }
+            } catch(Exception ex)
+            {
+                data = null;
+            }
+            return data;
         }
     }
 }

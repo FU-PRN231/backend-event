@@ -11,7 +11,8 @@ namespace PRN231.TicketBooking.Common.Dto.Response
     public class UpdateAttendeeReponse
     {
         public bool CheckedIn { get; set; }
-        public Guid OrderId { get; set; }
-        public Guid EventId { get; set; }
+        public DateTime OrderDate { get; set; }
+        public Account Account { get; set; }
+        public SeatRank SeatRank { get; set; }
     }
 }

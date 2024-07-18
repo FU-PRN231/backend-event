@@ -10,7 +10,7 @@ namespace PRN231.TicketBooking.Service.Contract
 	public interface IReportService
 	{
 		public Task<AppActionResult> GetRevenueReport(Guid? organizationId, int timePeriod);
-		public Task<AppActionResult> GetUserReport(int timePeriod);
 		public Task<AppActionResult> GetEventDetailReport(Guid eventId);
-	}
+		public Task<AppActionResult> GetSponsorReport(Guid sponsorId, int timePeriod);
+    }
 }

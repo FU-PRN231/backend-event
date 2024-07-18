@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PRN231.TicketBooking.DAO.Data;
 
@@ -11,9 +12,10 @@ using PRN231.TicketBooking.DAO.Data;
 namespace PRN231.TicketBooking.DAO.Migrations
 {
     [DbContext(typeof(BookingTicketDbContext))]
-    partial class BookingTicketDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240626171611_AddMainImgInEvent")]
+    partial class AddMainImgInEvent
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

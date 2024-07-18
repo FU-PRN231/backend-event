@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using PRN231.TicketBooking.BusinessObject.Enum;
+using PRN231.TicketBooking.BusinessObject.Models;
 using PRN231.TicketBooking.Common.Dto;
 using PRN231.TicketBooking.Common.Dto.Request;
 using System;

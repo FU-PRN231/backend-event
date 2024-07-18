@@ -200,5 +200,28 @@ namespace PRN231.TicketBooking.Repository.Implementation
             }
             return result;
         }
+
+        public async Task<PagedResult<Event>> GetEventsByOrganizationId(Guid organizationId, int pageNumber, int pageSize)
+        {
+            PagedResult<Event> result = null;
+            try
+            {
+                result = new PagedResult<Event>();
+                result = await _eventDAO.GetAllDataByExpression(
+                    filter: e => e.OrganizationId == organizationId,
+                    pageNumber: pageNumber,
+                    pageSize: pageSize,
+                    includes: new Expression<Func<Event, object>>[] {
+             e => e.Location,
+             e => e.Organization,
+                    }
+                );
+            }
+            catch (Exception ex)
+            {
+                result = null;
+            }
+            return result;
+        }
     }
 }

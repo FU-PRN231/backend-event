@@ -1,4 +1,6 @@
-﻿using PRN231.TicketBooking.BusinessObject.Models;
+﻿using Microsoft.AspNetCore.Http;
+using PRN231.TicketBooking.BusinessObject.Models;
+using System;
 using System.Text;
 
 namespace PRN231.TicketBooking.Common.Util
@@ -133,7 +135,7 @@ namespace PRN231.TicketBooking.Common.Util
             font-size: 30px;
           ""
         >
-          Love House
+          Cóc Event
         </p>
       </div>
       <div class=""mainBody"">
@@ -143,7 +145,7 @@ namespace PRN231.TicketBooking.Common.Util
         <p class=""greeting""></p>
 
         <p class=""emailBody"">
-          You are currently registering an account through <b><i>Love House </i></b>.
+          You are currently registering an account through <b><i>Cóc Event </i></b>.
         </p>
         <p class=""emailBody"">
           Below is your OTP information:
@@ -159,14 +161,14 @@ namespace PRN231.TicketBooking.Common.Util
           >
         </p>
         <p class=""support"">
-          Thank you for your interest in the services of <b><i>Love House</i></b
+          Thank you for your interest in the services of <b><i>Cóc Event</i></b
           >, for any inquiries, please contact
           <u><i>qk.backend@gmail.com</i></u> for support
         </p>
         <div class=""signature"">
           <p>Best regards,</p>
           <p>
-            <b><i>Love House Team</i></b>
+            <b><i>Cóc Event Team</i></b>
           </p>
         </div>
       </div>
@@ -295,7 +297,7 @@ namespace PRN231.TicketBooking.Common.Util
             font-size: 30px;
           ""
         >
-          Love House
+          Cóc Event
         </p>
       </div>
       <div class=""mainBody"">
@@ -305,7 +307,7 @@ namespace PRN231.TicketBooking.Common.Util
         <p class=""greeting""></p>
 
         <p class=""emailBody"">
-          You are in the process of completing contract procedures through <b><i>Love House </i></b>.
+          You are in the process of completing contract procedures through <b><i>Cóc Event </i></b>.
         </p>
         <p class=""emailBody"">
           Below is your OTP information:
@@ -321,14 +323,14 @@ namespace PRN231.TicketBooking.Common.Util
           >
         </p>
         <p class=""support"">
-          Thank you for your interest in the services of <b><i>Love House</i></b
+          Thank you for your interest in the services of <b><i>Cóc Event</i></b
           >, for any inquiries, please contact
           <u><i>qk.backend@gmail.com</i></u> for support
         </p>
         <div class=""signature"">
           <p>Best regards,</p>
           <p>
-            <b><i>Love House Team</i></b>
+            <b><i>Cóc Event Team</i></b>
           </p>
         </div>
       </div>
@@ -457,7 +459,7 @@ namespace PRN231.TicketBooking.Common.Util
             font-size: 30px;
           ""
         >
-          Love House
+          Cóc Event
         </p>
       </div>
       <div class=""mainBody"">
@@ -467,7 +469,7 @@ namespace PRN231.TicketBooking.Common.Util
         <p class=""greeting""></p>
 
         <p class=""emailBody"">
-         You have accidentally forgotten your password through <b><i>Love House </i></b>.
+         You have accidentally forgotten your password through <b><i>Cóc Event </i></b>.
         </p>
         <p class=""emailBody"">
           Below is your OTP information:
@@ -483,14 +485,14 @@ namespace PRN231.TicketBooking.Common.Util
           >
         </p>
         <p class=""support"">
-          Thank you for your interest in the services of <b><i>Love House</i></b
+          Thank you for your interest in the services of <b><i>Cóc Event</i></b
           >, for any inquiries, please contact
           <u><i>qk.backend@gmail.com</i></u> for support
         </p>
         <div class=""signature"">
           <p>Best regards,</p>
           <p>
-            <b><i>Love House Team</i></b>
+            <b><i>Cóc Event Team</i></b>
           </p>
         </div>
       </div>
@@ -786,7 +788,7 @@ namespace PRN231.TicketBooking.Common.Util
             font-size: 30px;
           ""
         >
-          Love House
+          Cóc Event
         </p>
       </div>
       <div class=""mainBody"">
@@ -796,7 +798,7 @@ namespace PRN231.TicketBooking.Common.Util
         <p class=""greeting""></p>
 
         <p class=""emailBody"">
-         Your quote request has been completed at <b><i>Love House </i></b>.
+         Your quote request has been completed at <b><i>Cóc Event </i></b>.
         </p>
         <p class=""emailBody"">
          Please enter the system to view the quote and moderate this quote
@@ -807,14 +809,14 @@ namespace PRN231.TicketBooking.Common.Util
             ></a
           >
         <p class=""support"">
-          Thank you for your interest in the services of <b><i>Love House</i></b
+          Thank you for your interest in the services of <b><i>Cóc Event</i></b
           >, for any inquiries, please contact
           <u><i>qk.backend@gmail.com</i></u> for support
         </p>
         <div class=""signature"">
           <p>Best regards,</p>
           <p>
-            <b><i>Love House Team</i></b>
+            <b><i>Cóc Event Team</i></b>
           </p>
         </div>
       </div>
@@ -829,7 +831,7 @@ namespace PRN231.TicketBooking.Common.Util
             return body;
         }
 
-        public static string GenerateTicketEmailBody(Account account, Dictionary<string, List<string>> ticketInfo, Event eventInfo)
+        public static string GenerateTicketEmailBody(Account account, Dictionary<string, List<IFormFile>> ticketInfo, Event eventInfo)
         {
             var emailTemplate = @"
 <!DOCTYPE html>
@@ -881,19 +883,72 @@ namespace PRN231.TicketBooking.Common.Util
             list-style-type: none;
             padding: 0;
         }
-        .ticket-list li {
+        .ticket-item {
             background-color: #f1f1f1;
             margin: 5px 0;
             padding: 10px;
             border-radius: 5px;
+            display: flex;
+            align-items: center;
         }
-        .ticket-list img {
-            max-width: 100px;
+        .ticket-item .icon {
+            margin-right: 10px;
+        }
+        .ticket-item img {
+            max-width: 100%;
             height: auto;
             display: block;
-            margin: 0 auto;
+        }
+        .ticket-item .details {
+            display: flex;
+            flex-direction: column;
+        }
+        .ticket-item .file-name,
+        .ticket-item .file-size {
+            margin: 2px 0;
+        }
+        .image-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+        .image-grid .ticket-item {
+            flex: 0 0 calc(25% - 20px);
+            margin-bottom: 30px;
+            position: relative;
+            list-style-type: none;
+            padding: 0;
+            text-align: center;
+        }
+        .image-grid .ticket-item .image-container {
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            height: 90%;
+            padding: 15px;
+        }
+        .image-grid .ticket-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Maintain aspect ratio */
+            transition: transform 0.3s ease;
+        }
+        .image-grid .ticket-item:hover img {
+            transform: scale(1.1);
         }
     </style>
+    <script>
+        function setDownloadFilename(url, filename) {
+            var link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
 </head>
 <body>
     <div class='container'>
@@ -912,29 +967,32 @@ namespace PRN231.TicketBooking.Common.Util
             <p><strong>Description:</strong> {{EventDescription}}</p>
             <p><strong>Start Date:</strong> {{EventStartDate}}</p>
             <p><strong>End Date:</strong> {{EventEndDate}}</p>
-            <p><strong>Start Time:</strong> {{EventStartTime}}</p>
-            <p><strong>End Time:</strong> {{EventEndTime}}</p>
             <p><strong>Location:</strong> {{EventLocation}}</p>
             <p><strong>Organization:</strong> {{EventOrganization}}</p>
         </div>
         <div class='ticket-section'>
             <h2>Tickets</h2>
-            {{TicketSections}}
+           <p>Below are the tickets you have purchased for the event</p>
         </div>
     </div>
-</body>
-</html>";
 
-            var ticketSectionsBuilder = new StringBuilder();
-            foreach (var rank in ticketInfo.Keys)
-            {
-                ticketSectionsBuilder.AppendLine($"<div class='rank-section'><h3>{rank}</h3><ul class='ticket-list'>");
-                foreach (var ticket in ticketInfo[rank])
-                {
-                    ticketSectionsBuilder.AppendLine($"<li><img src='{ticket}' alt='QR Code'></li>");
-                }
-                ticketSectionsBuilder.AppendLine("</ul></div>");
-            }
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var ticketLinks = document.querySelectorAll('.ticket-item a');
+            ticketLinks.forEach(function(link) {
+                link.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    var url = this.getAttribute('href');
+                    var filename = this.getAttribute('data-download-filename');
+                    setDownloadFilename(url, filename);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+";
+
 
             var emailBody = emailTemplate
                 .Replace("{{FirstName}}", account.FirstName)
@@ -942,16 +1000,20 @@ namespace PRN231.TicketBooking.Common.Util
                 .Replace("{{PhoneNumber}}", account.PhoneNumber)
                 .Replace("{{EventTitle}}", eventInfo.Title)
                 .Replace("{{EventDescription}}", eventInfo.Description)
-                .Replace("{{EventStartDate}}", eventInfo.StartEventDate.ToString("yyyy-MM-dd"))
-                .Replace("{{EventEndDate}}", eventInfo.EndEventDate.ToString("yyyy-MM-dd"))
-                .Replace("{{EventStartTime}}", eventInfo.StartTime.ToString("HH:mm"))
-                .Replace("{{EventEndTime}}", eventInfo.EndTime.ToString("HH:mm"))
+                .Replace("{{EventStartDate}}", eventInfo.StartEventDate.ToString("yyyy-MM-dd HH:mm"))
+                .Replace("{{EventEndDate}}", eventInfo.EndEventDate.ToString("yyyy-MM-dd HH:mm"))
                 .Replace("{{EventLocation}}", eventInfo.Location != null ? eventInfo.Location.Name : "N/A")
-                .Replace("{{EventOrganization}}", eventInfo.Organization != null ? eventInfo.Organization.Name : "N/A")
-                .Replace("{{TicketSections}}", ticketSectionsBuilder.ToString());
+                .Replace("{{EventOrganization}}", eventInfo.Organization != null ? eventInfo.Organization.Name : "N/A");
 
             return emailBody;
         }
+
+        private static string GetFileNameFromUrl(string url)
+        {
+            return Path.GetFileName(url);
+        }
+
+
 
 
     }

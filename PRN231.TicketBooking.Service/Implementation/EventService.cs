@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using PRN231.TicketBooking.BusinessObject.Enum;
 using PRN231.TicketBooking.BusinessObject.Models;
 using PRN231.TicketBooking.Common.Dto;
 using PRN231.TicketBooking.Common.Dto.Request;
@@ -196,11 +197,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                 eventEntity.Id = Guid.NewGuid();
                 eventEntity.CreateBy = dto.UserId;
                 eventEntity.CreateDate = DateTime.Now;
-                var resultAddEvent = await eventRepository.AddEvent(eventEntity);
-                if (resultAddEvent == null || !resultAddEvent.IsSuccess)
-                {
-                    return resultAddEvent;
-                }
+                
                 //Create SeatRank
                 if (dto.CreateSeatRankDtoRequests != null && dto.CreateSeatRankDtoRequests.Count > 0)
                 {
@@ -273,7 +270,18 @@ namespace PRN231.TicketBooking.Service.Implementation
                 //Create StaticFile
                 if (dto.CreateSpeakerEvents != null && dto.CreateSpeakerEvents.Count > 0)
                 {
-                    foreach (var item in dto.Img)
+                    await _firebaseService.DeleteFileFromFirebase($"{SD.FirebasePathName.EVENT}{eventEntity.Id}");
+
+                    var mainUrl = await _firebaseService
+                                    .UploadFileToFirebase(dto.Img[0], $"{SD.FirebasePathName.EVENT}{eventEntity.Id}");
+                    if (!mainUrl.IsSuccess)
+                    {
+                        return BuildAppActionResultError(mainUrl, "Cannot upload file!");
+                    }
+                    //eventEntity.MainImg = (string)mainUrl.Result;
+                    
+
+                    foreach (var item in dto.Img.Skip(1).Take(dto.Img.Count - 1))
                     {
                         var staticFile = new StaticFile();
                         staticFile.Id = Guid.NewGuid();
@@ -294,7 +302,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                         }
                     }
                 }
-
+                await eventRepository.Insert(eventEntity);
                 await _unitOfWork.SaveChangeAsync();
                 result.Result = _mapper.Map<CreateEventResponse>(dto);
                 return BuildAppActionResultSuccess(result, "Tạo sự kiện thành công");
@@ -449,5 +457,54 @@ namespace PRN231.TicketBooking.Service.Implementation
             }
             return result;
 		}
-	}
+
+        public async Task<AppActionResult> GetAllEventByOrganizationId(Guid organizationId, int pageNumber, int pageSize)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                var eventRepository = Resolve<IEventRepository>();
+                var data = await eventRepository.GetEventsByOrganizationId(organizationId, pageNumber, pageSize);
+                result = new AppActionResult()
+                {
+                    Result = data,
+                    IsSuccess = true
+                };
+                return BuildAppActionResultSuccess(result, "Get list event successfully!");
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
+        }
+
+        public async Task<AppActionResult> UpdateEventStatus(Guid eventId, EventCensorStatus status)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                var eventRepository = Resolve<IEventRepository>();
+                var eventDb = await eventRepository.GetById(eventId);
+                if(eventDb == null)
+                {
+                    result = BuildAppActionResultError(result, $"Không tìm thấy sư kiện với id {eventId}");
+                    return result;
+                }
+                if(eventDb.Status != EventCensorStatus.PENDING)
+                {
+                    result = BuildAppActionResultError(result, $"Sự kiện {eventDb.Title} đã được duyệt, không thể chuyển trạng thái");
+                    return result;
+                }
+
+                eventDb.Status = status;
+                await eventRepository.Update(eventDb);
+                await _unitOfWork.SaveChangeAsync();
+            } catch(Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
+        }
+    }
 }

@@ -12,7 +12,9 @@ namespace PRN231.TicketBooking.Common.Dto.Response
 		public int NumOfSeat {  get; set; }
 		public int NumOfBookedSeat { get; set; }
 		public double TotalRevenue { get; set; }
-		public double TotalSponsor { get; set; }
-		public double TotalCost { get; set; }
+		public double TotalTicketRevenue { get; set; }
+        public double TotalSponsor { get; set; }
+		public double TotalSponsorAmount { get; set; }
+        public double TotalCost { get; set; }
 	}
 }

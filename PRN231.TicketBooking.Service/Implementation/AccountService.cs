@@ -16,9 +16,10 @@ using QRCoder;
 using System.Security.Cryptography;
 using System.Text;
 using System.Drawing;
-using IronBarCode;
 using Firebase.Auth;
 using System.Data.Entity.Core.Metadata.Edm;
+using Humanizer;
+using ZXing;
 
 
 namespace PRN231.TicketBooking.Service.Implementation
@@ -245,6 +246,23 @@ namespace PRN231.TicketBooking.Service.Implementation
                 }
 
                 item.Role = userRole;
+               
+                if (userRole.Where(u => u.Name.Equals("ADMIN")) != null)
+                {
+                    item.MainRole = "ADMIN";
+                }
+                else if (userRole.Where(u => u.Name.Equals("ORGANIZER")) != null)
+                {
+                    item.MainRole = "ORGANIZER";
+                }
+                else if (userRole.Count > 0)
+                {
+                    item.MainRole = userRole.FirstOrDefault(n => !n.Equals("CUSTOMER")).Name;
+                }
+                else
+                {
+                    item.MainRole = "CUSTOMER";
+                }
             }
 
             result.Result =
@@ -259,13 +277,12 @@ namespace PRN231.TicketBooking.Service.Implementation
 
             try
             {
-                if (await _accountRepository.GetAccountByEmail(changePasswordDto.Email, false, null) == null)
+                var user = await _userManager.FindByEmailAsync(changePasswordDto.Email);
+                if (user == null || (user != null && user.IsDeleted))
                     result = BuildAppActionResultError(result,
                         $"Tài khoản có email {changePasswordDto.Email} không tồn tại!");
                 if (!BuildAppActionResultIsError(result))
                 {
-                    var user = await _accountRepository.GetByExpression(c =>
-                        c!.Email == changePasswordDto.Email && c.IsDeleted == false);
                     var changePassword = await _userManager.ChangePasswordAsync(user!, changePasswordDto.OldPassword,
                         changePasswordDto.NewPassword);
                     if (!changePassword.Succeeded)
@@ -316,8 +333,8 @@ namespace PRN231.TicketBooking.Service.Implementation
 
             try
             {
-                var user = await _accountRepository.GetAccountByEmail(dto.Email, false, true);
-                if (user == null)
+                var user = await _userManager.FindByEmailAsync(dto.Email);
+                if (user == null || (user != null && user.IsDeleted))
                     result = BuildAppActionResultError(result, "Tài khoản không tồn tại hoặc chưa được xác thực!");
                 else if (user.VerifyCode != dto.RecoveryCode)
                     result = BuildAppActionResultError(result, "Mã xác thực sai!");
@@ -347,11 +364,11 @@ namespace PRN231.TicketBooking.Service.Implementation
             var result = new AppActionResult();
             try
             {
-                var user = await _accountRepository.GetAccountByEmail(email, false, false);
-                if (user == null)
-                    result = BuildAppActionResultError(result, "Tài khoản không tồn tại ");
+                var user = await _userManager.FindByEmailAsync(email);
+                if (user == null || (user != null && user.IsDeleted))
+                    result = BuildAppActionResultError(result, "Tài khoản không tồn tại hoặc chưa được xác thực!");
                 else if (user.VerifyCode != verifyCode)
-                    result = BuildAppActionResultError(result, "Mã xác thực sai");
+                    result = BuildAppActionResultError(result, "Mã xác thực sai!");
 
                 if (!BuildAppActionResultIsError(result))
                 {
@@ -375,8 +392,9 @@ namespace PRN231.TicketBooking.Service.Implementation
 
             try
             {
-                var user = await _accountRepository.GetAccountByEmail(email, false, true);
-                if (user == null) result = BuildAppActionResultError(result, "Tài khoản không tồn tại hoặc chưa được xác thực");
+                var user = await _userManager.FindByEmailAsync(email);
+                if (user == null || (user != null && user.IsDeleted))
+                    result = BuildAppActionResultError(result, "Tài khoản không tồn tại hoặc chưa được xác thực!");
 
                 if (!BuildAppActionResultIsError(result))
                 {
@@ -401,8 +419,9 @@ namespace PRN231.TicketBooking.Service.Implementation
 
             try
             {
-                var user = await _accountRepository.GetAccountByEmail(email, false, false);
-                if (user == null) result = BuildAppActionResultError(result, "Tài khoản không tồn tại hoặc chưa xác thực");
+                var user = await _userManager.FindByEmailAsync(email);
+                if (user == null || (user != null && user.IsDeleted))
+                    result = BuildAppActionResultError(result, "Tài khoản không tồn tại hoặc chưa được xác thực!");
 
                 if (!BuildAppActionResultIsError(result))
                 {
@@ -425,8 +444,7 @@ namespace PRN231.TicketBooking.Service.Implementation
         {
             var code = string.Empty;
 
-            var user = await _accountRepository.GetAccountByEmail(email, false, isForForgettingPassword);
-
+            var user = await _userManager.FindByEmailAsync(email);
             if (user != null)
             {
                 code = Guid.NewGuid().ToString("N").Substring(0, 6);
@@ -783,10 +801,9 @@ namespace PRN231.TicketBooking.Service.Implementation
                     result = BuildAppActionResultError(result, "Không tìm thấy thông tin tài khoản");
                     return result;
                 }
-                string qrAccountString = $"{accountDb.FirstName} {accountDb.LastName},{accountDb.PhoneNumber},{accountDb.Email}";
                 //string encryptAccountResponseString = EncryptData(qrAccountString, SD.QR_CODE_KEY);
                 string pathName = SD.FirebasePathName.QR_PREFIX + accountDb.Id;
-                IFormFile qr = GenerateQRCodeImage(qrAccountString);
+                IFormFile qr = CreateQRCode(accountDb.Id);
                 var url = await _firebaseService.UploadFileToFirebase(qr, pathName);
                 if (url.IsSuccess)
                 {
@@ -829,22 +846,44 @@ namespace PRN231.TicketBooking.Service.Implementation
         }
 
 
-        public IFormFile GenerateQRCodeImage(string data)
+        //public IFormFile GenerateQRCodeImage(string data)
+        //{
+        //    GeneratedBarcode barcode = QRCodeWriter.CreateQrCode(data, 500, QRCodeWriter.QrErrorCorrectionLevel.Medium);
+
+        //    // Save barcode as PNG in memory
+        //    byte[] barcodeBytes = barcode.ToPngBinaryData();
+
+        //    // Create a MemoryStream from the barcode bytes
+        //    MemoryStream ms = new MemoryStream(barcodeBytes);
+
+        //    // Create an IFormFile from the MemoryStream
+        //    IFormFile formFile = new FormFile(ms, 0, ms.Length, "barcode.png", "image/png");
+
+        //    // Set the position of the MemoryStream back to the beginning for subsequent reads
+        //    ms.Position = 0;
+
+        //    return formFile;
+        //}
+
+        public IFormFile CreateQRCode(string qrCodeText)
         {
-            GeneratedBarcode barcode = QRCodeWriter.CreateQrCode(data, 500, QRCodeWriter.QrErrorCorrectionLevel.Medium);
+            byte[] qrCodeBytes = new byte[0];
+            QRCodeGenerator qRCodeGenerator = new QRCodeGenerator();
+            QRCodeData data = qRCodeGenerator.CreateQrCode(qrCodeText, QRCodeGenerator.ECCLevel.Q);
+            BitmapByteQRCode bitmap = new BitmapByteQRCode(data);
+            qrCodeBytes = bitmap.GetGraphic(20);
 
-            // Save barcode as PNG in memory
-            byte[] barcodeBytes = barcode.ToPngBinaryData();
-
-            // Create a MemoryStream from the barcode bytes
-            MemoryStream ms = new MemoryStream(barcodeBytes);
+            MemoryStream ms = new MemoryStream(qrCodeBytes);
 
             // Create an IFormFile from the MemoryStream
-            IFormFile formFile = new FormFile(ms, 0, ms.Length, "barcode.png", "image/png");
+            IFormFile formFile = new FormFile(ms, 0, ms.Length, "barcode", "barcode.png")
+            {
+                Headers = new HeaderDictionary(),
+                ContentType = "image/png"
+            };
 
             // Set the position of the MemoryStream back to the beginning for subsequent reads
             ms.Position = 0;
-
             return formFile;
         }
 
@@ -857,12 +896,12 @@ namespace PRN231.TicketBooking.Service.Implementation
                 //if(decryptData != null)
                 //{
                 //}
-                string[] data = hashedAccountData.Split(',');
+                var account = await _accountRepository.GetById(hashedAccountData);
                 result.Result = new QRAccountResponse
                 {
-                    FullName = data[0],
-                    PhoneNumber = data[1],
-                    Email = data[2]
+                    FullName = account.LastName + " " + account.FirstName,
+                    PhoneNumber = account.PhoneNumber,
+                    Email = account.Email,
                 };
             }
             catch (Exception ex)

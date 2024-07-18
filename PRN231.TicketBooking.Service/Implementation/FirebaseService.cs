@@ -1,6 +1,9 @@
 ﻿using DinkToPdf.Contracts;
 using Firebase.Auth;
 using Firebase.Storage;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
+using Google.Cloud.Storage.V1;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json.Linq;
@@ -25,6 +28,7 @@ namespace PRN231.TicketBooking.Service.Implementation
             _result = new();
             _firebaseConfiguration = Resolve<FirebaseConfiguration>();
             _configuration = configuration;
+           
         }
 
         public async Task<AppActionResult> DeleteFileFromFirebase(string pathFileName)
@@ -82,11 +86,13 @@ namespace PRN231.TicketBooking.Service.Implementation
         {
             var _result = new AppActionResult();
             bool isValid = true;
+
             if (file == null || file.Length == 0)
             {
                 isValid = false;
                 _result.Messages.Add("The file is empty");
             }
+
             if (isValid)
             {
                 using (var memoryStream = new MemoryStream())
@@ -95,22 +101,26 @@ namespace PRN231.TicketBooking.Service.Implementation
                     var stream = new MemoryStream(memoryStream.ToArray());
                     var auth = new FirebaseAuthProvider(new FirebaseConfig(_firebaseConfiguration.ApiKey));
                     var account = await auth.SignInWithEmailAndPasswordAsync(_firebaseConfiguration.AuthEmail, _firebaseConfiguration.AuthPassword);
-                    string destinationPath = $"{pathFileName}";
+                    string destinationPath = $"{pathFileName}.png"; // Add .png extension
 
+                    // Since Firebase.Storage doesn't support metadata directly, use a workaround
+                    // You could encode metadata in the file path or handle it separately
                     var task = new FirebaseStorage(
-                    _firebaseConfiguration.Bucket,
-                    new FirebaseStorageOptions
-                    {
-                        AuthTokenAsyncFactory = () => Task.FromResult(account.FirebaseToken),
-                        ThrowOnCancel = true
-                    })
-                    .Child(destinationPath)
-                    .PutAsync(stream);
+                        _firebaseConfiguration.Bucket,
+                        new FirebaseStorageOptions
+                        {
+                            AuthTokenAsyncFactory = () => Task.FromResult(account.FirebaseToken),
+                            ThrowOnCancel = true
+                        })
+                        .Child(destinationPath)
+                        .PutAsync(stream);
+
                     var downloadUrl = await task;
 
                     if (task != null)
                     {
                         _result.Result = downloadUrl;
+                        _result.IsSuccess = true;
                     }
                     else
                     {
@@ -119,7 +129,37 @@ namespace PRN231.TicketBooking.Service.Implementation
                     }
                 }
             }
+
             return _result;
         }
+
+
+
+        //public async Task<List<IFormFile>> GetFilesAsFormFilesAsync(List<string> fileUrls)
+        //{
+        //    var storageClient = StorageClient.Create();
+        //    var formFiles = new List<IFormFile>();
+
+        //    foreach (var fileUrl in fileUrls)
+        //    {
+        //        using (var memoryStream = new MemoryStream())
+        //        {
+        //            await storageClient.DownloadObjectAsync(_firebaseConfiguration.Bucket, fileUrl, memoryStream);
+        //            memoryStream.Position = 0;
+        //            formFiles.Add(new FormFile(memoryStream, 0, memoryStream.Length, null, Path.GetFileName(fileUrl))
+        //            {
+        //                Headers = new HeaderDictionary(),
+        //                ContentType = "application/octet-stream"
+        //            });
+        //        }
+        //    }
+
+        //    return formFiles;
+        //}
+    }
+
+    public class CustomMetadata
+    {
+        public string ContentType { get; set; }
     }
 }
