@@ -26,19 +26,19 @@ namespace PRN231.TicketBooking.API.Controllers
         }
 
         [HttpPost("create-organization")]
-        public async Task<AppActionResult> CreateOrganization(CreateOrganizationDto organizationDto)
+        public async Task<AppActionResult> CreateOrganization([FromForm]CreateOrganizationDto organizationDto)
         {
             return await _organizationService.CreateOrganization(organizationDto);      
         }
 
         [HttpDelete("delete-organization")]
-        public async Task<AppActionResult> DeleteOrganization(int id)
+        public async Task<AppActionResult> DeleteOrganization(Guid id)
         {
             return await _organizationService.DeleteOrganization(id);   
         }
 
         [HttpPut("update-organization")]
-        public async Task<AppActionResult> UpdateOrganization(UpdateOrganizationDTO organizationDTO)
+        public async Task<AppActionResult> UpdateOrganization([FromForm] UpdateOrganizationDTO organizationDTO)
         {
             return await _organizationService.UpdateOrganization(organizationDTO);        
         }
