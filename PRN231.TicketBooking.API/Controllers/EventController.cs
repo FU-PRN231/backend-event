@@ -40,7 +40,7 @@ namespace PRN231.TicketBooking.API.Controllers
         }
 
         [HttpGet("get-event-by-id/{id}")]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Permission.REGISTERED)]
+        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Permission.REGISTERED)]
         public async Task<AppActionResult> GetById(Guid id)
         {
             return await _eventService.GetEventById(id);
