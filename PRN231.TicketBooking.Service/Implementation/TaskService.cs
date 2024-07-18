@@ -30,7 +30,7 @@ namespace PRN231.TicketBooking.Service.Implementation
             try
             {
                 var eventRepository = Resolve<IEventRepository>();
-                var eventDb = await eventRepository.GetByExpression(p => p!.Id == taskRequestDto.EventId);
+                var eventDb = await eventRepository.GetEventById(taskRequestDto.EventId);
                 if (eventDb == null)
                 {
                     result = BuildAppActionResultError(result, $"Sự kiện với {taskRequestDto.EventId} không tồn tại");
@@ -92,12 +92,12 @@ namespace PRN231.TicketBooking.Service.Implementation
             try
             {
                 var eventRepository = Resolve<IEventRepository>();
-                var eventDb = await eventRepository.GetByExpression(p => p.Id == eventId);
+                var eventDb = await eventRepository.GetEventById(eventId);
                 if (eventDb == null)
                 {
                     result = BuildAppActionResultError(result, $"Sự kiện với {eventId} không tìm thấy");
                 }
-                var taskDb = await _taskRepository.GetAllDataByExpression(p => p.EventId == eventId && p.Status == taskStatus, pageNumber, pageSize, null, false, p => p.Event!) ;
+                var taskDb = await _taskRepository.GetAllEventTaskByStatus(pageNumber, pageSize, eventId, taskStatus);
                 result.Result = taskDb; 
             }
             catch (Exception ex)
@@ -113,12 +113,12 @@ namespace PRN231.TicketBooking.Service.Implementation
             try
             {
                 var eventRepository = Resolve<IEventRepository>();
-                var eventDb = await eventRepository.GetByExpression(p => p.Id == eventId);
+                var eventDb = await eventRepository.GetEventById(eventId);
                 if (eventDb == null)
                 {
                     result = BuildAppActionResultError(result, $"Sự kiện với {eventId} không tìm thấy");
                 }
-                var taskDb = await _taskRepository.GetAllDataByExpression(p => p.EventId == eventId, pageNumber, pageSize, null, false, p => p.Event!);
+                var taskDb = await _taskRepository.GetAllTaskOfEvent(pageNumber, pageSize, eventId);
                 result.Result = taskDb;
             }
             catch (Exception ex)
@@ -133,7 +133,7 @@ namespace PRN231.TicketBooking.Service.Implementation
             var result = new AppActionResult();
             try
             {
-                result.Result = await _taskRepository.GetByExpression(p => p!.Id == taskId, p => p.Event!);
+                result.Result = await _taskRepository.getTaskByIdIncludeEvent(taskId);
             }
             catch (Exception ex)
             {
@@ -147,7 +147,7 @@ namespace PRN231.TicketBooking.Service.Implementation
             var result = new AppActionResult();
             try
             {
-                var taskDb = await _taskRepository.GetByExpression(p => p.Id == taskId);
+                var taskDb = await _taskRepository.getTaskById(taskId);
                 if (taskDb == null)
                 {
                     result = BuildAppActionResultError(result, $"Task này không tồn tại");
@@ -173,12 +173,12 @@ namespace PRN231.TicketBooking.Service.Implementation
             try
             {
                 var eventRepository = Resolve<IEventRepository>();
-                var eventDb = await eventRepository.GetByExpression(p => p.Id == eventId);
+                var eventDb = await eventRepository.GetEventById(eventId);
                 if (eventDb == null)
                 {
                     result = BuildAppActionResultError(result, $"Sự kiện với {eventId} không tìm thấy");
                 }
-                var taskDb = await  _taskRepository.GetByExpression(p => p.Id == updateTask.Id);
+                var taskDb = await  _taskRepository.getTaskById(updateTask.Id);
                 if (taskDb == null)
                 {
                     result = BuildAppActionResultError(result, $"Task này không tồn tại");
