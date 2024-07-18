@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNet.Identity.EntityFramework;
 using PRN231.TicketBooking.BusinessObject.Models;
 using PRN231.TicketBooking.Common.Dto.Request;
+using PRN231.TicketBooking.Common.Dto.Response;
 using PRN231.TicketBooking.DAO.dao;
 using PRN231.TicketBooking.Repository.Contract;
+using System.Linq.Expressions;
 
 namespace PRN231.TicketBooking.Repository.Implementation
 {
@@ -38,6 +40,21 @@ namespace PRN231.TicketBooking.Repository.Implementation
                     u!.Email.ToLower() == email.ToLower()
                     && (IsDeleted == null || u.IsDeleted == IsDeleted)
                     && (IsVerified == null || u.IsVerified == IsVerified));
+        }
+
+        public async Task<PagedResult<Account>> GetAllIAccount(Expression<Func<Account, bool>>? filter, int pageNumber, int pageSize, Expression<Func<Account, object>>? orderBy = null, bool isAscending = true, params Expression<Func<Account, object>>[]? includes)
+        {
+            PagedResult<Account> result = null;
+            try
+            {
+                result = new PagedResult<Account>();
+                result = await _dao.GetAllDataByExpression(filter, pageNumber, pageSize, orderBy, isAscending, includes);
+            }
+            catch (Exception ex)
+            {
+                result = null;
+            }
+            return result;
         }
     }
 }

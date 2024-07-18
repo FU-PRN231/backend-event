@@ -67,7 +67,7 @@ namespace PRN231.TicketBooking.Service.Implementation
             try
             {
                 var attendeeRepository = Resolve<IAttendeeRepostory>();
-                var attendeeEntity = await attendeeRepository.GetByExpression(a => a.Id == Guid.Parse(qrString), a => a.OrderDetail.Order.Account, a => a.OrderDetail.SeatRank.Event);
+                var attendeeEntity = await attendeeRepository.GetById(Guid.Parse(qrString));
                 if (attendeeEntity == null)
                 {
                     result.IsSuccess = false;

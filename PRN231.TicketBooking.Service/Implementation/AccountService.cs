@@ -199,7 +199,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                 var account = await _accountRepository.GetById(id);
                 if (account.OrganizationId != null)
                 {
-                    var organizationDb = await organizationRepository.GetByExpression(p => p!.Id == account.OrganizationId);
+                    var organizationDb = await organizationRepository.GetById(account.OrganizationId);
                     if (organizationDb == null)
                     {
                         result = BuildAppActionResultError(result, $"Tổ chức với {account.OrganizationId} không tồn tại");
@@ -208,7 +208,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                 }
                 else if (account.SponsorId != null)
                 {
-                    var sponsorDb = await sponsorRepository.GetByExpression(p => p.Id == account.SponsorId);
+                    var sponsorDb = await sponsorRepository.GetById(account.SponsorId);
                     if (sponsorDb == null)
                     {
                         result = BuildAppActionResultError(result, $"Nhà tài trợ với {account.SponsorId} không tồn tại");
@@ -229,7 +229,7 @@ namespace PRN231.TicketBooking.Service.Implementation
         public async Task<AppActionResult> GetAllAccount(int pageIndex, int pageSize)
         {
             var result = new AppActionResult();
-            var list = await _accountRepository.GetAllDataByExpression(null, pageIndex, pageSize, null, false, null);
+            var list = await _accountRepository.GetAllIAccount(null, pageIndex, pageSize, null, false, null);
 
             var userRoleRepository = Resolve<IIdentityUserRoleRepository>();
             var roleRepository = Resolve<IIdentityRoleRepository>();
@@ -238,7 +238,7 @@ namespace PRN231.TicketBooking.Service.Implementation
             foreach (var item in listMap)
             {
                 var userRole = new List<IdentityRole>();
-                var role = await userRoleRepository!.GetAllDataByExpression(a => a.UserId == item.Id, 1, 100, null, false, null);
+                var role = await userRoleRepository!.GetAllIdentityUserRole(a => a.UserId == item.Id, 1, 100, null, false, null);
                 foreach (var itemRole in role.Items!)
                 {
                     var roleUser = listRole.Items!.ToList().FirstOrDefault(a => a.Id == itemRole.RoleId);
@@ -692,11 +692,11 @@ namespace PRN231.TicketBooking.Service.Implementation
                 if (roleDb != null)
                 {
                     var userRoleRepository = Resolve<IIdentityUserRoleRepository>();
-                    var userRoleDb = await userRoleRepository!.GetAllDataByExpression(u => u.RoleId == roleDb.Id, 0, 0, null, false, null);
+                    var userRoleDb = await userRoleRepository!.GetAllIdentityUserRole(u => u.RoleId == roleDb.Id, 0, 0, null, false, null);
                     if (userRoleDb.Items != null && userRoleDb.Items.Count > 0)
                     {
                         var accountIds = userRoleDb.Items.Select(u => u.UserId).Distinct().ToList();
-                        var accountDb = await _accountRepository.GetAllDataByExpression(a => accountIds.Contains(a.Id), pageNumber, pageSize, null, false, null);
+                        var accountDb = await _accountRepository.GetAllIAccount(a => accountIds.Contains(a.Id), pageNumber, pageSize, null, false, null);
                         result.Result = accountDb;
                     }
                 }
@@ -724,11 +724,11 @@ namespace PRN231.TicketBooking.Service.Implementation
                 if (roleDb != null)
                 {
                     var userRoleRepository = Resolve<IIdentityUserRoleRepository>();
-                    var userRoleDb = await userRoleRepository!.GetAllDataByExpression(u => u.RoleId == roleDb.Id, 0, 0, null, false, null);
+                    var userRoleDb = await userRoleRepository!.GetAllIdentityUserRole(u => u.RoleId == roleDb.Id, 0, 0, null, false, null);
                     if (userRoleDb.Items != null && userRoleDb.Items.Count > 0)
                     {
                         var accountIds = userRoleDb.Items.Select(u => u.UserId).Distinct().ToList();
-                        var accountDb = await _accountRepository.GetAllDataByExpression(a => accountIds.Contains(a.Id), pageNumber, pageSize, null, false, null);
+                        var accountDb = await _accountRepository.GetAllIAccount(a => accountIds.Contains(a.Id), pageNumber, pageSize, null, false, null);
                         result.Result = accountDb;
                     }
                 }
