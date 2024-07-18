@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.Extensions.Logging;
 using PRN231.TicketBooking.BusinessObject.Enum;
 using PRN231.TicketBooking.BusinessObject.Models;
 using PRN231.TicketBooking.Common.Dto;
@@ -8,6 +9,7 @@ using PRN231.TicketBooking.Common.Util;
 using PRN231.TicketBooking.Repository.Contract;
 using PRN231.TicketBooking.Repository.Implementation;
 using PRN231.TicketBooking.Service.Contract;
+using ZXing;
 
 namespace PRN231.TicketBooking.Service.Implementation
 {
@@ -501,6 +503,22 @@ namespace PRN231.TicketBooking.Service.Implementation
                 await eventRepository.Update(eventDb);
                 await _unitOfWork.SaveChangeAsync();
             } catch(Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
+        }
+
+        public async Task<AppActionResult> GetAllEventByStatus(EventCensorStatus status, int pageNumber, int pageSize)
+        {
+            var result = new AppActionResult(); 
+            try
+            {
+                var eventRepository = Resolve<IEventRepository>();
+                var eventDb = await eventRepository.GetAllDataByExpression(p => p.Status == status, pageNumber, pageSize, null, false, p => p.Organization!, p => p.Location! );
+                result.Result = eventDb;
+            }
+            catch (Exception ex)
             {
                 result = BuildAppActionResultError(result, ex.Message);
             }

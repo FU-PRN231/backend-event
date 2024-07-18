@@ -39,6 +39,12 @@ namespace PRN231.TicketBooking.API.Controllers
             return await _eventService.GetAllEventByOrganizationId(organizationId, pageNumber, pageSize);
         }
 
+
+        [HttpGet("get-all-event-by-status/{pageNumber}/{pageSize}")]
+        public async Task<AppActionResult> GetEventByStatus(EventCensorStatus status, int pageNumber = 1, int pageSize = 10)
+        {
+            return await _eventService.GetAllEventByStatus(status, pageNumber, pageSize);
+        }
         [HttpGet("get-event-by-id/{id}")]
         //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Permission.REGISTERED)]
         public async Task<AppActionResult> GetById(Guid id)
