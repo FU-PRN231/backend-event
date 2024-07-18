@@ -72,10 +72,12 @@ namespace PRN231.TicketBooking.Service.Implementation
             {
                 try
                 {
+                    var utility = Resolve<Utility>();
                     var paymentGatewayService = Resolve<IPaymentGatewayService>();
                     var accountRepository = Resolve<IAccountRepository>();
                     var seatRepository = Resolve<ISeatRankRepository>();
                     var orderDetailsRepository = Resolve<IOrderDetailsRepository>();
+                    var attendeeRepository = Resolve<IAttendeeRepostory>();
                     var accountDb = await accountRepository.GetByExpression(p => p!.Id == orderRequestDto.AccountId);
                     if (accountDb == null)
                     {
@@ -92,13 +94,14 @@ namespace PRN231.TicketBooking.Service.Implementation
                     {
                         Id = Guid.NewGuid(),
                         AccountId = accountDb.Id,
-                        PurchaseDate = DateTime.Now,
+                        PurchaseDate = utility.GetCurrentDateTimeInTimeZone(),
                         Status = OrderStatus.PENDING,
                         Total = 0,
                         Content = orderRequestDto.Content,
                     };
 
                     double total = 0;
+                    List<OrderDetail> orderDetailList = new List<OrderDetail>();
 
                     foreach (var item in orderRequestDto.SeatRank)
                     {
@@ -129,9 +132,23 @@ namespace PRN231.TicketBooking.Service.Implementation
 
                         total += item.Quantity * seatRankItem.Price;
                         await orderDetailsRepository.Insert(orderDetails);
+                        orderDetailList.Add(orderDetails);
                     }
                     order.Total = total;
 
+                    if (orderDetailList.Count > 0) {
+                        foreach (var item in orderDetailList)
+                        {
+                            for (int i = 0; i < item.Quantity; i++) {
+                                await attendeeRepository.Insert(new Attendee
+                                {
+                                    Id = Guid.NewGuid(),
+                                    OrderDetailId = item.Id,
+                                    CheckedIn = false
+                                });
+                            }
+                        }
+                    }
 
                     if (!BuildAppActionResultIsError(result))
                     {
@@ -169,26 +186,9 @@ namespace PRN231.TicketBooking.Service.Implementation
                 Dictionary<string, List<IFormFile>> data = new Dictionary<string, List<IFormFile>>();
                 if (attendeeDb.Items.Count > 0)
                 {
-                    var attendeeImgs = attendeeDb.Items.Where(a => !string.IsNullOrEmpty(a.QR)).Select(o => o.QR).ToList();
-                    if (attendeeDb.Items.Count == attendeeImgs.Count)
-                    {
-                        var groupedImgs = attendeeDb.Items.GroupBy(g => g.OrderDetail!.SeatRank!.Name).ToDictionary(g => g.Key, g => g.Select(i => i.QR).ToList());
-                        foreach (var kvp in groupedImgs)
-                        {
-                            data.Add(kvp.Key,null);
-                        }
-                    }                    
-                } else
-                {
-                    var insertAttendee = await AddAttendee(orderId);
-                    if (insertAttendee == null)
-                    {
-                        result = BuildAppActionResultError(result, $"Tạo bảng điểm danh cho order với id {orderId} thất bại, vui lòng thử lại");
-                    }
-
                     Dictionary<Guid, string> details = new Dictionary<Guid, string>();
                     string seatRankName = null;
-                    foreach (var attendee in insertAttendee!)
+                    foreach (var attendee in attendeeDb.Items!)
                     {
                         AppActionResult upload = new AppActionResult();
                         upload = await oRCodeService.GenerateQR(attendee.Id.ToString());
@@ -200,10 +200,10 @@ namespace PRN231.TicketBooking.Service.Implementation
                         UploadImgResponseDto QrCodeDto = (UploadImgResponseDto)upload.Result;
                         attendee.QR = QrCodeDto.url;
                         await attendeeRepository.Insert(attendee);
-                        if(!details.ContainsKey(attendee.OrderDetailId)) 
+                        if (!details.ContainsKey(attendee.OrderDetailId))
                         {
                             var detail = await orderDetailsRepository.GetByExpression(o => o.Id == attendee.OrderDetailId, o => o.SeatRank);
-                            if(detail == null)
+                            if (detail == null)
                             {
                                 result = BuildAppActionResultError(result, $"Không tìm thấy ghế ngồi của chi tiết đơn hàng {attendee.OrderDetailId}");
                                 return result;
@@ -214,8 +214,9 @@ namespace PRN231.TicketBooking.Service.Implementation
                         if (data.ContainsKey(seatRankName))
                         {
                             data[seatRankName].Add(QrCodeDto.file);
-                        } else
-                        {                         
+                        }
+                        else
+                        {
                             data.Add(seatRankName, new List<IFormFile> { QrCodeDto.file });
                         }
                     }

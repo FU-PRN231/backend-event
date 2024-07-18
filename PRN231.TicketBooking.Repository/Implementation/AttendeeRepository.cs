@@ -28,12 +28,14 @@ namespace PRN231.TicketBooking.Repository.Implementation
         public async Task<Attendee> GetAttendeeByAccountIdAndEventId(string accountId, Guid eventId)
         {
             return await _attendeeDao.GetByExpression(a => a.OrderDetail.Order.AccountId == accountId 
-                                                        && a.OrderDetail.SeatRank.EventId == eventId, a => a.OrderDetail)!;
+                                                        && a.OrderDetail.SeatRank.EventId == eventId
+                                                        && a.OrderDetail.Order.Status == BusinessObject.Enum.OrderStatus.SUCCUSSFUL, a => a.OrderDetail)!;
         }
 
         public async Task<PagedResult<Attendee>> GetAttendeeByEvent(Guid eventId)
         {
-            return await _attendeeDao.GetAllDataByExpression(a => a.OrderDetail.SeatRank.EventId == eventId, 0, 0, null, false, a => a.OrderDetail.Order.Account, a => a.OrderDetail.SeatRank.Event);
+            return await _attendeeDao.GetAllDataByExpression(a => a.OrderDetail.SeatRank.EventId == eventId
+                                                        && a.OrderDetail.Order.Status == BusinessObject.Enum.OrderStatus.SUCCUSSFUL, 0, 0, null, false, a => a.OrderDetail.Order.Account, a => a.OrderDetail.SeatRank.Event);
         }
     }
 }
