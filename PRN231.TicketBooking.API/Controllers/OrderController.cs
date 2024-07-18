@@ -5,6 +5,9 @@ using PRN231.TicketBooking.Common.Dto;
 using PRN231.TicketBooking.Service.Contract;
 using PRN231.TicketBooking.BusinessObject.Enum;
 using PRN231.TicketBooking.Service.Payment.PaymentResponse;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using PRN231.TicketBooking.Common.Util;
 
 namespace PRN231.TicketBooking.API.Controllers
 {
@@ -19,18 +22,22 @@ namespace PRN231.TicketBooking.API.Controllers
         }
 
         [HttpPost("create-order-with-payment")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Permission.REGISTERED)]
         public async Task<AppActionResult> CreateOrderWithPayment(OrderRequestDto orderRequestDto)
         {
             return await _orderService.CreateOrderWithPayment(orderRequestDto, HttpContext);
         }
 
         [HttpPost("purchase-order/{orderId}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Permission.REGISTERED)]
+
         public async Task<AppActionResult> PurchaseOrder(Guid orderId)
         {
             return await _orderService.PurchaseOrder(orderId, HttpContext);     
         }
 
         [HttpPost("cancel-order/{orderId}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Permission.REGISTERED)]
         public async Task<AppActionResult> CancelOrder(Guid orderId)
         {
             return await _orderService.CancelOrder(orderId);
@@ -74,36 +81,42 @@ namespace PRN231.TicketBooking.API.Controllers
         }
 
         [HttpGet("get-all-order/{pageNumber}/{pageSize}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Permission.REGISTERED)]
         public async Task<AppActionResult> GetAllOrder(int pageNumber = 1, int pageSize = 10)
         {
             return await _orderService.GetAllOrder(pageNumber, pageSize);
         }
 
         [HttpGet("get-all-order-by-status/{pageNumber}/{pageSize}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Permission.REGISTERED)]
         public async Task<AppActionResult> GetAllOrderByStatus(OrderStatus orderStatus, int pageNumber = 1, int pageSize = 10)
         {
             return await _orderService.GetAllOrderByStatus(orderStatus, pageNumber, pageSize);  
         }
 
         [HttpGet("get-all-order-by-accountId/{accountId}/{pageNumber}/{pageSize}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Permission.REGISTERED)]
         public async Task<AppActionResult> GetAllOrderByAccountId(string accountId, int pageNumber = 1, int pageSize = 10)
         {
             return await _orderService.GetAllOrderByAccountId(accountId, pageNumber, pageSize); 
         }
 
         [HttpGet("get-all-order-detail-by-order-id/{orderId}/{pageNumber}/{pageSize}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Permission.REGISTERED)]
         public async Task<AppActionResult> GetAllOrderDetailByOrderId(Guid orderId, int pageNumber = 1, int pageSize = 10)
         {
             return await _orderService.GetAllOrderDetailByOrderId(orderId, pageNumber, pageSize);
         }
 
         [HttpGet("get-event-order-by-status/{eventId}/{pageNumber}/{pageSize}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Permission.REGISTERED)]
         public async Task<AppActionResult> GetEventOrderByStatus(Guid eventId, OrderStatus orderStatus, int pageNumber = 1, int pageSize = 10)
         {
             return await _orderService.GetEventOrderByStatus(eventId, orderStatus, pageNumber, pageSize);
         }
 
         [HttpGet("get-all-order-by-event-id/{eventId}/{pageNumber}/{pageSize}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Permission.REGISTERED)]
         public async Task<AppActionResult> GetAllOrderByEventId(Guid eventId, int pageNumber = 1, int pageSize = 10)
         {
             return await _orderService.GetAllOrderByEventId(eventId, pageNumber, pageSize);

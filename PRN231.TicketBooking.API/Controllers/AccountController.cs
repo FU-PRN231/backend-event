@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PRN231.TicketBooking.Common.Dto;
 using PRN231.TicketBooking.Common.Dto.Request;
+using PRN231.TicketBooking.Common.Util;
 using PRN231.TicketBooking.Service.Contract;
 
 namespace PRN231.TicketBooking.API.Controllers
@@ -24,6 +26,7 @@ namespace PRN231.TicketBooking.API.Controllers
         }
 
         [HttpGet("get-all-account")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Permission.ADMIN)]
         public async Task<AppActionResult> GetAllAccount(int pageIndex = 1, int pageSize = 10)
         {
             return await _accountService.GetAllAccount(pageIndex, pageSize);
@@ -54,12 +57,14 @@ namespace PRN231.TicketBooking.API.Controllers
         }
 
         [HttpPost("get-account-by-userId/{id}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Permission.REGISTERED)]
         public async Task<AppActionResult> GetAccountByUserId(string id)
         {
             return await _accountService.GetAccountByUserId(id);
         }
 
         [HttpPut("change-password")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Permission.REGISTERED)]
         public async Task<AppActionResult> ChangePassword(ChangePasswordDto dto)
         {
             return await _accountService.ChangePassword(dto);
@@ -72,6 +77,7 @@ namespace PRN231.TicketBooking.API.Controllers
         }
 
         [HttpPut("forgot-password")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Permission.REGISTERED)]
         public async Task<AppActionResult> ForgotPassword(ForgotPasswordDto dto)
         {
             return await _accountService.ForgotPassword(dto);
@@ -114,13 +120,15 @@ namespace PRN231.TicketBooking.API.Controllers
         }
 
 		[HttpPost("assign-role")]
-		public async Task<AppActionResult> AssignRole(string userId, string roleName)
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Permission.ADMIN)]
+        public async Task<AppActionResult> AssignRole(string userId, string roleName)
 		{
 			return await _accountService.AssignRole(userId, roleName);
 		}
 
 		[HttpPost("add-sponsor")]
-		public async Task<AppActionResult> AddSponsor([FromForm]CreateSponsorDto dto)
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Permission.ADMIN)]
+        public async Task<AppActionResult> AddSponsor([FromForm]CreateSponsorDto dto)
 		{
 			return await _accountService.AddSponsor(dto);
 		}

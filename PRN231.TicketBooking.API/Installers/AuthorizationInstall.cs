@@ -15,19 +15,29 @@ namespace PRN231.TicketBooking.API.Installers
                     policy.RequireRole(SD.RoleConvert.ADMIN);
                 });
 
-                options.AddPolicy("MANAGEMENT", policy =>
-                {
-                    policy.RequireRole(SD.RoleConvert.ADMIN);
-                    policy.RequireRole(SD.RoleConvert.STAFF);
-                });
-
                 options.AddPolicy("ORGANIZATION", policy =>
                 {
                     policy.RequireRole(SD.RoleConvert.ADMIN);
-                    policy.RequireRole(SD.RoleConvert.STAFF);
+                    policy.RequireRole(SD.RoleConvert.ORGANIZER);
+                    policy.RequireRole(SD.RoleConvert.PM);
+                });
+
+                options.AddPolicy("FUNDINGMANAGEMENT", policy =>
+                {
+                    policy.RequireRole(SD.RoleConvert.ADMIN);
                     policy.RequireRole(SD.RoleConvert.ORGANIZER);
                     policy.RequireRole(SD.RoleConvert.PM);
                     policy.RequireRole(SD.RoleConvert.SPONSOR);
+                });
+
+                options.AddPolicy("REGISTERED", policy =>
+                {
+                    policy.RequireRole(SD.RoleConvert.ADMIN);
+                    policy.RequireRole(SD.RoleConvert.ORGANIZER);
+                    policy.RequireRole(SD.RoleConvert.PM);
+                    policy.RequireRole(SD.RoleConvert.SPONSOR);
+                    policy.RequireRole(SD.RoleConvert.CUSTOMER);
+
                 });
             });
         }

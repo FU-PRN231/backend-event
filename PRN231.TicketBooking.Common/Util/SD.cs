@@ -18,10 +18,10 @@ namespace PRN231.TicketBooking.Common.Util
             public static string CUSTOMER = "CUSTOMER";
             public static string SPONSOR = "SPONSOR";
             public static string ORGANIZER = "ORGANIZER";
-            public static string STAFF = "STAFF";
             public static string PM = "PM";
+
         }
-      
+
 
         public class ResponseMessage
         {

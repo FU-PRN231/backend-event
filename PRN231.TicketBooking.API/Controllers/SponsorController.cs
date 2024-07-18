@@ -1,6 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using PRN231.TicketBooking.Common.Dto;
 using PRN231.TicketBooking.Common.Dto.Request;
+using PRN231.TicketBooking.Common.Util;
 using PRN231.TicketBooking.Service.Contract;
 
 namespace PRN231.TicketBooking.API.Controllers
@@ -19,24 +22,28 @@ namespace PRN231.TicketBooking.API.Controllers
        
 
         [HttpPost("add-sponsor-money-to-event")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Permission.ORGANIZATION)]
         public async Task<AppActionResult> AddSponsorMoneytoEvent(AddSponsorMoneyDto dto)
         {
             return await _service.AddSponsorMoneyToEvent(dto);
         }
 
         [HttpGet("get-all-sponsor-item-of-an-event/{eventId}/{pageNumber}/{pageSize}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Permission.ORGANIZATION)]
         public async Task<AppActionResult> GetAllSponsorItemOfAnEvent(Guid eventId, int pageNumber = 1, int pageSize = 10)
         {
             return await _service.GetAllSponsorItemOfAnEvent(eventId, pageNumber, pageSize);
         }
 
         [HttpGet("get-sponsor-history-by-event-id/{eventId}/{pageNumber}/{pageSize}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Permission.ORGANIZATION)]
         public async Task<AppActionResult> GetSponsorHistoryByEventId(Guid eventId, int pageNumber = 1, int pageSize = 10)
         {
             return await _service.GetSponsorHistoryByEventId(eventId, pageNumber, pageSize);       
         }
 
         [HttpGet("get-all-sponsors")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Permission.ORGANIZATION)]
         public async Task<AppActionResult> GetAllSponsors(int pageNumber = 1, int pageSize = 10)
         {
             return await _service.GetAllSponsor(pageNumber, pageSize);

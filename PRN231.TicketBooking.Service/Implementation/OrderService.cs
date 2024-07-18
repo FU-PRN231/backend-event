@@ -595,14 +595,17 @@ namespace PRN231.TicketBooking.Service.Implementation
                 else
                 {
                     //if (!isSuccessful) orderDb.Status = OrderStatus.CANCELLED;
-                    if (orderDb.Status == OrderStatus.PENDING) orderDb.Status = OrderStatus.SUCCUSSFUL;
-                    await _unitOfWork.SaveChangeAsync();
-                    var orderSend = await this.SendTicketEmail(orderDb.Id);
-                    if (!orderSend.IsSuccess)
+                    if (orderDb.Status == OrderStatus.PENDING)
                     {
-                        foreach (var mess in orderSend.Messages)
+                        orderDb.Status = OrderStatus.SUCCUSSFUL;
+                        await _unitOfWork.SaveChangeAsync();
+                        var orderSend = await this.SendTicketEmail(orderDb.Id);
+                        if (!orderSend.IsSuccess)
                         {
-                            result.Messages.Add(mess);
+                            foreach (var mess in orderSend.Messages)
+                            {
+                                result.Messages.Add(mess);
+                            }
                         }
                     }
                 }
