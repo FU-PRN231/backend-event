@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PRN231.TicketBooking.BusinessObject.Enum;
 using PRN231.TicketBooking.Common.Dto;
@@ -19,14 +20,14 @@ namespace PRN231.TicketBooking.API.Controllers
         }
 
         [HttpGet("get-all-event")]
-        [Authorize("ORGANIZATION")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Permission.ORGANIZATION)]
         public async Task<AppActionResult> GetAllEvent([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             return await _eventService.GetAllEvent(pageNumber, pageSize);
         }
 
         [HttpGet("get-available-event")]
-        [Authorize("REGISTERED")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Permission.REGISTERED)]
         public async Task<AppActionResult> GetAvailableEvent([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             return await _eventService.GetAvailableEvent(pageNumber, pageSize);
@@ -39,27 +40,28 @@ namespace PRN231.TicketBooking.API.Controllers
         }
 
         [HttpGet("get-event-by-id/{id}")]
-        [Authorize("REGISTERED")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Permission.REGISTERED)]
         public async Task<AppActionResult> GetById(Guid id)
         {
             return await _eventService.GetEventById(id);
         }
 
         [HttpPost("add-event")]
-        [Authorize(Roles = "ORGANIZER")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Permission.ORGANIZATION)]
         public async Task<AppActionResult> AddEvent([FromForm] CreateEventRequest createEventRequest)
         {
             return await _eventService.AddEvent(createEventRequest);
         }
 
         [HttpPut("update-event/{id}")]
-        [Authorize(Roles = "ORGANIZER")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Permission.ORGANIZATION)]
         public async Task<AppActionResult> UpdateEvent(Guid id, [FromForm] UpdateEventRequest updateEventRequest)
         {
             return await _eventService.UpdateEvent(id, updateEventRequest);
         }
 
         [HttpPost("update-event-status")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Permission.ORGANIZATION)]
         public async Task<AppActionResult> UpdateEventStatus(Guid eventId, EventCensorStatus status)
         {
             return await _eventService.UpdateEventStatus(eventId, status);
