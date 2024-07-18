@@ -129,7 +129,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                     var isExistedOrganization = await _organizationRepository.GetById(organizationDTO.Id);
                     if (isExistedOrganization == null)
                     {
-                        result = BuildAppActionResultError(result, $"Tổ chức với tên {organizationDTO.Id} không tồn tại");
+                        result = BuildAppActionResultError(result, $"Tổ chức với id {organizationDTO.Id} không tồn tại");
                     }
 
                     var pathNameToDelete = SD.FirebasePathName.ORGANIZATION_PREFIX + $"{organizationDTO.Id}{Guid.NewGuid()}.jpg";
