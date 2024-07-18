@@ -69,7 +69,7 @@ namespace PRN231.TicketBooking.Service.Implementation
             {
                 if (confirmed)
                 {
-                    var taskDb = await _taskRepository.GetByExpression(p => p.Id == taskId);
+                    var taskDb = await _taskRepository.getTaskById(taskId);
                     if (taskDb == null)
                     {
                         result = BuildAppActionResultError(result, $"Task này không tồn tại");
