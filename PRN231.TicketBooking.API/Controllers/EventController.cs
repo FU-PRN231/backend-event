@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using DocumentFormat.OpenXml.Wordprocessing;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PRN231.TicketBooking.BusinessObject.Enum;
@@ -65,6 +66,20 @@ namespace PRN231.TicketBooking.API.Controllers
         public async Task<AppActionResult> UpdateEventStatus(Guid eventId, EventCensorStatus status)
         {
             return await _eventService.UpdateEventStatus(eventId, status);
+        }
+
+        [HttpGet("get-sponsor-event/{id}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Permission.SPONSOR)]
+        public async Task<AppActionResult> GetSponsorEvent(Guid id, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            return await _eventService.GetAllEventBySponsorId(id, pageNumber, pageSize);
+        }
+
+        [HttpGet("get-organization-event/{id}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Permission.ORGANIZER)]
+        public async Task<AppActionResult> GetOrganizationByEventId(Guid id, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            return await _eventService.GetAllEventByOrganizationId(id, pageNumber, pageSize);
         }
     }
 }

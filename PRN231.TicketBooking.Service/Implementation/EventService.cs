@@ -197,7 +197,8 @@ namespace PRN231.TicketBooking.Service.Implementation
                 eventEntity.Id = Guid.NewGuid();
                 eventEntity.CreateBy = dto.UserId;
                 eventEntity.CreateDate = DateTime.Now;
-                
+                eventEntity.UpdateDate = DateTime.Now;
+
                 //Create SeatRank
                 if (dto.CreateSeatRankDtoRequests != null && dto.CreateSeatRankDtoRequests.Count > 0)
                 {
@@ -479,6 +480,27 @@ namespace PRN231.TicketBooking.Service.Implementation
             return result;
         }
 
+        public async Task<AppActionResult> GetAllEventBySponsorId(Guid sponsorId, int pageNumber, int pageSize)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                var eventRepository = Resolve<IEventSponsorRepository>();
+                var data = await eventRepository.GetEventsBySponsorId(sponsorId, pageNumber, pageSize);
+                result = new AppActionResult()
+                {
+                    Result = data,
+                    IsSuccess = true
+                };
+                return BuildAppActionResultSuccess(result, "Get list sponsor event successfully!");
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
+        }
+
         public async Task<AppActionResult> UpdateEventStatus(Guid eventId, EventCensorStatus status)
         {
             AppActionResult result = new AppActionResult();
@@ -506,5 +528,6 @@ namespace PRN231.TicketBooking.Service.Implementation
             }
             return result;
         }
+
     }
 }

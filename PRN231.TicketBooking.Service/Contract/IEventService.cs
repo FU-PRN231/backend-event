@@ -15,6 +15,6 @@ namespace PRN231.TicketBooking.Service.Contract
         public Task<AppActionResult> GetEventByStatus(Guid? organizationId, int happened, int pageNumber, int pageSize);
         public Task<AppActionResult> CountingEventByStatus(Guid? organizationId);
         public Task<AppActionResult> UpdateEventStatus(Guid eventId, EventCensorStatus status);
-
+        public Task<AppActionResult> GetAllEventBySponsorId(Guid sponsorId, int pageNumber, int pageSize);
     }
 }
