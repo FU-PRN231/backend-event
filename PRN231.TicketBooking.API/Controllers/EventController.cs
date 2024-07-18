@@ -27,7 +27,7 @@ namespace PRN231.TicketBooking.API.Controllers
         }
 
         [HttpGet("get-available-event")]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Permission.REGISTERED)]
+        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Permission.REGISTERED)]
         public async Task<AppActionResult> GetAvailableEvent([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             return await _eventService.GetAvailableEvent(pageNumber, pageSize);
