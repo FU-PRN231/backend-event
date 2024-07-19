@@ -199,7 +199,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                         }
                         UploadImgResponseDto QrCodeDto = (UploadImgResponseDto)upload.Result;
                         attendee.QR = QrCodeDto.url;
-                        await attendeeRepository.Insert(attendee);
+                        await attendeeRepository.Update(attendee);
                         if (!details.ContainsKey(attendee.OrderDetailId))
                         {
                             var detail = await orderDetailsRepository.GetByExpression(o => o.Id == attendee.OrderDetailId, o => o.SeatRank);

@@ -273,7 +273,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                     }
                 }
                 //Create StaticFile
-                if (dto.CreateSpeakerEvents != null && dto.CreateSpeakerEvents.Count > 0)
+                if (dto.Img.Count > 0)
                 {
                     await _firebaseService.DeleteFileFromFirebase($"{SD.FirebasePathName.EVENT}{eventEntity.Id}");
 
@@ -286,7 +286,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                     //eventEntity.MainImg = (string)mainUrl.Result;
                     
 
-                    foreach (var item in dto.Img.Skip(1).Take(dto.Img.Count - 1))
+                    foreach (var item in dto.Img.Skip(0).Take(dto.Img.Count))
                     {
                         var staticFile = new StaticFile();
                         staticFile.Id = Guid.NewGuid();
