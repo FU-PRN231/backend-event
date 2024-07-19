@@ -247,13 +247,17 @@ namespace PRN231.TicketBooking.Service.Implementation
 
                 item.Role = userRole;
                
-                if (userRole.Where(u => u.Name.Equals("ADMIN")) != null)
+                if (userRole.Where(u => u.Name.Equals("ADMIN")).FirstOrDefault() != null)
                 {
                     item.MainRole = "ADMIN";
                 }
-                else if (userRole.Where(u => u.Name.Equals("ORGANIZER")) != null)
+                else if (userRole.Where(u => u.Name.Equals("ORGANIZER")).FirstOrDefault() != null)
                 {
                     item.MainRole = "ORGANIZER";
+                }
+                else if (userRole.Where(u => u.Name.Equals("SPONSOR")).FirstOrDefault() != null)
+                {
+                    item.MainRole = "SPONSOR";
                 }
                 else if (userRole.Count > 0)
                 {
