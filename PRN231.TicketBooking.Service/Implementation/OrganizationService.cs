@@ -81,7 +81,7 @@ namespace PRN231.TicketBooking.Service.Implementation
             AppActionResult result = new AppActionResult();
             try
             {
-                var organizationDb = _organizationRepository.GetById(id);
+                var organizationDb = await _organizationRepository.GetById(id);
                 if (organizationDb == null)
                 {
                     result = BuildAppActionResultError(result, $"Tổ chức với tên {id} không tồn tại");
