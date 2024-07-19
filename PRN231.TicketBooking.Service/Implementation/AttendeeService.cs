@@ -4,6 +4,7 @@ using PRN231.TicketBooking.BusinessObject.Models;
 using PRN231.TicketBooking.Common.Dto;
 using PRN231.TicketBooking.Common.Dto.Request;
 using PRN231.TicketBooking.Common.Dto.Response;
+using PRN231.TicketBooking.Common.Util;
 using PRN231.TicketBooking.Repository.Contract;
 using PRN231.TicketBooking.Service.Contract;
 using System;
@@ -72,6 +73,14 @@ namespace PRN231.TicketBooking.Service.Implementation
                 {
                     result.IsSuccess = false;
                     result.Messages.Add($"Event Not Found with Id: {qrString}!");
+                    return result;
+                }
+                var utility = Resolve<Utility>();
+                if(attendeeEntity.OrderDetail.SeatRank.Event.StartEventDate > utility.GetCurrentDateTimeInTimeZone() 
+                    || attendeeEntity.OrderDetail.SeatRank.Event.EndEventDate < utility.GetCurrentDateTimeInTimeZone())
+                {
+                    result.IsSuccess = false;
+                    result.Messages.Add($"Chưa đến thời gian điểm danh");
                     return result;
                 }
                 var orderRepo = Resolve<IOrderRepository>();

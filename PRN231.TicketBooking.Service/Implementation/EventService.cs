@@ -282,9 +282,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                     if (!mainUrl.IsSuccess)
                     {
                         return BuildAppActionResultError(mainUrl, "Cannot upload file!");
-                    }
-                    //eventEntity.MainImg = (string)mainUrl.Result;
-                    
+                    }                  
 
                     foreach (var item in dto.Img.Skip(0).Take(dto.Img.Count))
                     {

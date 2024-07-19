@@ -35,7 +35,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                 var firebaseService = Resolve<IFirebaseService>();
                 try
                 {
-                    var isOrganizationExisted = _organizationRepository.GetByExpression(p => p.Name == organizationDto.Name);
+                    var isOrganizationExisted = await _organizationRepository.GetByExpression(p => p.Name == organizationDto.Name);
                     if (isOrganizationExisted == null)
                     {
                         result = BuildAppActionResultError(result, $"Tổ chức với tên {organizationDto.Name} đã tồn tại");
@@ -133,7 +133,7 @@ namespace PRN231.TicketBooking.Service.Implementation
                     }
 
                     var pathNameToDelete = SD.FirebasePathName.ORGANIZATION_PREFIX + $"{organizationDTO.Id}{Guid.NewGuid()}.jpg";
-                    var imageResult = firebaseService!.DeleteFileFromFirebase(pathNameToDelete);
+                    var imageResult = await firebaseService!.DeleteFileFromFirebase(pathNameToDelete);
                     if (imageResult != null)
                     {
                         result.Messages.Add("Delete image on firebase cloud successful");
